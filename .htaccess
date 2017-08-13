@@ -1,0 +1,4 @@
+# AddHandler application/x-httpd-php5 .php
+RewriteEngine on
+RewriteCond $1 !^(index\.php|assets|public|robots\.txt)
+RewriteRule ^(.+)$ index.php/$1 [L]  

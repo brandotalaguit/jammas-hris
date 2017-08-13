@@ -1,0 +1,67 @@
+.box-tools .btn {padding:9px 10px !important;}
+#cd .select2 {width:100% !important;}
+#filter_project_form .select2 {width:363px !important}
+#filter_position_form .select2 {width:363px !important}
+#orderby_form .select2 {width:181px !important}
+.dl-horizontal dt , .dl-horizontal dd {padding: 5px 0px; border-top:1px solid #e6e6e6; }
+.dl-horizontal dt { text-align:left !important ;}
+
+.btn.btn-print {
+    background-color: #006080;
+    border-color: #006080;
+    color:#fff;
+}
+
+#view_employee_details .dl-horizontal dt, #view_employee_details h4 {padding-left: 5px} 
+.data-filters .select2-container {width: 90% !important;display: block;}
+.deduction_employee_filter .select2 {width:257px !important}
+.deduction_category_filter .select2 {width:258px !important}
+
+.print {font-family: 'Source Sans Pro', sans-serif !important}
+.print h1 {font-size: 22px}
+
+.print .box {
+    position: relative;
+    background: #ffffff;
+    border-top: 2px solid #c1c1c1;
+    margin-bottom: 20px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    width: 100%;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+}
+.print table {width:100% !important; font-size: 11px !important}
+.print .employee-details table td:first-child {width:25% !important;}
+.print .employee-details table td:last-child {width:75% !important;}
+.print td {padding:5px; border-top: 1px solid #e6e6e6 }
+.print .matrix td {text-align: center}
+.print th {padding: 5px;}
+
+
+
+body > .header .logo {
+  float: left;
+  font-size: 20px;
+  line-height: 50px;
+  text-align: left;
+  padding: 0 10px;
+  width: 220px;
+  font-family: 'Source Sans Pro Bold', sans-serif !important;
+  font-weight: 500;
+  height: 50px;
+  display: block;
+}
+
+.th-caption h5 p {line-height: 10px !important}  
+/**
+ * The asterisk targets all HTML elements in a web page.
+ */@media print { 
+  * {
+    -webkit-transition: none !important;
+    transition: none !important;
+  }
+
+
+
+}
