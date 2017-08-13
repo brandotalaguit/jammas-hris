@@ -16,6 +16,7 @@ class Manning_payroll extends Admin_Controller
         $this->load->model('projects');
         $this->load->model('manning_payroll_m');
         $this->load->model('manning_payroll_earning_m');
+
     }
 
     public function index()
@@ -882,7 +883,7 @@ class Manning_payroll extends Admin_Controller
             }
 
             // pagibig
-            if ($govt_dues == 2) 
+            if ($govt_dues == 2)
             {
                 $govt_dues = 'pagibig';
                 // deduction 

@@ -4,6 +4,7 @@
     <list default="true" id="963015b7-6640-4522-af6d-530c37be9bc7" name="Default" comment="" />
     <ignored path="jammas-hris.iws" />
     <ignored path=".idea/workspace.xml" />
+    <ignored path=".idea/dataSources.local.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -18,13 +19,38 @@
   <component name="FavoritesManager">
     <favorites_list name="jammas-hris" />
   </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file leaf-file-name="manning_payroll.php" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/application/controllers/manning_payroll.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.8414097">
+              <caret line="970" column="0" selection-start-line="970" selection-start-column="0" selection-end-line="970" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/application/helpers/alcu_helper.php" />
+        <option value="$PROJECT_DIR$/application/controllers/manning_payroll.php" />
+      </list>
+    </option>
   </component>
   <component name="JsBuildToolGruntFileManager" detection-done="true" />
   <component name="JsBuildToolPackageJson" detection-done="true" />
   <component name="JsGulpfileManager">
     <detection-done>true</detection-done>
+  </component>
+  <component name="PhpServers">
+    <servers />
   </component>
   <component name="PhpWorkspaceProjectConfiguration" backward_compatibility_performed="true" />
   <component name="ProjectFrameBounds">
@@ -66,6 +92,30 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="jammas-hris" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="jammas-hris" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="jammas-hris" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="jammas-hris" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="application" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
       <pane id="Scope" />
@@ -75,8 +125,39 @@
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="js-jscs-nodeInterpreter" value="C:\Program Files\nodejs\node.exe" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Font" />
+    <property name="settings.editor.splitter.proportion" value="0.2" />
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug">
+      <method />
+    </configuration>
+    <configuration default="true" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
+      <TestRunner />
+      <method />
+    </configuration>
+    <configuration default="true" type="PhpBehatConfigurationType" factoryName="Behat">
+      <BehatRunner />
+      <method />
+    </configuration>
+    <configuration default="true" type="PhpLocalRunConfigurationType" factoryName="PHP Console">
+      <method />
+    </configuration>
+    <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
+      <method />
+    </configuration>
+    <configuration default="true" type="js.build_tools.npm" factoryName="npm">
+      <command value="run-script" />
+      <scripts />
+      <envs />
+      <method />
+    </configuration>
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="963015b7-6640-4522-af6d-530c37be9bc7" name="Default" comment="" />
@@ -90,7 +171,7 @@
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="false" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24963397" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19472913" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
@@ -109,11 +190,136 @@
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
+  <component name="Vcs.Log.UiProperties">
+    <option name="RECENTLY_FILTERED_USER_GROUPS">
+      <collection />
+    </option>
+    <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+      <collection />
+    </option>
+  </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
     <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/application/libraries/Admin_Controller.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.2349486">
+          <caret line="8" column="30" selection-start-line="8" selection-start-column="30" selection-end-line="8" selection-end-column="30" />
+          <folding>
+            <marker date="1497754610000" expanded="true" signature="120:1263" placeholder="{...}" />
+            <marker date="1497754610000" expanded="true" signature="180:1260" placeholder="{...}" />
+            <marker date="1497754610000" expanded="true" signature="656:697" placeholder="{...}" />
+            <marker date="1497754610000" expanded="true" signature="811:848" placeholder="..." />
+            <marker date="1497754610000" expanded="true" signature="907:1008" placeholder="{...}" />
+            <marker date="1497754610000" expanded="true" signature="955:1004" placeholder="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/application/helpers/alcu_helper.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.79441994">
+          <caret line="480" column="34" selection-start-line="480" selection-start-column="33" selection-end-line="480" selection-end-column="34" />
+          <folding>
+            <marker date="1502626797568" expanded="true" signature="129:183" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="223:337" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="244:333" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="294:332" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="378:513" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="399:509" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="451:508" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="553:659" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="571:655" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="622:654" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="699:935" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="720:930" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="774:929" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="978:1256" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="996:1251" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="1063:1250" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="1312:1541" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="1582:1722" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="1603:1718" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="1658:1717" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="1775:2013" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="2018:2151" placeholder=" Dump helper. Functions to dump variables to the screen, in a nicley formatted manner. ..." />
+            <marker date="1502626797568" expanded="true" signature="2185:2799" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="2241:2798" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="2497:2604" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="2703:2738" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="2754:2791" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="2839:2958" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="2901:2956" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="2983:3050" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="3108:3212" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="3268:3372" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="3399:3442" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="3470:3501" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="3519:3552" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="3610:3717" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="3723:4077" placeholder=" Return the value for a key in an array or a property in an object. ..." />
+            <marker date="1502626797568" expanded="true" signature="4138:4452" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="4171:4299" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="4311:4449" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="4498:8224" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="4668:6113" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="6152:6179" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="6267:6483" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="6310:6454" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="6508:6579" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="6664:6727" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="6753:7919" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="6780:6843" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="6871:7117" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="7026:7097" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="7146:7439" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="7327:7419" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="7456:7914" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="7744:7894" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="7980:8197" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="8096:8150" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="8231:8298" placeholder=" Return value without knowing key in one-pair-associative-aray ..." />
+            <marker date="1502626797568" expanded="true" signature="8345:8374" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="8379:8908" placeholder=" ENUM ..." />
+            <marker date="1502626797568" expanded="true" signature="8939:9265" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="8963:8993" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="9075:9116" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="9344:9756" placeholder=" NOT ENUM ..." />
+            <marker date="1502626797568" expanded="true" signature="9791:9855" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="9902:9991" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="10042:10082" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="10135:10175" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="10177:10253" placeholder="//..." />
+            <marker date="1502626797568" expanded="true" signature="10436:12991" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="11284:11475" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="11487:12264" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="11740:12041" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="11901:12031" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="12057:12258" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="12588:12642" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="12681:12962" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="12994:13144" placeholder="//..." />
+            <marker date="1502626797568" expanded="true" signature="13184:13844" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="13266:13842" placeholder="{...}" />
+            <marker date="1502626797568" expanded="true" signature="13333:13476" placeholder="..." />
+            <marker date="1502626797568" expanded="true" signature="13849:13880" placeholder=" @param string $expression ..." />
+            <marker date="1502626797568" expanded="true" signature="13912:13951" placeholder="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/application/controllers/manning_payroll.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.8414097">
+          <caret line="970" column="0" selection-start-line="970" selection-start-column="0" selection-end-line="970" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
   </component>
 </project>

@@ -472,3 +472,11 @@ if ( ! function_exists('pagination') )
         return $ci->pagination->create_links();
     }
 }
+
+/**
+ * @param string $expression
+ */
+function dd($expression = '')
+{
+    return die(dump($expression));
+}
