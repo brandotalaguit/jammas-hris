@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
 * Filename: projects.php
 * Author: Brando Talaguit (ITC Developer)
@@ -6,7 +6,7 @@
 class Projects extends MY_Model
 {
 	protected $table_name = "projects";
-	protected $primary_key = "project_id";	
+	protected $primary_key = "project_id";
 	protected $order_by = "projects.created_at DESC";
 	protected $timestamps = TRUE;
 
@@ -23,7 +23,7 @@ class Projects extends MY_Model
 		// 'rate_monthly' => ['field' => 'rate_monthly', 'label' => 'Monthly Rate', 'rules' => 'is_natural|xss_clean'],
 		// 'rate_semi_monthly' => ['field' => 'rate_semi_monthly', 'label' => 'Semi-Monthly Rate', 'rules' => 'is_natural|xss_clean']
 	);
-	
+
 	function __construct()
 	{
 		parent::__construct();
@@ -44,7 +44,7 @@ class Projects extends MY_Model
 		$project->rate_monthly = 0;
 		$project->rate_semi_monthly = 0;
 		// $project->fields = '';
-		
+
 		return $project;
 	}
 
@@ -52,7 +52,7 @@ class Projects extends MY_Model
 	{
 		$array = array(
 			// 'cola' => 'COLA',									--> this field is automatically included
-			// 'hourly_rate' => 'Rate per Hour',					--> this field is automatically included 
+			// 'hourly_rate' => 'Rate per Hour',					--> this field is automatically included
 			// 'daily_rate' => 'Rate per Day',						--> this field is automatically included
 			// 'semi_monthly_rate' => 'Rate per Semi-Monthly',		--> this field is automatically included
 			// 'monthly_rate' => 'Rate per Monthly',				--> this field is automatically included
@@ -83,30 +83,30 @@ class Projects extends MY_Model
 	public function get_field()
 	{
 		$array = array(
-			'cola' => ['label' => 'COLA', 'abbr' => 'ECOLA', 'payroll' => 'r_cola', 'multiplier' => 'e_cola'], 
-			'hourly_rate' => ['label' => 'Rate per Hour', 'abbr' => 'Basic/Hrs', 'payroll' => 'r_hourly_rate', 'multiplier' => 'no_hrs'], 
-			'daily_rate' => ['label' => 'Rate per Day', 'abbr' => 'Basic/Day', 'payroll' => 'r_daily_rate', 'multiplier' => 'rw_day'], 
-			'semi_monthly_rate' => ['label' => 'Rate per Semi-Monthly', 'abbr' => 'Basic/Semi-Month', 'payroll' => 'r_semi_monthly_rate', 'multiplier' => 'semi_monthly_rate'], 
-			'monthly_rate' => ['label' => 'Rate per Monthly', 'abbr' => 'Basic/Month', 'payroll' => 'r_monthly_rate', 'multiplier' => 'monthly_rate'], 
-			'straight_duty' => ['label' => 'Straight Duty', 'abbr' => 'Straight Duty', 'payroll' => 'r_straight_duty', 'multiplier' => 'sd_day'], 
-			'night_diff' => ['label' => 'Night Differential', 'abbr' => 'Night Diff.', 'payroll' => 'r_night_diff', 'multiplier' => 'nd_day'], 
-			'night_ot_diff' => ['label' => 'Night Differential Over-time', 'abbr' => 'Night Diff. OT', 'payroll' => 'r_night_ot_diff', 'multiplier' => 'nd_ot_day'], 
-			'rest_day_rate' => ['label' => 'Rest Day', 'abbr' => 'Rest Day', 'payroll' => 'r_rest_day_rate', 'multiplier' => 'rd_day'], 
-			'rest_day_ot_rate' => ['label' => 'Rest Day Over-time', 'abbr' => 'Rest Day OT', 'payroll' => 'r_rest_day_ot_rate', 'multiplier' => 'rd_ot_day'], 
-			'rest_day_special_holiday' => ['label' => 'Rest Day Special Holiday', 'abbr' => 'Sp Hol/Rest Day', 'payroll' => 'r_rest_day_special_holiday', 'multiplier' => 'rd_sh_day'], 
-			'rest_day_special_ot_holiday' => ['label' => 'Rest Day Special Holiday Over-time', 'abbr' => 'Sp Hol/Rest OT', 'payroll' => 'r_rest_day_special_ot_holiday', 'multiplier' => 'rd_sh_ot_day'], 
-			'rest_day_legal_holiday' => ['label' => 'Rest Day Legal Holiday', 'abbr' => 'Lg Hol/Rest', 'payroll' => 'r_rest_day_legal_holiday', 'multiplier' => 'rd_lg_hl'], 
-			'rest_day_legal_ot_holiday' => ['label' => 'Rest Day Legal Holiday Over-time', 'abbr' => 'LG Hol/Rest OT', 'payroll' => 'r_rest_day_legal_ot_holiday', 'multiplier' => 'rd_lg_ot_hl'], 
-			'legal_holiday' => ['label' => 'Legal Holiday', 'abbr' => 'Lg Holiday', 'payroll' => 'r_legal_holiday', 'multiplier' => 'lg_day'], 
-			'legal_ot_holiday' => ['label' => 'Legal Holiday Over-time', 'abbr' => 'Lg Holiday OT', 'payroll' => 'r_legal_ot_holiday', 'multiplier' => 'lg_ot_day'], 
-			'special_holiday' => ['label' => 'Special Holiday', 'abbr' => 'Sp Holiday', 'payroll' => 'r_special_holiday', 'multiplier' => 'sp_day'], 
-			'special_ot_holiday' => ['label' => 'Special Holiday Over-time', 'abbr' => 'Sp Holiday OT', 'payroll' => 'r_special_ot_holiday', 'multiplier' => 'sp_ot_day'], 
-			'regular_ot_day' => ['label' => 'Regular Over-time', 'abbr' => 'Basic OT', 'payroll' => 'r_regular_ot_day', 'multiplier' => 'rw_ot_day'], 
-			'late_amount' => ['label' => 'Tardiness', 'abbr' => 'Tardiness', 'payroll' => 'r_late_amount', 'multiplier' => 'late_minutes'], 
-			'absent_rate' => ['label' => 'Absent per Hours', 'abbr' => 'Absent/Hrs', 'payroll' => 'r_absent_rate', 'multiplier' => 'no_absences_per_hr'], 
-			'absent_rate_per_day' => ['label' => 'Absent', 'abbr' => 'Absent', 'payroll' => 'r_absent_rate_per_day', 'multiplier' => 'no_absences_per_day'], 
-			// 'incentive' => ['label' => 'Incentives', 'abbr' => 'Incentives', 'payroll' => 'r_incentive', 'multiplier' => 'no_hrs'], 
-			'13thmonth' => ['label' => '13th Month', 'abbr' => '13th Month', 'payroll' => 'r_13thmonth', 'multiplier' => 'no_hrs'], 
+			'cola' => ['label' => 'COLA', 'abbr' => 'ECOLA', 'payroll' => 'r_cola', 'multiplier' => 'e_cola'],
+			'hourly_rate' => ['label' => 'Rate per Hour', 'abbr' => 'Basic/Hrs', 'payroll' => 'r_hourly_rate', 'multiplier' => 'no_hrs'],
+			'daily_rate' => ['label' => 'Rate per Day', 'abbr' => 'Basic/Day', 'payroll' => 'r_daily_rate', 'multiplier' => 'rw_day'],
+			'semi_monthly_rate' => ['label' => 'Rate per Semi-Monthly', 'abbr' => 'Basic/Semi-Month', 'payroll' => 'r_semi_monthly_rate', 'multiplier' => 'no_hrs'],
+			'monthly_rate' => ['label' => 'Rate per Monthly', 'abbr' => 'Basic/Month', 'payroll' => 'r_monthly_rate', 'multiplier' => 'no_hrs'],
+			'straight_duty' => ['label' => 'Straight Duty', 'abbr' => 'Straight Duty', 'payroll' => 'r_straight_duty', 'multiplier' => 'sd_day'],
+			'night_diff' => ['label' => 'Night Differential', 'abbr' => 'Night Diff.', 'payroll' => 'r_night_diff', 'multiplier' => 'nd_day'],
+			'night_ot_diff' => ['label' => 'Night Differential Over-time', 'abbr' => 'Night Diff. OT', 'payroll' => 'r_night_ot_diff', 'multiplier' => 'nd_ot_day'],
+			'rest_day_rate' => ['label' => 'Rest Day', 'abbr' => 'Rest Day', 'payroll' => 'r_rest_day_rate', 'multiplier' => 'rd_day'],
+			'rest_day_ot_rate' => ['label' => 'Rest Day Over-time', 'abbr' => 'Rest Day OT', 'payroll' => 'r_rest_day_ot_rate', 'multiplier' => 'rd_ot_day'],
+			'rest_day_special_holiday' => ['label' => 'Rest Day Special Holiday', 'abbr' => 'Sp Hol/Rest Day', 'payroll' => 'r_rest_day_special_holiday', 'multiplier' => 'rd_sh_day'],
+			'rest_day_special_ot_holiday' => ['label' => 'Rest Day Special Holiday Over-time', 'abbr' => 'Sp Hol/Rest OT', 'payroll' => 'r_rest_day_special_ot_holiday', 'multiplier' => 'rd_sh_ot_day'],
+			'rest_day_legal_holiday' => ['label' => 'Rest Day Legal Holiday', 'abbr' => 'Lg Hol/Rest', 'payroll' => 'r_rest_day_legal_holiday', 'multiplier' => 'rd_lg_hl'],
+			'rest_day_legal_ot_holiday' => ['label' => 'Rest Day Legal Holiday Over-time', 'abbr' => 'LG Hol/Rest OT', 'payroll' => 'r_rest_day_legal_ot_holiday', 'multiplier' => 'rd_lg_ot_hl'],
+			'legal_holiday' => ['label' => 'Legal Holiday', 'abbr' => 'Lg Holiday', 'payroll' => 'r_legal_holiday', 'multiplier' => 'lg_day'],
+			'legal_ot_holiday' => ['label' => 'Legal Holiday Over-time', 'abbr' => 'Lg Holiday OT', 'payroll' => 'r_legal_ot_holiday', 'multiplier' => 'lg_ot_day'],
+			'special_holiday' => ['label' => 'Special Holiday', 'abbr' => 'Sp Holiday', 'payroll' => 'r_special_holiday', 'multiplier' => 'sp_day'],
+			'special_ot_holiday' => ['label' => 'Special Holiday Over-time', 'abbr' => 'Sp Holiday OT', 'payroll' => 'r_special_ot_holiday', 'multiplier' => 'sp_ot_day'],
+			'regular_ot_day' => ['label' => 'Regular Over-time', 'abbr' => 'Basic OT', 'payroll' => 'r_regular_ot_day', 'multiplier' => 'rw_ot_day'],
+			'late_amount' => ['label' => 'Tardiness', 'abbr' => 'Tardiness', 'payroll' => 'r_late_amount', 'multiplier' => 'late_minutes'],
+			'absent_rate' => ['label' => 'Absent per Hours', 'abbr' => 'Absent/Hrs', 'payroll' => 'r_absent_rate', 'multiplier' => 'no_absences_per_hr'],
+			'absent_rate_per_day' => ['label' => 'Absent', 'abbr' => 'Absent', 'payroll' => 'r_absent_rate_per_day', 'multiplier' => 'no_absences_per_day'],
+			// 'incentive' => ['label' => 'Incentives', 'abbr' => 'Incentives', 'payroll' => 'r_incentive', 'multiplier' => 'no_hrs'],
+			'13thmonth' => ['label' => '13th Month', 'abbr' => '13th Month', 'payroll' => 'r_13thmonth', 'multiplier' => 'no_hrs'],
 		);
 
 		return $array;
@@ -119,7 +119,7 @@ class Projects extends MY_Model
 
 		$array = $this->get_project_rates_array();
 
-		foreach ($array as $field => $value) 
+		foreach ($array as $field => $value)
 		{
 			$array[$field] = $value;
 		}
@@ -132,27 +132,27 @@ class Projects extends MY_Model
 		$proj = self::get($project_id, TRUE);
 		$rates = self::get_project_rates_array();
 
-		foreach ($rates as $field => $value) 
-		{ 
-			$rates[$field] = $value; 
+		foreach ($rates as $field => $value)
+		{
+			$rates[$field] = $value;
 			// $rates[] = ['id'=> $field, 'text' => $value];
 		}
 
-		if ($proj->rate_hourly == 1) 
+		if ($proj->rate_hourly == 1)
 		{
 		    unset($rates['hourly_rate']);
 		    unset($rates['semi_monthly_rate']);
 		    unset($rates['monthly_rate']);
 		}
 
-		if ($proj->rate_daily == 1) 
+		if ($proj->rate_daily == 1)
 		{
 		    unset($rates['daily_rate']);
 		    unset($rates['semi_monthly_rate']);
 		    unset($rates['monthly_rate']);
 		}
 
-		if (($proj->rate_semi_monthly == 1) || ($proj->rate_monthly == 1)) 
+		if (($proj->rate_semi_monthly == 1) || ($proj->rate_monthly == 1))
 		{
 		    unset($rates['semi_monthly_rate']);
 		    unset($rates['monthly_rate']);
@@ -169,13 +169,13 @@ class Projects extends MY_Model
 		$this->db->order_by('title, description');
 		$projects = parent::get();
 
-		if ($multiple == FALSE) 
+		if ($multiple == FALSE)
 		$array = array(0 => 'Select projects');
 
 		// Return key -> value pair array
-		if (count($projects)) 
+		if (count($projects))
 		{
-			foreach ($projects as $project) 
+			foreach ($projects as $project)
 			$array[$project->project_id] = $project->title;
 		}
 
@@ -188,15 +188,15 @@ class Projects extends MY_Model
 
 	    // if ( ! isset($_POST['search']))
         $this->db->limit($limit);
-        
-        if ($search !== NULL) 
+
+        if ($search !== NULL)
 	    $this->db->like('title', $search, 'after')->or_like('description', $search, 'both');
 
-	    foreach (parent::get() as $key => $result) 
+	    foreach (parent::get() as $key => $result)
 	    {
-	      $data[] = 
+	      $data[] =
 	      				[
-	                        "id" => $result->project_id, 
+	                        "id" => $result->project_id,
 	                        'text' => "{$result->title} ({$result->description})",
 	                        'title' => "{$result->title}",
 	                        'description' => "{$result->description}",
@@ -214,9 +214,9 @@ class Projects extends MY_Model
 
 		// Return key -> value pair array
 		$array = array('0' => 'Select employees');
-		if (count($employees)) 
+		if (count($employees))
 		{
-			foreach ($employees as $employee) 
+			foreach ($employees as $employee)
 			{
 				$array[$employee->employee_id] = $employee->lastname . ', ' . $employee->firstname . ' ' . $employee->middlename;
 				// $array[$employee->employee_id] = $employee->member_status;
@@ -237,9 +237,9 @@ class Projects extends MY_Model
 
 		// Return key -> value pair array
 		$array = array('0' => 'Select position');
-		if (count($positions)) 
+		if (count($positions))
 		{
-			foreach ($positions as $position) 
+			foreach ($positions as $position)
 			{
 				$array[$position->position_id] = $position->position;
 			}
@@ -261,7 +261,7 @@ class Projects extends MY_Model
 	{
 		$this->db->join('project_employees', 'project_employees.project_id = projects.project_id', 'LEFT');
 		$this->db->join('employees', 'employees.employee_id = project_employees.employee_id', 'LEFT');
-		
+
 		// return parent::get($employee_id, $single);
 		return $this->db;
 	}
@@ -269,7 +269,7 @@ class Projects extends MY_Model
 	public function with_positions()
 	{
 		$this->db->join('positions', 'project_employees.position_id = positions.position_id', 'LEFT');
-		
+
 		return $this->db;
 	}
 
@@ -277,7 +277,7 @@ class Projects extends MY_Model
 	{
 		$this->db->join('project_rates', 'project_rates.project_id = projects.project_id', 'LEFT');
 		$this->db->join('rates', 'rates.rate_id = rates.rate_id', 'LEFT');
-		
+
 		return $this->db;
 	}
 }

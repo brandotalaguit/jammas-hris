@@ -2,7 +2,7 @@
 
 <?php echo $form_url; ?>
 <div class="container">
-	
+
 
 <div class="row">
 	<div class="col-sm-10">
@@ -21,7 +21,7 @@
 		  <div id="ei" class="tab-pane fade in active">
 		  	<h3>Personal Information</h3>
 
-		  	
+
 
 		    <label for="firstname" class="col-sm-2 control-label">Firstname</label>
 			<div class="form-group">
@@ -51,14 +51,14 @@
 				<label class="col-sm-2 control-label">Gender</label>
 				<div class="col-sm-8">
 					<label class="radio-inline">
-					  <input type="radio" name="gender" id="inlineradio1" value="Male" <?php $employee->gender == 'Male' ? $check = TRUE : $check = FALSE; echo set_radio('gender', 'Male', $check);?> > Male
+					  <input type="radio" name="gender" id="inlineradio1" value="M" <?php $employee->gender == 'M' ? $check = TRUE : $check = FALSE; echo set_radio('gender', 'M', $check);?> > Male
 					</label>
 					<label class="radio-inline">
-					  <input type="radio" name="gender" id="inlineradio2" value="Female" <?php $employee->gender == 'Female' ? $check = TRUE : $check = FALSE; echo set_radio('gender', 'Female', $check);?> > Female
+					  <input type="radio" name="gender" id="inlineradio2" value="F" <?php $employee->gender == 'F' ? $check = TRUE : $check = FALSE; echo set_radio('gender', 'F', $check);?> > Female
 					</label>
-					
+
 				</div>
-			</div>		
+			</div>
 			<label for="date_of_birth" class="col-sm-2 control-label">Date of Birth</label>
 			<div class="form-group">
 				<div class="col-sm-6">
@@ -114,14 +114,14 @@
 				</div>
 				<span class="help-block"></span>
 			</div>
-			
+
 
 
 
 
 			<label for="remarks" class="col-sm-2 control-label">Remarks</label>
 			<div class="form-group">
-				<div class="col-sm-6">			
+				<div class="col-sm-6">
 					<textarea id="remarks" name="remarks" class="form-control" rows="3" placeholder="Remarks"><?php echo set_value('remarks', $employee->remarks);?></textarea>
 				</div>
 				<span class="help-block"></span>
@@ -204,7 +204,7 @@
 
 			<label for="contract_remarks" class="col-sm-2 control-label">Contract Remarks</label>
 			<div class="form-group">
-				<div class="col-sm-6">			
+				<div class="col-sm-6">
 					<textarea id="contract_remarks" name="contract_remarks" class="form-control" rows="3" placeholder="Contract Remarks"><?php echo set_value('contract_remarks', $employee->contract_remarks);?></textarea>
 				</div>
 				<span class="help-block"></span>
@@ -247,7 +247,7 @@
 		  </div>
 		  <div id="sd" class="tab-pane fade">
 		    <h3>Salary Details</h3>
-		    
+
 		    <div class="form-group">
 				<label class="col-sm-2 control-label">Rate Type</label>
 				<div class="col-sm-8">
@@ -261,7 +261,7 @@
 					  <input type="radio" name="rate" id="inlineradio2" value="3" <?php $employee->rate == '3' ? $check = TRUE : $check = FALSE; echo set_radio('rate', '3', $check);?> > Monthly
 					</label>
 				</div>
-			</div>	
+			</div>
 		    <label for="daily_rate" class="col-sm-2 control-label">Daily Rate</label>
 			<div class="form-group">
 				<div class="col-sm-6">
@@ -315,11 +315,11 @@
 					  <input type="radio" name="allowance_mode_of_payment" id="inlineradio2" value="3" <?php $employee->allowance_mode_of_payment == '3' ? $check = TRUE : $check = FALSE; echo set_radio('allowance_mode_of_payment', '3', $check);?> > Monthly
 					</label>
 				</div>
-			</div>	
+			</div>
 
 			<label for="allowance_remarks" class="col-sm-2 control-label">Allowance Remarks</label>
 			<div class="form-group">
-				<div class="col-sm-6">			
+				<div class="col-sm-6">
 					<textarea id="allowance_remarks" name="allowance_remarks" class="form-control" rows="3" placeholder="Allowance Remarks"><?php echo set_value('allowance_remarks', $employee->allowance_remarks);?></textarea>
 				</div>
 				<span class="help-block"></span>
@@ -359,7 +359,7 @@
 				<span class="help-block"></span>
 			</div>
 
-			
+
 
 			<label for="mayors_permit_clerance_date_submitted" class="col-sm-2 control-label">Mayor's Permit Clearance</label>
 			<div class="form-group">
@@ -404,7 +404,7 @@
 
 			<label for="insurance_remarks" class="col-sm-2 control-label">Insurance Remarks</label>
 			<div class="form-group">
-				<div class="col-sm-6">			
+				<div class="col-sm-6">
 					<textarea id="insurance_remarks" name="insurance_remarks" class="form-control" rows="3" placeholder="Insurance Remarks"><?php echo set_value('insurance_remarks', $employee->insurance_remarks);?></textarea>
 				</div>
 				<span class="help-block"></span>
@@ -413,10 +413,10 @@
 		  </div>
 		</div>
 
-		
 
 
-		
+
+
 
 
 
@@ -427,7 +427,7 @@
 
 <div class="row">
 	<div class="col-sm-10">
-	
+
 	<div class="form-group">
 	  <div class="col-sm-offset-2 col-sm-6">
 	  <div class="btn-group">

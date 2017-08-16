@@ -1,4 +1,4 @@
-<?php 
+<?php
 	$this->load->model(['manning_payroll_earning_m', 'manning_payroll_deduction_m']);
 
 	$GLOBALS['billing_rates'] = $billing_rates = $this->projects->get_field();
@@ -17,18 +17,20 @@
         foreach (explode(',', $fields) as $wage_name)
         {
             $rate_data = $billing_rates[$wage_name];
-        	if ( ! in_array($billing_rates[$wage_name]['payroll'], $tardiness)) 
+        	if ( ! in_array($billing_rates[$wage_name]['payroll'], $tardiness))
         	{
-        		if ($totalOnly == FALSE) 
+        		if ($totalOnly == FALSE)
         		{
 
-		           	if (empty($GLOBALS['earning'][$wage_name])) 
+		           	if (empty($GLOBALS['earning'][$wage_name]))
+		           	{
 		           		$GLOBALS['earning'][$wage_name] = array(
-	           												'description' => $rate_data['abbr'], 
+	           												'description' => $rate_data['abbr'],
 	           												'amount' => $payroll->$rate_data['payroll'],
-	           												'multiplier' => $payroll->$rate_data['payroll'] == 0 ? '' : $payroll->$rate_data['multiplier'], 
+	           												'multiplier' => $payroll->$rate_data['payroll'] == 0 ? '' : $payroll->$rate_data['multiplier'],
 	           											);
-		           	else 
+		           	}
+		           	else
 		           	{
 		           		$GLOBALS['earning'][$wage_name]['amount'] += $payroll->$rate_data['payroll'];
 		           		$GLOBALS['earning'][$wage_name]['multiplier'] += $payroll->$rate_data['payroll'] == 0 ? '' : $payroll->$rate_data['multiplier'];
@@ -38,11 +40,11 @@
 		                        'name' => $wage_name,
 		                        'description' => $rate_data['abbr'],
 		                        'amount' => $payroll->$rate_data['payroll'],
-								'multiplier' => $payroll->$rate_data['payroll'] == 0 ? '' : $payroll->$rate_data['multiplier'], 
+								'multiplier' => $payroll->$rate_data['payroll'] == 0 ? '' : $payroll->$rate_data['multiplier'],
 		                      );
-        			
+
         		}
-        		else 
+        		else
         		{
         			$data[] = $GLOBALS['earning'][$wage_name];
         		}
@@ -50,63 +52,63 @@
         	}
         }
 
-        if ($totalOnly == FALSE) 
+        if ($totalOnly == FALSE)
         {
     	     // e-cola
-	    	if (empty($GLOBALS['earning']['r_cola'])) 
+	    	if (empty($GLOBALS['earning']['r_cola']))
 	    		$GLOBALS['earning']['r_cola'] = array(
-													'description' => 'E-COLA', 
+													'description' => 'E-COLA',
 													'amount' => $payroll->r_cola,
-													'multiplier' => '', 
+													'multiplier' => '',
 												);
-	    	else 
+	    	else
 	    	{
 	    		$GLOBALS['earning']['r_cola']['amount'] += $payroll->r_cola;
 	    		$GLOBALS['earning']['r_cola']['multiplier'] += '';
 	    	}
 
 	        // 13th month benefits
-	       	if (empty($GLOBALS['earning']['r_13thmonth'])) 
+	       	if (empty($GLOBALS['earning']['r_13thmonth']))
 	       		$GLOBALS['earning']['r_13thmonth'] = array(
-	   												'description' => '13th Month', 
+	   												'description' => '13th Month',
 	   												'amount' => $payroll->r_13thmonth,
-	   												'multiplier' => '', 
+	   												'multiplier' => '',
 	   											);
-	       	else 
+	       	else
 	       	{
 	       		$GLOBALS['earning']['r_13thmonth']['amount'] += $payroll->r_13thmonth;
 	       		$GLOBALS['earning']['r_13thmonth']['multiplier'] += '';
 	       	}
 
 	       	// allowance
-   	    	if (empty($GLOBALS['earning']['r_allowance'])) 
+   	    	if (empty($GLOBALS['earning']['r_allowance']))
    	    		$GLOBALS['earning']['r_allowance'] = array(
-   													'description' => 'Allowance', 
+   													'description' => 'Allowance',
    													'amount' => $payroll->r_allowance,
-   													'multiplier' => '', 
+   													'multiplier' => '',
    												);
-   	    	else 
+   	    	else
    	    	{
    	    		$GLOBALS['earning']['r_allowance']['amount'] += $payroll->r_allowance;
    	    		$GLOBALS['earning']['r_allowance']['multiplier'] += '';
    	    	}
 	       	$data[] = array(
-							'description' => 'E-COLA', 
+							'description' => 'E-COLA',
 							'amount' => $payroll->r_cola,
-							'multiplier' => '', 
+							'multiplier' => '',
 						);
 	       	$data[] = array(
-							'description' => '13th Month', 
+							'description' => '13th Month',
 							'amount' => $payroll->r_13thmonth,
-							'multiplier' => '', 
+							'multiplier' => '',
 						);
    	       	$data[] = array(
-   							'description' => 'Allowance', 
+   							'description' => 'Allowance',
    							'amount' => $payroll->r_allowance,
-   							'multiplier' => '', 
+   							'multiplier' => '',
    						);
         }
-        else 
+        else
         {
 	       	$data[] = $GLOBALS['earning']['r_cola'];
 	       	$data[] = $GLOBALS['earning']['r_13thmonth'];
@@ -121,7 +123,7 @@
     	$data = array();
     	$deduction1 = array();
     	$deduction_subtotal = 0;
-    		
+
     		if ( ! empty($payroll->deductions))
 			{
 				$ctr = 1;
@@ -155,11 +157,11 @@
 				           	);
 					}
     			}
-    			
+
     		}
 
     		return $deduction1;
-    		
+
     }
 
 	function display_button()
@@ -190,7 +192,7 @@
  				font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
  			}
  		table,tr,td,th,
- 		.col-xs-3 
+ 		.col-xs-3
  		{
  				font-size: 10px !important;
  		}
@@ -198,9 +200,9 @@
  		    vertical-align: bottom;
  		    border-bottom: 1px solid #000;
  		}
- 		/*section.content .box .table, 
- 		section.content .box .table tr, 
- 		section.content .box .table th, 
+ 		/*section.content .box .table,
+ 		section.content .box .table tr,
+ 		section.content .box .table th,
  		section.content .box .table td {
  				border: 1px solid #000;
  		}*/
@@ -211,38 +213,32 @@
  </style>
 <!-- <div class="col-xs-12"> -->
 
-<?php 
+<?php
 ?>
 
 <?php if (count($payroll)): ?>
-		<?php 
+		<?php
 			$this->load->model('projects');
 
 			$fields = $payroll_info->fields;
 			$project = $this->projects->get($payroll_info->project_id);
 			$reg_deduction = $this->manning_payroll_deduction_m->deduction_field();
 
-			if ($project->rate_hourly == 1) 
-			    $fields = 'hourly_rate,' . $fields;
+		    $fields = 'hourly_rate,' . $fields;
+		    $fields = 'daily_rate,' . $fields;
+		    $fields = 'semi_monthly_rate,' . $fields;
+		    $fields = 'monthly_rate,' . $fields;
 
-			if ($project->rate_daily == 1) 
-			    $fields = 'daily_rate,' . $fields;
-
-			if ($project->rate_semi_monthly == 1) 
-			    $fields = 'semi_monthly_rate,' . $fields;
-
-			if ($project->rate_monthly == 1)
-			    $fields = 'monthly_rate,' . $fields;
 			$earning_total = $deduction_total = $ctr = 0;
 		 ?>
 
 		<?php foreach ($payroll as $row): ?>
 <div class="row">
 	<div class="col-xs-12">
-		
-		
+
+
 <div class="box matrix content invoice">
-	
+
 	<?php echo display_button(); ?>
 	<!-- <div class="row"> -->
 		<!-- <div class="col-xs-3"> -->
@@ -259,22 +255,22 @@
 					<b>Employee Code: </b> <?php echo $row->employee_no; ?> <br>
 					<b>Name: </b> <?php echo $row->lastname . ', ' . $row->firstname . $row->middlename; ?> <br>
 					<br>
-					<?php 
+					<?php
 						$total_earnings = $total_deductions = 0;
-						$earnings = get_earnings($row, $fields); 
+						$earnings = get_earnings($row, $fields);
 						$deductions = explode('|', $row->deductions);
-						$deduction3 = get_deductions($row, $deductions, $reg_deduction); 
+						$deduction3 = get_deductions($row, $deductions, $reg_deduction);
 
 						$earning_subtotal = $deduction_subtotal = 0;
 
-						foreach ($earnings as $earning) 
+						foreach ($earnings as $earning)
 						{
 							$earning_subtotal += $earning['amount'];
 							$total_earnings += $earning['amount'];
-							$earning_total += $earning_subtotal; 
+							$earning_total += $earning_subtotal;
 							$earning_subtotal = 0;
 						}
-						foreach ($deduction3 as $deduction4) 
+						foreach ($deduction3 as $deduction4)
 						{
 							$deduction_subtotal += $deduction4['payroll'];
 							$deduction_total += $deduction_subtotal;
@@ -292,7 +288,7 @@
 					<p class="total">
 						<b class="text-left">Net Pay: </b> <span class="pull-right text-right"><?php echo nf($total_earnings - $total_deductions); ?></span> <br>
 					</p>
-					
+
 					<div class="row margin">
 						<div class="col-xs-offset-2 col-xs-8">
 							<br>
@@ -318,29 +314,29 @@
 					    		<td colspan="6">
 					    			<div class="row">
 					    				<div class="col-xs-6">
-					    					<p class="total"> <b>Name: </b> 
+					    					<p class="total"> <b>Name: </b>
 					    					<?php echo $row->lastname . ', ' . $row->firstname . ' ' . substr($row->middlename, 0, 1); ?>
 					    					</p>
 					    				</div>
     				    				<!-- <div class="col-xs-offset-4 col-xs-4">
-    					    				<p class="total"> <b>Days of Week: </b> 
+    					    				<p class="total"> <b>Days of Week: </b>
     				    					&nbsp;
     				    					</p>
     				    				</div> -->
 					    			</div>
 					    			<div class="row">
 					    				<div class="col-xs-6">
-						    				<p class="total"> <b>Pay Period: </b> 
+						    				<p class="total"> <b>Pay Period: </b>
 						    				<?php echo payroll_date($payroll_info->date_start) ?> To: <?php echo payroll_date($payroll_info->date_end) ?>
 					    					</p>
 					    				</div>
 					    				<div class="col-xs-6">
-						    				<p class="total"> <b>Project: </b> 
+						    				<p class="total"> <b>Project: </b>
 					    					<?php echo $payroll_info->title; ?>
 					    					</p>
 					    				</div>
 					    			</div>
-					    				
+
 					    		</td>
 					    	</tr>
 							<tr>
@@ -403,16 +399,16 @@
 												<?php foreach ($reg_deduction as $deduction2): ?>
 													<?php if (!empty($row->$deduction2['payroll'])): ?>
 													<?php if (abs($row->$deduction2['payroll']) > 0): ?>
-														<?php 
-												           	if (empty($GLOBALS['deduction'][$deduction2['payroll']])) 
+														<?php
+												           	if (empty($GLOBALS['deduction'][$deduction2['payroll']]))
 												           	{
 												           		$GLOBALS['deduction'][$deduction2['payroll']] = array(
-											           												'description' => $deduction2['abbr'], 
+											           												'description' => $deduction2['abbr'],
 											           												'amount' => abs($row->$deduction2['payroll']),
-											           												'multiplier' => $deduction2['multiplier'] == '' ? '' : nf($row->$deduction2['multiplier']), 
+											           												'multiplier' => $deduction2['multiplier'] == '' ? '' : nf($row->$deduction2['multiplier']),
 											           											);
 												           	}
-												           	else 
+												           	else
 												           	{
 												           		$GLOBALS['deduction'][$deduction2['payroll']]['amount'] += abs($row->$deduction2['payroll']);
 												           		$GLOBALS['deduction'][$deduction2['payroll']]['multiplier'] += $deduction2['multiplier'] == '' ? '' : nf($row->$deduction2['multiplier']);
@@ -423,49 +419,49 @@
 														<td class="text-right" width="15%"><?php echo $deduction2['multiplier'] == '' ? '' : nf($row->$deduction2['multiplier']) ?></td>
 														<td class="text-right" width="35%"><?php echo nf(abs($row->$deduction2['payroll'])) ?></td>
 													</tr>
-													
+
 													<?php endif ?>
 													<?php endif ?>
 												<?php endforeach ?>
 												</table>
 											</td>
-											
+
 										</tr>
 										<tr>
 											<td colspan="6">
 												<div class="row">
 													<div class="col-xs-4">
 														<p class="total">
-															<b class="text-left">Total Earnings: </b> 
+															<b class="text-left">Total Earnings: </b>
 															<span class="pull-right text-right"><?php echo nf($total_earnings); ?></span>
 														</p>
 													</div>
 													<div class="col-xs-4">
 														<p class="total">
-															<b class="text-left">Total Deductions: </b> 
+															<b class="text-left">Total Deductions: </b>
 															<span class="pull-right text-right"><?php echo nf($total_deductions); ?></span>
 														</p>
 													</div>
 													<div class="col-xs-4">
 														<p class="total">
-															<b class="text-left">Net Pay: </b> 
+															<b class="text-left">Net Pay: </b>
 															<span class="pull-right text-right"><?php echo nf($total_earnings - $total_deductions); ?></span>
 														</p>
 													</div>
 												</div>
 											</td>
 										</tr>
-									
+
 
 						</tbody>
 				    </table>
-				    
+
 					<?php echo display_button(); ?>
 			</td>
 		</tr>
 	</table>
 
-	
+
 		<!-- </div> -->
 		<!-- <div class="col-xs-9"> -->
 
@@ -475,7 +471,7 @@
 </div>
 
 	</div>
-</div>	
+</div>
 
 
 
@@ -492,7 +488,7 @@
 						POSITIVE NET PAYS</b>
 				</td>
 				<td>
-					<?php 
+					<?php
 						$totalOnly = TRUE;
 						$earnings = get_earnings(NULL, $fields, $totalOnly);
 					?>
@@ -524,16 +520,16 @@
 					<tr>
 						<td>Grand Earnings</td>
 						<td class="text-right">
-							<?php 
-									echo nf($earning_total); 
+							<?php
+									echo nf($earning_total);
 								?>
 						</td>
 					</tr>
 					<tr>
 						<td>Grand Deductions</td>
 						<td class="text-right">
-							<?php 
-									echo nf($deduction_total); 
+							<?php
+									echo nf($deduction_total);
 								?>
 						</td>
 					</tr>
@@ -553,7 +549,7 @@
 						set opposite his/her name. The total amount paid in this payroll for employees receiving positive(+) net pays is<br>
 						<?php $my_total = explode('.', $grand_net); ?>
 						<?php echo ucwords((convert_number_to_words($my_total[0]))); ?>
-						<?php 
+						<?php
 						    if ( ! empty($my_total[1]))
 						    echo ' & ' . substr(nf( '.' . $my_total[1] ),2,10) . '/100';
 						?>

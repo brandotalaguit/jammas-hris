@@ -6,7 +6,7 @@
 class Manning extends MY_Model
 {
 	protected $table_name = "manning";
-	protected $primary_key = "manning_id";	
+	protected $primary_key = "manning_id";
 	protected $order_by = "project_id DESC, lastname DESC";
 	protected $timestamps = TRUE;
 
@@ -27,6 +27,7 @@ class Manning extends MY_Model
 		'date_hired' => ['field' => 'date_hired', 'label' => 'Date Hired', 'rules' => 'trim|xss_clean'],
 		'date_renew' => ['field' => 'date_renew', 'label' => 'Date Renew', 'rules' => 'trim|xss_clean'],
 		'contract_expiry_date' => ['field' => 'contract_expiry_date', 'label' => 'Contract Expiry Date', 'rules' => 'trim|xss_clean'],
+		'employee_no' => ['field' => 'employee_no', 'label' => 'Employee No.', 'rules' => 'trim|required|callback__is_unique|xss_clean'],
 		'sss_no' => ['field' => 'sss_no', 'label' => 'SSS No.', 'rules' => 'trim|xss_clean'],
 		'philhealth_no' => ['field' => 'philhealth_no', 'label' => 'Philhealth No.', 'rules' => 'trim|xss_clean'],
 		'pagibig_no' => ['field' => 'pagibig_no', 'label' => 'PAGIBIG No.', 'rules' => 'trim|xss_clean'],
@@ -37,7 +38,7 @@ class Manning extends MY_Model
 		'address2' => ['field' => 'address2', 'label' => 'Address Line 2', 'rules' => 'trim|xss_clean'],
 		'contract_remarks' => ['field' => 'contract_remarks', 'label' => 'Contract Remarks', 'rules' => 'trim|xss_clean'],
 		'rate' => ['field' => 'rate', 'label' => 'Rate Type', 'rules' => 'trim|required|to_decimal|xss_clean'],
-		'daily_rate' => ['field' => 'daily_rate', 'label' => 'Daily Rate', 'rules' => 'trim|required|to_decimal|xss_clean'],
+		'daily_rate' => ['field' => 'daily_rate', 'label' => 'Daily Rate', 'rules' => 'trim|required|to_decimal|greater_than[0]|xss_clean'],
 		'semi_monthly_rate' => ['field' => 'semi_monthly_rate', 'label' => 'Semi Monthly Rate', 'rules' => 'trim|to_decimal|xss_clean'],
 		'monthly_rate' => ['field' => 'monthly_rate', 'label' => 'Monthly Rate', 'rules' => 'trim|to_decimal|xss_clean'],
 		'e_cola' => ['field' => 'e_cola', 'label' => 'E-Cola', 'rules' => 'trim|required|to_decimal|xss_clean'],
@@ -58,10 +59,23 @@ class Manning extends MY_Model
 		'insurance_remarks' => ['field' => 'insurance_remarks', 'label' => 'Insurance Remarks', 'rules' => 'trim|xss_clean'],
 		'remarks' => ['field' => 'remarks', 'label' => 'Remarks', 'rules' => 'trim|xss_clean'],
 	);
-	
+
 	function __construct()
 	{
 		parent::__construct();
+	}
+
+	public function max_proj_id($project_id)
+	{
+		$this->db->select('CAST(max(right(employee_no, 4))+1 AS UNSIGNED INT) max_id', FALSE);
+		$this->db->group_by('project_id')->order_by('project_id', 'asc');
+		$result = parent::get_by(['project_id' => $project_id], TRUE);
+		// dump($this->db->last_query());
+		// dump($result);
+		$this->db->close();
+
+		return $result->max_id;
+
 	}
 
 	public function get_new()
@@ -82,7 +96,7 @@ class Manning extends MY_Model
 		$employee->date_hired = '';
 		$employee->date_renew = '';
 		$employee->contract_expiry_date = '';
-		$employee->sss_no = ''; 
+		$employee->sss_no = '';
 		$employee->philhealth_no = '';
 		$employee->pagibig_no = '';
 		$employee->tin_no = '';
@@ -95,7 +109,7 @@ class Manning extends MY_Model
 		$employee->daily_rate = '481.00';
 		$employee->semi_monthly_rate = '0.00';
 		$employee->monthly_rate = '0.00';
-		$employee->e_cola = '10.00'; 
+		$employee->e_cola = '10.00';
 		$employee->allowance = '0.00';
 		$employee->allowance_mode_of_payment = '0';
 		$employee->allowance_remarks = '';
@@ -107,21 +121,21 @@ class Manning extends MY_Model
 		$employee->mayors_permit_clerance_date_submitted = '';
 		$employee->fit_to_work_date_submitted = '';
 		$employee->xray_date_submitted = '';
-		$employee->date_resigned = '';			
+		$employee->date_resigned = '';
 		$employee->insurance_remarks = '';
-		$employee->date_filed_up = '';			
+		$employee->date_filed_up = '';
 		$employee->remarks = '';
 
-		
+
 		return $employee;
 	}
 
 	public function get_employees($id = NULL, $single = FALSE, $fields = NULL)
 	{
-		
+
 		// select statements
 		$this->db->select('manning.*, f.employment_status as employment_status,  e.position as position, d.title as title', FALSE);
-		
+
 		// join statements
 		$this->db->join('projects as d', 'manning.project_id = d.project_id', 'left');
 		$this->db->join('positions as e', 'manning.position_id = e.position_id', 'left');
@@ -134,7 +148,7 @@ class Manning extends MY_Model
 	{
 		// select statements
 		$this->db->select('cases.*, b.lastname, b.firstname, e.position, d.title, b.middlename, c.case_category_code, c.case_category', FALSE);
-		
+
 		// join statements
 		$this->db->join('case_categories as c', 'cases.case_category_id = c.case_category_id', 'left');
 		$this->db->join('manning as b', 'cases.employee_id = b.manning_id', 'left');
@@ -148,17 +162,17 @@ class Manning extends MY_Model
 	{
 		// select statements
 		$this->db->select('project_id, title',  FALSE);
-		
+
 		$projects = $this->db->order_by('title')->get('projects')->result();
-		 
+
 		// Return key -> value pair array
 		$array = array('0' => 'Select Project');
-		if (count($projects)) 
+		if (count($projects))
 		{
-			foreach ($projects as $project) 
+			foreach ($projects as $project)
 			$array[$project->project_id] = $project->title;
 		}
-		
+
 
 		return $array;
 	}
@@ -167,17 +181,17 @@ class Manning extends MY_Model
 	{
 		// select statements
 		$this->db->select('position_id, position',  FALSE);
-		
+
 		$positions = $this->db->order_by('position')->get('positions')->result();
-		 
+
 		// Return key -> value pair array
 		$array = array('0' => 'Select Position');
-		if (count($positions)) 
+		if (count($positions))
 		{
-			foreach ($positions as $position) 
+			foreach ($positions as $position)
 			$array[$position->position_id] = $position->position;
 		}
-		
+
 
 		return $array;
 	}
@@ -188,15 +202,15 @@ class Manning extends MY_Model
 		$this->db->select('employment_status_id, employment_status',  FALSE);
 		$this->db->where('is_actived', 1);
 		$employment_statuses = $this->db->order_by('employment_status')->get('employment_status')->result();
-		 
+
 		// Return key -> value pair array
-		$array = array('0' => 'Select Employment Status');	
-		if (count($employment_statuses)) 
+		$array = array('0' => 'Select Employment Status');
+		if (count($employment_statuses))
 		{
-			foreach ($employment_statuses as $employment_status) 
+			foreach ($employment_statuses as $employment_status)
 			$array[$employment_status->employment_status_id] = $employment_status->employment_status;
 		}
-		
+
 
 		return $array;
 	}
@@ -217,13 +231,13 @@ class Manning extends MY_Model
 		$this->db->select($this->primary_key . ',' . $this->_dropdown_field)->order_by($this->_dropdown_field);
 		$data = parent::get();
 		// die(dump($data));
-		foreach ($data as $row) 
+		foreach ($data as $row)
 		$array[$row->{$this->primary_key}] = $row->lastname . ', ' . $row->firstname . ' ' . $row->middlename;
 
 		return $array;
 	}
 
-	
+
 }
 
 /*Location: ./application/models/manning.php*/
