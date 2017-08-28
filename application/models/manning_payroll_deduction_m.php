@@ -58,6 +58,27 @@ class Manning_payroll_deduction_m extends MY_Model
         'value' => ['field' => 'value', 'label' => 'Values', 'rules' => 'required|is_numeric|to_decimal|nf|xss_clean']
     );
 
+    public $philhealth_deduction = array(
+                                            'philhealth_no',
+                                            'SUM(employee_share_philhealth) employee_share_philhealth',
+                                            'SUM(employer_share_philhealth) employer_share_philhealth',
+                                            'SUM(total_monthly_premium_philhealth) total_monthly_premium_philhealth',
+                                        );
+
+    public $pagibig_deduction = array(
+                                            'pagibig_no',
+                                            'SUM(employee_share_pagibig) employee_share_pagibig',
+                                            'SUM(employer_share_pagibig) employer_share_pagibig',
+                                            'SUM(total_monthly_premium_pagibig) total_monthly_premium_pagibig',
+                                     );
+
+    public $sss_deduction = array(
+                                            'sss_no',
+                                            'SUM(employee_share_sss) employee_share_sss',
+                                            'SUM(employer_share_sss) employer_share_sss',
+                                            'SUM(total_monthly_premium_sss) total_monthly_premium_sss',
+                                            'SUM(employee_compensation_program_sss) employee_compensation_program_sss'
+                                 );
 
     function __construct()
     {
@@ -172,6 +193,16 @@ class Manning_payroll_deduction_m extends MY_Model
         ! $manning_id || $this->db->where('manning_id IN (' . implode(',', $manning_id) . ')');
         ! $payroll_month || $this->db->where('payroll_month', $payroll_month);
 
+        if ($this->input->post('report_format') == 1)
+        {
+            ! $payroll_month || $this->db->group_by('payroll_month');
+            $this->db->group_by('payroll_year');
+        }
+        else
+        {
+            $this->db->group_by('payroll_date');
+        }
+
         $this->db->where('payroll_year', $payroll_year);
         return $this->fields($field_arr)->group_by('manning_id')
                     ->get_manning_payroll_deduction();
@@ -194,8 +225,20 @@ class Manning_payroll_deduction_m extends MY_Model
              ! $payroll_month || $this->db->where('payroll_month', $payroll_month);
              $this->db->where('payroll_year', $payroll_year);
              $this->db->where('G.project_id', $row->project_id);
+
+             if ($this->input->post('report_format') == 1)
+             {
+                 ! $payroll_month || $this->db->group_by('payroll_month');
+                 $this->db->group_by('payroll_year');
+             }
+             else
+             {
+                 $this->db->group_by('payroll_date');
+             }
+
              $result = $this->fields($field_arr)
-                            ->group_by('G.project_id, manning_id')
+                            // ->group_by('G.project_id, manning_id')
+                            ->group_by('manning_id')
                             ->get_manning_payroll_deduction();
 
              $project[] = array(
@@ -280,20 +323,16 @@ class Manning_payroll_deduction_m extends MY_Model
     }
 
 
-    public function get_manning_payroll_deduction($payroll_id = NULL, $manning_payroll_earning_id = NULL, $single = FALSE)
+    public function get_manning_payroll_deduction($payroll_id=NULL, $manning_payroll_earning_id = NULL, $single = FALSE)
     {
         $this->db->select($this->_select);
-        /*$this->db->select('title, tin, rate_hourly, rate_daily, rate_monthly, rate_semi_monthly,
-                            lastname, firstname, middlename, position_code, position,
-                            pagibig_no, philhealth_no, tin_no, sss_no, employee_no, date_printed, date_start, date_end,
-                            manning_payroll_deduction.*');*/
 
         $this->db->join('manning_payroll as A', 'A.payroll_id = manning_payroll_deduction.payroll_id', 'left');
         $this->db->join('manning as E', 'E.manning_id = manning_payroll_deduction.employee_id', 'left');
         $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
         $this->db->join('projects as G', 'G.project_id = A.project_id', 'left');
 
-        $this->db->order_by('title, lastname, firstname, middlename, date_printed ASC');
+        $this->db->order_by('lastname, firstname, middlename, date_printed ASC');
 
 
         if ($payroll_id == NULL && $manning_payroll_earning_id == NULL)

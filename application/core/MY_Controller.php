@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class MY_Controller extends CI_Controller 
+class MY_Controller extends CI_Controller
 {
 
 	public $data = array();
@@ -12,7 +12,7 @@ class MY_Controller extends CI_Controller
 		$this->data['site_name'] = config_item('site_name');
 		$this->load->helper('form');
 		$this->load->library('session');
-		
+
 	}
 
 
@@ -25,7 +25,7 @@ class MY_Controller extends CI_Controller
 	public function redirect_to($msg, $redirect_to = 'dashboard', $error = TRUE)
 	{
 		// $this->session->set_userdata($error == TRUE ? 'error' : 'success', $msg);
-		if ($error == TRUE) 
+		if ($error == TRUE)
 		{
 			$this->session->set_flashdata('error', $msg);
 		}
@@ -34,6 +34,17 @@ class MY_Controller extends CI_Controller
 			$this->session->set_flashdata('success', $msg);
 		}
 		redirect(base_url($redirect_to));
+	}
+
+	public function redirect_with($uri, $data = array())
+	{
+		if (is_array($data))
+		{
+			foreach ($data as $key => $value)
+			$this->session->set_flashdata($key, $value);
+		}
+
+		return redirect($uri);
 	}
 
 }

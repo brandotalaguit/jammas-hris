@@ -38,6 +38,22 @@ class Manning_payroll_deduction_detail_m extends MY_Model
         'value' => ['field' => 'value', 'label' => 'Values', 'rules' => 'required|is_numeric|to_decimal|nf|xss_clean']
     );
 
+    public $other_deduction = array(
+                                        'manning_payroll_deduction_detail.manning_payroll_deduction_detail_id',
+                                        'manning_payroll_deduction_detail.PayrollId',
+                                        'manning_payroll_deduction_detail.DeductionId',
+                                        'payroll_date',
+                                        'SUM(manning_payroll_deduction_detail.amount) amount',
+                                        'employee_no',
+                                        'lastname',
+                                        'firstname',
+                                        'middlename',
+                                        'position_code',
+                                        'position',
+                                        'deduction_category_code',
+                                        'deduction_category',
+                                    );
+
     function __construct()
     {
         parent::__construct();
@@ -56,13 +72,28 @@ class Manning_payroll_deduction_detail_m extends MY_Model
 
     public function get_manning_payroll_deduction_detail()
     {
-        $this->db->select('manning_payroll_deduction_detail.*, employee_no, lastname, firstname, middlename, position_code, position, payroll_date, deduction_category_code, deduction_category');
+        $field = $this->other_deduction;
+
+        if ($this->input->post('report_format') == 1)
+        {
+            $key = array_search('payroll_date', $field);
+            unset($field[$key]);
+        }
+        else
+        {
+            $this->db->group_by('payroll_date');
+        }
+
+        $this->db->select($field, FALSE);
+
         $this->db->join('deductions as H', 'H.deduction_id = DeductionId', 'left');
         $this->db->join('deduction_categories as I', 'I.deduction_category_id = H.deduction_category_id', 'left');
         $this->db->join('manning as E', 'E.manning_id = H.employee_id', 'left');
         $this->db->join('manning_payroll as A', 'A.payroll_id = manning_payroll_deduction_detail.PayrollId', 'left');
         $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
         $this->db->join('projects as G', 'G.project_id = A.project_id', 'left');
+        $this->db->group_by('manning_id');
+        $this->db->order_by('lastname, firstname, middlename');
 
         return parent::get(NULL, FALSE);
     }

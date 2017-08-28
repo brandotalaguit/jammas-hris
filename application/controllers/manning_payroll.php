@@ -33,18 +33,18 @@ class Manning_payroll extends Admin_Controller
 
         $rules = $this->manning_payroll_m->search_rules;
         $this->form_validation->set_rules($rules);
-        
-        if ($this->form_validation->run() == TRUE) 
+
+        if ($this->form_validation->run() == TRUE)
         {
             $by = $this->input->post('by');
             $search = $this->input->post('search');
-            if (!empty($by) && !empty($search)) 
+            if (!empty($by) && !empty($search))
             $this->db->like($by, $search, 'after');
 
             $project_id = $this->input->post('project_id');
-            if ($project_id) 
+            if ($project_id)
             {
-                if (empty($by) || empty($search)) 
+                if (empty($by) || empty($search))
                 $this->db->ar_like = array();
                 $this->db->where('manning_payroll.project_id', $project_id);
             }
@@ -57,7 +57,7 @@ class Manning_payroll extends Admin_Controller
         $db_result = $this->manning_payroll_m->_db;
         // dump($db_result);
         $this->data['total_result'] = $total_rows = $search ? $db_result->num_rows : $this->manning_payroll_m->count();
-        
+
         // Set up view
         $search || $this->data['pagination'] = pagination($total_rows, $this->limit, 'manning_payroll/Page');
         $this->data['search_option'] = $this->manning_payroll_m->search_option;
@@ -75,11 +75,11 @@ class Manning_payroll extends Admin_Controller
                                                 'data-keyboard' => 'false',
                                                 'class'         => 'btn btn-primary',
                                             ]);
-        
-        
+
+
         // Load view
-        return $this->input->is_ajax_request() ? 
-                    $this->load->view('manning_payroll/result_ajax', $this->data) : 
+        return $this->input->is_ajax_request() ?
+                    $this->load->view('manning_payroll/result_ajax', $this->data) :
                     $this->load_view('manning_payroll/index');
     }
 
@@ -87,7 +87,7 @@ class Manning_payroll extends Admin_Controller
     {
         // $this->output->enable_profiler(TRUE);
         $search = FALSE;
-        
+
         // Filter user account per user
         $this->session->userdata('AccountType') == 'S' || $this->db->where('A.user_id', $this->session->userdata('Id'));
 
@@ -98,15 +98,15 @@ class Manning_payroll extends Admin_Controller
         $rules = $this->manning_payroll_m->search_rules;
         $this->form_validation->set_rules($rules);
 
-        // search filter 
-        if ($this->form_validation->run() == TRUE) 
+        // search filter
+        if ($this->form_validation->run() == TRUE)
         {
             $by = $this->input->post('by');
             $search = $this->input->post('search');
             $this->db->like($by, $search, 'after');
 
             $project_id = $this->input->post('project_id');
-            if ($project_id) 
+            if ($project_id)
             {
                 $this->db->ar_like = array();
                 $this->db->where('project_id', $project_id);
@@ -122,7 +122,7 @@ class Manning_payroll extends Admin_Controller
         // dump($db_result);
 
         $total_rows = $search ? $db_result->num_rows : $this->manning_payroll_m->count();
-        
+
         // Set up view
         $search || $this->data['pagination'] = pagination($total_rows, $this->limit, 'manning_payroll/Page');
 
@@ -148,8 +148,8 @@ class Manning_payroll extends Admin_Controller
         $rules = $this->manning_payroll_m->search_rules;
         $this->form_validation->set_rules($rules);
 
-        // search filter 
-        if ($this->form_validation->run() == TRUE) 
+        // search filter
+        if ($this->form_validation->run() == TRUE)
         {
             $by = $this->input->post('by');
             $search = $this->input->post('search');
@@ -162,7 +162,7 @@ class Manning_payroll extends Admin_Controller
         $db_result = $this->manning_payroll_m->_db;
         // dump($db_result);
         $this->data['total_result'] = $total_rows = $search ? $db_result->num_rows : $this->manning_payroll_m->count();
-        
+
         // Set up view
         $search || $this->data['pagination'] = pagination($total_rows, $this->limit, 'manning_payroll/Page');
         $this->data['search_option'] = $this->manning_payroll_m->search_option;
@@ -171,8 +171,8 @@ class Manning_payroll extends Admin_Controller
         $this->data['projects'] = $this->projects->get_projects();
         $this->data['months'] = $this->manning_payroll_m->get_month();
         // Load view
-        return $this->input->is_ajax_request() ? 
-                    $this->load->view('manning_payroll/result_ajax', $this->data) : 
+        return $this->input->is_ajax_request() ?
+                    $this->load->view('manning_payroll/result_ajax', $this->data) :
                     $this->load_view('manning_payroll/index');
     }
 
@@ -188,7 +188,7 @@ class Manning_payroll extends Admin_Controller
         dump(1231);
         $payroll = FALSE;
 
-        if ($payroll_id != NULL) 
+        if ($payroll_id != NULL)
         {
             $payroll = $this->manning_payroll_m->get($payroll_id);
             dump(substr($payroll->payroll_period, 0, 1));
@@ -201,7 +201,7 @@ class Manning_payroll extends Admin_Controller
      * get payroll setting
      *
      * @return array of payroll setting
-     * @author 
+     * @author
      */
     public function get_config()
     {
@@ -221,7 +221,7 @@ class Manning_payroll extends Admin_Controller
         if ($this->form_validation->run() == TRUE)
         {
             $post['payroll_date'] != '0000-00-00' || $post['payroll_date'] = date('Y-m-d');
-            
+
             // save post data
             $data['id'] = $this->manning_payroll_m->save($post, $id);
             $earning = $this->manning_payroll_earning_m->save_earning($id);
@@ -230,7 +230,7 @@ class Manning_payroll extends Admin_Controller
             $data['status'] = 'success';
 
             $data['message'] = $data['flash_message'] = 'All rates has been successfully re-computed and applied.';
-            if ($id == NULL) 
+            if ($id == NULL)
             {
                 $data['flash_message'] = '<h4>Success.</h4><p>New Payroll has been successfully created.</p>';
                 $data['message'] = strip_tags($data['flash_message']);
@@ -281,15 +281,15 @@ class Manning_payroll extends Admin_Controller
             // prep post data
             $_POST['user_id'] = $this->session->userdata('Id');
             $data = $this->manning_payroll_m->array_from_post([
-                    'project_id', 
-                    'payroll_period', 
-                    'payroll_date', 
-                    'payroll_month', 
-                    'payroll_year', 
-                    'date_start', 
-                    'date_end', 
-                    'date_printed', 
-                    'remarks', 
+                    'project_id',
+                    'payroll_period',
+                    'payroll_date',
+                    'payroll_month',
+                    'payroll_year',
+                    'date_start',
+                    'date_end',
+                    'date_printed',
+                    'remarks',
                     'user_id',
                 ]);
             ! empty($data['payroll_date']) || $data['payroll_date'] = date('Y-m-d');
@@ -305,7 +305,7 @@ class Manning_payroll extends Admin_Controller
         // Set up view
         $this->data['projects'] = $this->projects->get_projects();
         $this->data['months'] = $this->manning_payroll_m->get_month();
-        
+
         // $this->data['project_id'] = $project_id;
         // $this->data['page_title'] = $project->title;
         // $this->data['page_subtitle'] = $project->description;
@@ -331,10 +331,10 @@ class Manning_payroll extends Admin_Controller
     public function finalize()
     {
         $this->form_validation->set_rules('payroll_id', 'Payroll Id', 'intval|is_natural_no_zero|required');
-        $this->form_validation->set_message('is_natural_no_zero', 'Please select %s to finalize');    
-        if ($this->form_validation->run() == TRUE) 
+        $this->form_validation->set_message('is_natural_no_zero', 'Please select %s to finalize');
+        if ($this->form_validation->run() == TRUE)
         {
-            if ($this->input->post('btn_action') == 'Save as Final') 
+            if ($this->input->post('btn_action') == 'Save as Final')
             {
                 $now = date('Y-m-d H:i:s');
                 $id = $this->input->post('payroll_id');
@@ -346,7 +346,7 @@ class Manning_payroll extends Admin_Controller
 
                 $this->manning_payroll_m->save($post, $id);
 
-                $this->db->order_by('payroll_id'); 
+                $this->db->order_by('payroll_id');
                 $data['payroll'] = $this->manning_payroll_m->get_manning_payroll($id);
                 $html = $this->load->view('manning_payroll/finalize', $data, TRUE);
                 $this->session->set_flashdata('dialog_box', $html);
@@ -368,7 +368,7 @@ class Manning_payroll extends Admin_Controller
     {
         $payroll_id = intval($payroll_id);
 
-        if ($payroll_id > 0) 
+        if ($payroll_id > 0)
         {
             $this->db->order_by('payroll_id', 'desc');
             $this->db->select('manning_payroll.*, title, description, rate_hourly, rate_daily, rate_monthly, rate_semi_monthly');
@@ -445,9 +445,9 @@ class Manning_payroll extends Admin_Controller
 
     public function search($id)
     {
-        if ($id === NULL) 
+        if ($id === NULL)
         return [];
-        
+
         $this->db->where('project_id', $id);
         return $this->output->set_content_type('application/json')->set_output(json_encode($this->projects->dropdown()));
     }
@@ -460,17 +460,17 @@ class Manning_payroll extends Admin_Controller
         $payroll = $this->manning_payroll_m->get($payroll_id, TRUE);
         count($payroll) || parent::redirect_to('Unable to display payroll register. Record does not exists.', 'manning_payroll');
 
-        if (empty($payroll->fields)) 
+        if (empty($payroll->fields))
         {
             $this->manning_payroll_m->delete($payroll_id);
-            parent::redirect_to("Unable to display payroll register. Please make sure you have fill-up wages field.", 
+            parent::redirect_to("Unable to display payroll register. Please make sure you have fill-up wages field.",
                     'manning_payroll');
         }
 
         // ! $payroll->IsFinal || parent::redirect_to('Access Denied. Payroll you trying to access is already finalize.', 'manning_payroll');
 
 
-        // Set up pagination 
+        // Set up pagination
         // $this->db->where('manning_payroll_earning_id', $payroll_id);
         // $config['total_rows'] = $this->project_billing_trans->count();
         // $config['per_page'] = 15;
@@ -479,17 +479,17 @@ class Manning_payroll extends Admin_Controller
         // Create pagination links
         // $this->data['pagination'] = $this->pagination->create_links();
 
-        if ($this->input->post('btn_action') == 'Search') 
+        if ($this->input->post('btn_action') == 'Search')
         {
             $this->form_validation->set_rules('search', 'Search', 'required|strtoupper');
-            
+
             $q = $this->input->post('search');
             $by = $this->input->post('by');
-            if ($by == "Lastname") 
+            if ($by == "Lastname")
             {
                 $this->db->like('lastname', $q, 'after');
             }
-            elseif ($by == "Firstname") 
+            elseif ($by == "Firstname")
             {
                 $this->db->like('firstname', $q, 'after');
             }
@@ -508,21 +508,21 @@ class Manning_payroll extends Admin_Controller
 
         $project = $this->projects->get($payroll->project_id, TRUE);
         $this->data['project'] = $project;
-        
+
         // Set up the view
         $this->data['page_subtitle'] = $project->description;
         $this->data['counter'] = $this->uri->segment(6, 0);
         $this->data['search_form'] = $this->load->view('employee/search_form', $this->data, TRUE);
-        
+
         $this->data['distinct_rate'] = $this->manning_payroll_earning_m->distinct_rate($payroll->project_id);
 
         $this->data['payroll'] = $payroll;
         $this->data['columns'] = explode(',', $payroll->fields);
         $this->data['billing_rates'] = $this->manning_payroll_earning_m->get_billing_rates_array();
-        
+
         $this->data['page_title'] = $project->title . '<br><small class="label label-danger">Period Covered: <strong>'. date('M j, y', strtotime($payroll->date_start)) . ' - ' . date('M j, y', strtotime($payroll->date_end)) .'</strong></small>';
-        
-        // Load view 
+
+        // Load view
         return $this->load_view('manning_payroll/listing');
     }
 
@@ -539,7 +539,7 @@ class Manning_payroll extends Admin_Controller
         $this->form_validation->set_rules($rules);
 
         // Process the form
-        if ($this->form_validation->run() == TRUE) 
+        if ($this->form_validation->run() == TRUE)
         {
             // $proj_employee = $this->manning_payroll_earning_m->get_manning_payroll_earning(NULL, $id, TRUE);
             // dump($proj_employee);
@@ -575,18 +575,18 @@ class Manning_payroll extends Admin_Controller
                 // '13thmonth' => 'r_13thmonth',     // no of absent per day
             );
 
-            
+
 
             // retreive data
             $pbt = $this->manning_payroll_earning_m->get($id, TRUE);
             // save data
             $affected = $this->manning_payroll_earning_m->save_earning(
-                $pbt->payroll_id, 
-                $pbt->employee_id, 
+                $pbt->payroll_id,
+                $pbt->employee_id,
                 ['field' => $name, 'value' => $value],
                 $id
             );
-            
+
             // billing period
             $this->db->select('payroll_id, project_id, fields');
             $payroll = $this->manning_payroll_m->get($pbt->payroll_id, TRUE);
@@ -604,8 +604,8 @@ class Manning_payroll extends Admin_Controller
             // project billing
             // $project = $this->projects->get($payroll->project_id, TRUE);
 
-            
-            // payroll summary 
+
+            // payroll summary
             $this->db->where('manning_payroll_earning.payroll_id', $pbt->payroll_id);
             $this->db->group_by('manning_payroll_earning.payroll_id');
             $grand_total = $this->manning_payroll_earning_m->get_project_summary(NULL, TRUE);
@@ -660,11 +660,11 @@ class Manning_payroll extends Admin_Controller
                 }
 
                 // if ($wage_name == ) {
-                    
+
                 // }
             }
 
-            
+
 
 
             //     // column sub-total
@@ -679,13 +679,13 @@ class Manning_payroll extends Admin_Controller
             return $this->output->set_content_type('application/json')
                 ->set_output(json_encode(
                     [
-                        'success' =>  TRUE, 
+                        'success' =>  TRUE,
                         'wages' => $payroll->fields,
-                        'newValue' => $current_amount, 
-                        'rate' => $fieldname, 
+                        'newValue' => $current_amount,
+                        'rate' => $fieldname,
                         'rate_name' => '#' . $rate[$name],
-                        'total_amt' => nf(floatval($sub_total->$current_amount)), 
-                        'subtotal' => nf(floatval($subtotal)), 
+                        'total_amt' => nf(floatval($sub_total->$current_amount)),
+                        'subtotal' => nf(floatval($subtotal)),
                         'column1total' => $column1total,
                         'column2total' => $column2total,
                         'grandtotal' => nf(floatval($grandtotal)),
@@ -717,19 +717,25 @@ class Manning_payroll extends Admin_Controller
     public function print_payroll($payroll_id)
     {
         // $this->output->enable_profiler(TRUE);
+
+        $this->db->select('manning_payroll.*, b.title, tin, po, business_style');
+        $this->db->join('projects b', 'b.project_id = manning_payroll.project_id', 'left');
+        $payroll_info = $this->manning_payroll_m->get($payroll_id);
+
+        if_fail_dump($payroll_info, 'The page you requested does not exists.');
+
         $now = date('Y-m-d H:i:s');
         $this->manning_payroll_m->save(['date_printed' => $now, 'IsPayrollPrinted' => 1], $payroll_id);
 
         $this->load->model('manning_payroll_deduction_m');
         $affected = $this->manning_payroll_deduction_m->generate_deduction($payroll_id);
-        $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id);
-        $this->db->select('manning_payroll.*, b.title, tin, po, business_style');
-        $this->db->join('projects b', 'b.project_id = manning_payroll.project_id', 'left');
-        $this->data['payroll_info'] = $this->manning_payroll_m->get($payroll_id);
 
+        $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id);
+        $this->data['payroll_info'] = $payroll_info;
         $this->data['page_title'] = 'P A Y R O L L &nbsp; R E G I S T E R';
-        // return $this->load->view('manning_payroll/payroll', $data);
+
         return parent::load_view('manning_payroll/payroll');
+
     }
 
     public function validate_contribution_modal()
@@ -743,11 +749,11 @@ class Manning_payroll extends Admin_Controller
     {
         $this->load->model(array('deduction_categories', 'manning'));
 
-        $data['months'] = $this->manning_payroll_m->get_month();        
+        $data['months'] = $this->manning_payroll_m->get_month();
         $data['projects'] = $this->projects->get_projects();
-                                            
+
         $data['employees'] = array('-1' => 'All Active Employees') + $this->manning->as_dropdown();
-        
+
         $data['deductions'] = $this->deduction_categories->as_dropdown();
         $data['govt_dues'] = array(
                                             // '0' => 'Select Gov\'t Due',
@@ -769,43 +775,43 @@ class Manning_payroll extends Admin_Controller
         // $this->output->enable_profiler(TRUE);
         $this->load->model('manning_payroll_deduction_m');
 
-        
+
         $this->form_validation->set_rules('search2', 'Search', 'strtoupper');
 
         $q = $this->input->post('search2');
         $by = $this->input->post('by2');
-            
 
-        if ($q > '') 
+
+        if ($q > '')
         {
-            if (in_array($by, ['lastname', 'firstname', 'position', 'title'])) 
+            if (in_array($by, ['lastname', 'firstname', 'position', 'title']))
             {
                 $this->db->like($by, $q, 'after');
             }
-            elseif ($by == "address") 
+            elseif ($by == "address")
             {
                 $this->db->like('address1', $q, 'after');
                 $this->db->or_like('address2', $q, 'after');
             }
         }
 
-        if ($this->input->post('btn_order_by') == 'Search') 
+        if ($this->input->post('btn_order_by') == 'Search')
         {
             $oby = $this->input->post('orderby');
             $ascdesc = $this->input->post('orderbyascdesc');
             $this->db->order_by($oby, $ascdesc);
-        }   
+        }
 
         $ds = $this->input->post('date_start');
         $de = $this->input->post('date_end');
 
-        if (!(empty($ds) || empty($de))) 
+        if (!(empty($ds) || empty($de)))
         {
             $this->form_validation->set_rules('date_start', 'Date Start', 'strtoupper|required');
             $this->form_validation->set_rules('date_end', 'Date End', 'strtoupper|required');
         }
 
-        if (!(empty($ds) && empty($de))) 
+        if (!(empty($ds) && empty($de)))
         {
             $this->db->where('payroll_date >=', $ds);
             $this->db->where('payroll_date <=', $de);
@@ -823,7 +829,7 @@ class Manning_payroll extends Admin_Controller
 
             if (intval($payroll_year)>0)
             $this->db->where('payroll_year', $payroll_year);
-        
+
         $validation = $this->form_validation->run();
 
         // Fecth all row
@@ -832,16 +838,15 @@ class Manning_payroll extends Admin_Controller
         $this->data['last_query'] = $this->db->last_query();
         $this->data['page_title'] = 'PAGIBIG CONTRIBUTION REPORT';
         // dump($this->data['last_query']);
-        // Load view 
+        // Load view
         $this->load_view('manning_payroll/pagibig_contribution2');
     }
 
     public function philhealth_contribution()
     {
         $this->load->model('manning_payroll_deduction_m');
-
+        $this->output->enable_profiler(TRUE);
         $field_arr = array(
-                            // manning info
                             'employee_no',
                             'lastname',
                             'firstname',
@@ -849,16 +854,22 @@ class Manning_payroll extends Admin_Controller
                             'position_code',
                             'position',
                             'SUM(gross_income) gross_income',
-                        );        
+                        );
 
         // $validation = $this->manning_payroll_deduction_m->get_deduction();
         $validation = $this->manning_payroll_deduction_m->validate_search_form();
-        if ($validation['success'] == FALSE) 
+        if ($validation['success'] == FALSE)
         {
-            $this->session->set_flashdata('error', $validation['messages']);
-            redirect('manning_payroll','refresh');
+            $message = '<h4>Unable to process request</h4><ul>';
+            if ( ! empty($validation['messages']))
+            $message .= on_fail(empty($error),  '<li>' . $validation['messages'] . '</li>');
+
+            foreach ($validation['form'] as $errors => $error)
+            $message .= on_fail(empty($error),  '<li>' . $error . '</li>');
+            $message .= '</ul>';
+
+            parent::redirect_with('manning_payroll', array('error' => $message));
         }
-        // die(dump($_POST));
 
         $post['payroll_month'] = NULL;
 
@@ -866,54 +877,35 @@ class Manning_payroll extends Admin_Controller
             empty($_POST[$key]) || $post[$key] = $_POST[$key];
         }
 
-        if ($post['deduction_and_govtdue'] == 1) 
+        if ($post['deduction_and_govtdue'] == 1)
         {
             $govt_dues = strtolower($post['contribution']);
             // philhealth
-            if ($govt_dues == 1) 
+            if ($govt_dues == 1)
             {
                 $govt_dues = 'philhealth';
-                // deduction 
-                $field_arr = array_merge($field_arr, array(
-                                                'philhealth_no',
-                                                'SUM(employee_share_philhealth) employee_share_philhealth',
-                                                'SUM(employer_share_philhealth) employer_share_philhealth',
-                                                'SUM(total_monthly_premium_philhealth) total_monthly_premium_philhealth',
-                                                ));
+                $field_arr = array_merge($field_arr, $this->manning_payroll_deduction_m->philhealth_deduction);
             }
 
             // pagibig
             if ($govt_dues == 2)
             {
                 $govt_dues = 'pagibig';
-                // deduction 
-                $field_arr = array_merge($field_arr, array(
-                                                'pagibig_no',
-                                                'SUM(employee_share_pagibig) employee_share_pagibig',
-                                                'SUM(employer_share_pagibig) employer_share_pagibig',
-                                                'SUM(total_monthly_premium_pagibig) total_monthly_premium_pagibig',
-                                                ));
+                $field_arr = array_merge($field_arr, $this->manning_payroll_deduction_m->pagibig_deduction);
             }
 
             // sss
-            if ($govt_dues == 3) 
+            if ($govt_dues == 3)
             {
                 $govt_dues = 'sss';
                 unset($field_arr['SUM(gross_income) gross_income']);
-                // deduction 
-                $field_arr = array_merge($field_arr, array(
-                                                'sss_no',
-                                                'SUM(employee_share_sss) employee_share_sss',
-                                                'SUM(employer_share_sss) employer_share_sss',
-                                                'SUM(total_monthly_premium_sss) total_monthly_premium_sss',
-                                                'SUM(employee_compensation_program_sss) employee_compensation_program_sss'
-                                                ));
+                $field_arr = array_merge($field_arr, $this->manning_payroll_deduction_m->sss_deduction);
             }
 
             $this->data['contribution'] = $govt_dues;
         }
-        
-        if ($post['deduction_and_govtdue'] == 2) 
+
+        if ($post['deduction_and_govtdue'] == 2)
         {
             $this->load->model('manning_payroll_deduction_detail_m', 'deduction_detail');
             $this->load->model('deduction_categories');
@@ -923,16 +915,16 @@ class Manning_payroll extends Admin_Controller
             $govt_dues = $deduction_category->deduction_category;
 
             // per employee
-            if ($post['scope'] == 1) 
+            if ($post['scope'] == 1)
             {
-                if (in_array(-1, $post['manning_id'])) 
+                if (in_array(-1, $post['manning_id']))
                 $post['manning_id'] = NULL;
 
                 ! $post['manning_id'] || $this->db->where('manning_id IN (' . implode(',', $post['manning_id']) . ')');
                 $this->db->where(
                                     array(
                                         'I.deduction_category_id' => $deduction_category_id,
-                                        'payroll_year' => $post['payroll_year']                                    
+                                        'payroll_year' => $post['payroll_year']
                                     )
                                 );
                 empty($post['payroll_month']) || $this->db->where('payroll_month', $post['payroll_month']);
@@ -946,20 +938,20 @@ class Manning_payroll extends Admin_Controller
             }
 
             // per project
-            if ($post['scope'] == 2) 
+            if ($post['scope'] == 2)
             {
                 $project = array();
                 $proj = $this->db->where_in('project_id', $post['project_id'])->get('projects')->result();
-                foreach ($proj as $row) 
+                foreach ($proj as $row)
                 {
                     $this->db->where(
                                         array(
                                             'I.deduction_category_id' => $deduction_category_id,
-                                            'payroll_year' => $post['payroll_year']                                    
+                                            'payroll_year' => $post['payroll_year']
                                         )
                                     );
                     empty($post['payroll_month']) || $this->db->where('payroll_month', $post['payroll_month']);
-                    $this->db->group_by('G.project_id, manning_id');
+                    $this->db->group_by('manning_id');
                     $result = $this->deduction_detail->get_manning_payroll_deduction_detail();
 
                     $project[] = array(
@@ -975,9 +967,9 @@ class Manning_payroll extends Admin_Controller
         }
         else
         {
-            if ($post['scope'] == 1) 
+            if ($post['scope'] == 1)
             {
-                if (in_array(-1, $post['manning_id'])) 
+                if (in_array(-1, $post['manning_id']))
                 $post['manning_id'] = NULL;
 
                 $project[] = array(
@@ -985,43 +977,50 @@ class Manning_payroll extends Admin_Controller
                                     'project_title' => '',
                                     'project_data'  => $this->manning_payroll_deduction_m
                                                        ->get_by_employee_contribution(
-                                                                                        $field_arr, 
-                                                                                        $post['payroll_year'], 
-                                                                                        $post['manning_id'], 
+                                                                                        $field_arr,
+                                                                                        $post['payroll_year'],
+                                                                                        $post['manning_id'],
                                                                                         $post['payroll_month']
                                                                                      )
                                   );
 
             }
 
-            if ($post['scope'] == 2) 
+            if ($post['scope'] == 2)
             {
                 $project = $this->manning_payroll_deduction_m
                                ->get_by_project_contribution(
-                                                                $field_arr, 
-                                                                $post['payroll_year'], 
-                                                                $post['project_id'], 
+                                                                $field_arr,
+                                                                $post['payroll_year'],
+                                                                $post['project_id'],
                                                                 $post['payroll_month']
                                                             );
             }
 
         }
 
-        
+
 
 
         $this->data['project'] = $project;
-        
+
         // die(dump($result));
         $this->data['invoice'] = TRUE;
         $this->data['field_arr'] = $field_arr;
         $this->data['last_query'] = $this->db->last_query();
-        $this->data['page_title'] = t($govt_dues) . ' CONTRIBUTION REPORT';
+
+        $this->data['page_title'] = t($govt_dues);
+        $this->data['page_title'] .= ($this->input->post('report_format') == 1) ? ' SUMMARY ' : ' DETAILED ';
+        $this->data['page_title'] .= 'CONTRIBUTION REPORT';
+
         $this->data['covered_period'] = "FOR THE " . (! empty($post['payroll_month']) ? "MONTH OF $post[payroll_month]" : "") . " YEAR $post[payroll_year]";
 
-        if ($post['deduction_and_govtdue'] == 2) 
+        if ($post['deduction_and_govtdue'] == 2)
         {
-            $this->data['page_title'] = t($govt_dues) . ' DEDUCTION REPORT';
+            $this->data['page_title'] = t($govt_dues);
+            $this->data['page_title'] .= ($this->input->post('report_format') == 1) ? ' SUMMARY ' : ' DETAILED ';
+            $this->data['page_title'] .= 'DEDUCTION REPORT';
+
             $this->load_view('manning_payroll/deduction_dues');
         }
 
@@ -1046,7 +1045,7 @@ class Manning_payroll extends Admin_Controller
 
                             'SUM(gross_income) gross_income',
 
-                            // deduction 
+                            // deduction
                             'SUM(employee_share_philhealth) employee_share_philhealth',
                             'SUM(employer_share_philhealth) employer_share_philhealth',
                             'SUM(total_monthly_premium_philhealth) total_monthly_premium_philhealth',
@@ -1062,9 +1061,9 @@ class Manning_payroll extends Admin_Controller
                             'philhealth_no',
                             // 'tin_no',
                             // 'sss_no',
-                            
+
                         );
-        
+
         $result = $this->manning_payroll_deduction_m->fields($field_arr)->group_by('project_id, manning_id')->get_manning_payroll_deduction();
         $this->data['result'] = $result;
         // die(dump($result));
@@ -1074,7 +1073,7 @@ class Manning_payroll extends Admin_Controller
         $this->data['page_title'] = 'PHILHEALTH CONTRIBUTION REPORT';
         $this->data['covered_period'] = 'FOR THE MONTH OF ' . $this->input->post('payroll_month') . ' ' . $this->input->post('payroll_year');
         // dump($this->data['last_query']);
-        // Load view 
+        // Load view
         $this->load_view('manning_payroll/government_dues');
     }
 
@@ -1084,41 +1083,41 @@ class Manning_payroll extends Admin_Controller
         $this->load->model('manning_payroll_deduction_m');
 
         $this->form_validation->set_rules('search2', 'Search', 'strtoupper');
-        
+
         $q = $this->input->post('search2');
         $by = $this->input->post('by2');
-            
 
-        if ($q > '') 
+
+        if ($q > '')
         {
-            if (in_array($by, ['lastname', 'firstname', 'position', 'title'])) 
+            if (in_array($by, ['lastname', 'firstname', 'position', 'title']))
             {
                 $this->db->like($by, $q, 'after');
             }
-            elseif ($by == "address") 
+            elseif ($by == "address")
             {
                 $this->db->like('address1', $q, 'after');
                 $this->db->or_like('address2', $q, 'after');
             }
         }
 
-        if ($this->input->post('btn_order_by') == 'Search') 
+        if ($this->input->post('btn_order_by') == 'Search')
         {
             $oby = $this->input->post('orderby');
             $ascdesc = $this->input->post('orderbyascdesc');
             $this->db->order_by($oby, $ascdesc);
-        }   
+        }
 
         $ds = $this->input->post('date_start');
         $de = $this->input->post('date_end');
 
-        if (!(empty($ds) || empty($de))) 
+        if (!(empty($ds) || empty($de)))
         {
             $this->form_validation->set_rules('date_start', 'Date Start', 'strtoupper|required');
             $this->form_validation->set_rules('date_end', 'Date End', 'strtoupper|required');
         }
 
-        if (!(empty($ds) && empty($de))) 
+        if (!(empty($ds) && empty($de)))
         {
             $this->db->where('payroll_date >=', $ds);
             $this->db->where('payroll_date <=', $de);
@@ -1136,7 +1135,7 @@ class Manning_payroll extends Admin_Controller
 
             if (intval($payroll_year)>0)
             $this->db->where('payroll_year', $payroll_year);
-        
+
         $validation = $this->form_validation->run();
 
 
@@ -1147,7 +1146,7 @@ class Manning_payroll extends Admin_Controller
         $this->data['last_query'] = $this->db->last_query();
         $this->data['page_title'] = 'SSS CONTRIBUTION REPORT';
         // dump($this->data['last_query']);
-        // Load view 
+        // Load view
         $this->load_view('manning_payroll/sss_contribution2');
     }
 
@@ -1165,17 +1164,17 @@ class Manning_payroll extends Admin_Controller
         $this->data['payroll_info'] = $this->manning_payroll_m->get($payroll_id);
 
         $this->data['page_title'] = 'PAYSLIP';
-        return parent::load_view('manning_payroll/payslip');   
+        return parent::load_view('manning_payroll/payslip');
     }
 
     public function _valid_id($id)
     {
         $id = intval($id);
-        if ($id) 
+        if ($id)
         {
             $this->db->select('manning_payroll_earning_id');
             $result = $this->manning_payroll_earning_m->get($id);
-            if ( ! count($result)) 
+            if ( ! count($result))
             {
                 $this->form_validation->set_message('_valid_id', "This manning payroll ID does not exists. ");
                 return FALSE;
@@ -1191,7 +1190,7 @@ class Manning_payroll extends Admin_Controller
     public function _valid_month($payroll_month)
     {
         $months = $this->manning_payroll_m->get_month();
-        if ( ! in_array($payroll_month, $months)) 
+        if ( ! in_array($payroll_month, $months))
         {
             $this->form_validation->set_message('_valid_month', 'This %s is not a valid month.');
             return FALSE;

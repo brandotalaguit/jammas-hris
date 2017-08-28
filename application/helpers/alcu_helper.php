@@ -31,7 +31,7 @@ function btn_delete($uri, $title = '')
     return anchor($uri, '<i class="fa fa-trash-o"></i>' . $title, array(
         'onclick'=>"return confirm('You are about to delete a record. This is cannot be undone. Are you sure?');",
         'class'=> 'btn btn-danger'
-    )); 
+    ));
 }
 
 function delete_link($uri, $title = NULL)
@@ -39,8 +39,8 @@ function delete_link($uri, $title = NULL)
 	return anchor($uri, '<i class="glyphicon glyphicon-trash"></i> ' . $title, array(
 		'onclick'=>"return confirm('You are about to delete a record. This is cannot be undone. Are you sure?');",
         'class' => 'text-danger lead',
-        'title' => 'Delete',        
-	));	
+        'title' => 'Delete',
+	));
 }
 
 function btn_detail($uri, $title = NULL, $attr = NULL)
@@ -62,7 +62,7 @@ function btn_excel($uri, $title = NULL)
 
 function btn_new($uri, $title = NULL, $attr = NULL)
 {
-    if (is_array($attr)) 
+    if (is_array($attr))
         $attr = array_merge(array('class' => 'btn btn-primary'), $attr);
     else
         $attr = array('class' => 'btn btn-primary');
@@ -78,15 +78,15 @@ function btn_new($uri, $title = NULL, $attr = NULL)
 if (!function_exists('dump')) {
     function dump ($var, $label = 'Dump', $echo = TRUE)
     {
-        // Store dump in variable 
+        // Store dump in variable
         ob_start();
         var_dump($var);
         $output = ob_get_clean();
-        
+
         // Add formatting
         $output = preg_replace("/\]\=\>\n(\s+)/m", "] => ", $output);
         $output = '<pre style="background: #FFFEEF; color: #000; border: 1px dotted #000; padding: 10px; margin: 10px 0; text-align: left;">' . $label . ' => ' . $output . '</pre>';
-        
+
         // Output
         if ($echo == TRUE) {
             echo $output;
@@ -149,13 +149,13 @@ function nf($str = '', $decimal_places = DECIMAL_PLACES)
 /**
  * Return the value for a key in an array or a property in an object.
  * Typical usage:
- * 
+ *
  * $object->foo = 'Bar';
  * echo get_key($object, 'foo');
- * 
+ *
  * $array['baz'] = 'Bat';
  * echo get_key($array, 'baz');
- * 
+ *
  * @param mixed $haystack
  * @param string $needle
  * @param mixed $default_value The value if key could not be found.
@@ -175,7 +175,7 @@ function get_key ($haystack, $needle, $default_value = '')
 
 
 function convert_number_to_words($number) {
-    
+
     $hyphen      = '-';
     $conjunction = ' and ';
     $separator   = ', ';
@@ -218,11 +218,11 @@ function convert_number_to_words($number) {
         1000000000000000    => 'quadrillion',
         1000000000000000000 => 'quintillion'
     );
-    
+
     if (!is_numeric($number)) {
         return false;
     }
-    
+
     if (($number >= 0 && (int) $number < 0) || (int) $number < 0 - PHP_INT_MAX) {
         // overflow
         trigger_error(
@@ -235,13 +235,13 @@ function convert_number_to_words($number) {
     if ($number < 0) {
         return $negative . convert_number_to_words(abs($number));
     }
-    
+
     $string = $fraction = null;
-    
+
     if (strpos($number, '.') !== false) {
         list($number, $fraction) = explode('.', $number);
     }
-    
+
     switch (true) {
         case $number < 21:
             $string = $dictionary[$number];
@@ -273,7 +273,7 @@ function convert_number_to_words($number) {
             }
             break;
     }
-    
+
     if (null !== $fraction && is_numeric($fraction)) {
         $string .= $decimal;
         $words = array();
@@ -282,7 +282,7 @@ function convert_number_to_words($number) {
         }
         $string .= implode(' ', $words);
     }
-    
+
     return $string;
 }
 
@@ -304,7 +304,7 @@ function get_array_value_without_key($array)
  *
  * example (any value beside exactly 'ASC' or 'DESC' are invalid):
  * $rule['order_by'] = "required|enum[ASC,DESC]";
- * 
+ *
  * example of case-insenstive enum using strtolower as validation rule
  * $rule['favorite_corey'] = "required|strtolower|enum[feldman]";
  *
@@ -372,9 +372,9 @@ function proper_date($str = '', $format = 'F j, Y')
 
 // function display_earnings($payroll)
 // {
-//     if ($payroll->) 
+//     if ($payroll->)
 //     {
-        
+
 //     }
 // }
 
@@ -450,7 +450,7 @@ function getWorkingDays($startDate, $endDate, array $holidays){
 // echo getWorkingDays("2008-12-22","2009-01-02",$holidays)
 // => will return 7
 
-if ( ! function_exists('pagination') ) 
+if ( ! function_exists('pagination') )
 {
     function pagination($total_rows, $per_page, $url = null, $uri_segment = 3)
     {
@@ -467,7 +467,7 @@ if ( ! function_exists('pagination') )
         $config['uri_segment'] = $uri_segment;
         $config['per_page']    = $per_page;
 
-        $ci->load->library('pagination');       
+        $ci->load->library('pagination');
         $ci->pagination->initialize($config);
         return $ci->pagination->create_links();
     }
@@ -476,7 +476,19 @@ if ( ! function_exists('pagination') )
 /**
  * @param string $expression
  */
-function dd($expression = '')
+function dd($output = '', $label = 'dump')
 {
-    return die(dump($expression));
+    return die(dump($output, $label));
+}
+
+function if_fail_dump($expression, $output)
+{
+    if (! $expression)
+        return dd($output, 'Note');
+}
+
+function on_fail($expression, $output)
+{
+    if (! $expression)
+    return $output;
 }

@@ -1,7 +1,7 @@
 <div class="modal-dialog">
     <div class="modal-content">
-    
-    
+
+
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h4 class="modal-title">Contribution and Deduction Report Options</h4>
@@ -37,13 +37,13 @@
 
             <label for="payroll_month" class="col-sm-1 control-label">Month</label>
             <div class="col-sm-4">
-            <?php 
+            <?php
                 echo form_dropdown(
-                        'payroll_month', 
-                        $months, 
-                        NULL, 
+                        'payroll_month',
+                        $months,
+                        NULL,
                         'id="select2_payroll_month" class="form-control" autofocus style="width:100%"'
-                    ); 
+                    );
                 ?>
             </div>
 
@@ -72,10 +72,10 @@
             <div class="col-sm-8">
 
                 <?php echo form_dropdown(
-                                            'manning_id[]', 
-                                            $employees, 
-                                            NULL, 
-                                            'id="manning_id" class="form-control multiple-select2" multiple="multiple"  style="width:100%"'); 
+                                            'manning_id[]',
+                                            $employees,
+                                            NULL,
+                                            'id="manning_id" class="form-control multiple-select2" multiple="multiple"  style="width:100%"');
                     ?>
 
             </div>
@@ -86,14 +86,14 @@
             <div class="col-sm-8">
 
                 <?php echo form_dropdown(
-                                            'project_id[]', 
-                                            $projects, 
-                                            NULL, 
-                                            'id="project_id" class="form-control multiple-select2" multiple="multiple"  style="width:100%"'); 
+                                            'project_id[]',
+                                            $projects,
+                                            NULL,
+                                            'id="project_id" class="form-control multiple-select2" multiple="multiple"  style="width:100%"');
                     ?>
 
             </div>
-        </div>        
+        </div>
 
         <div class="form-group">
             <label for="input" class="col-sm-3 control-label"><b>Type of Report</b></label>
@@ -118,11 +118,11 @@
             <div class="col-sm-8">
 
                 <?php echo form_dropdown(
-                                            'contribution', 
-                                            $govt_dues, 
-                                            NULL, 
+                                            'contribution',
+                                            $govt_dues,
+                                            NULL,
                                             'id="contribution" class="form-control" style="width:100%"'
-                                        ); 
+                                        );
                     ?>
 
             </div>
@@ -133,29 +133,29 @@
             <div class="col-sm-8">
 
                 <?php echo form_dropdown(
-                                            'deduction', 
-                                            $deductions, 
-                                            NULL, 
+                                            'deduction',
+                                            $deductions,
+                                            NULL,
                                             'id="deduction" class="form-control" style="width:100%"'
-                                        ); 
+                                        );
                     ?>
 
             </div>
         </div>
 
-        
 
-        
+
+
 
     </div>
     <div class="modal-footer clearfix">
-        
+
     <div class="row">
     <div class="col-md-6">
         <button type="submit" id="btn_action" name="btn_action" class="btn btn-primary btn-block">
         SUBMIT
         </button>
-        
+
     </div>
     <div class="col-md-6">
         <button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
@@ -184,14 +184,14 @@
                 $('input[name=payroll_year]').datepicker({
                     autoclose: true,
                         format: "yyyy",
-                        viewMode: "years", 
+                        viewMode: "years",
                         minViewMode: "years",
                         startDate: '2014',
                         endDate: new Date(),
                 });
-                
+
         $('#fields').select2();
-       
+
         $("#manning_id").select2({
             minimumInputLength: 0,
             ajax: {
@@ -201,33 +201,33 @@
                 type: 'POST',
                 data: function (params) {
                     return {
-                      search: params.term, // search term              
+                      search: params.term, // search term
                     };
                 },
-                processResults: function (data, params) {   
-                    return {                                    
+                processResults: function (data, params) {
+                    return {
                       results: $.map(data, function (item) {
                             return {
-                                text: item.text,                          
-                                id: item.id,                                                
-                            }                  
-                        })                            
+                                text: item.text,
+                                id: item.id,
+                            }
+                        })
                     };
-                },          
-            },        
-        }); 
+                },
+            },
+        });
     })
 
     $(document).on('click', 'input[type=radio][name=deduction_and_govtdue]', function (e) {
         $value = this.value;
-        // Gov't Due's 
-        if ($value == '1') 
+        // Gov't Due's
+        if ($value == '1')
         {
             $('#contribution').prop('disabled', false).val(1);
             $('#deduction').prop('disabled', true).val(0);
         }
-        // Deduction 
-        else if ($value == '2') 
+        // Deduction
+        else if ($value == '2')
         {
             $('#contribution').prop('disabled', true).val(0);
             $('#deduction').prop('disabled', false).val('00001');
@@ -243,13 +243,13 @@
     $(document).on('click', 'input[type=radio][name=scope]', function (e) {
         $value = this.value;
         // Per employee
-        if ($value == '1') 
+        if ($value == '1')
         {
             $('#manning_id').prop('disabled', false).val(0).select2({placeholder: "Select employee"});
             $('#project_id').prop('disabled', true).val(0).select2({placeholder: ""});
         }
-        // Per project 
-        else if ($value == '2') 
+        // Per project
+        else if ($value == '2')
         {
             $('#manning_id').prop('disabled', true).val(0).select2({placeholder: ""});
             $('#project_id').prop('disabled', false).val(0).select2({placeholder: "Select project"});
@@ -262,7 +262,7 @@
 
     })
 
-    
+
 
     $(document).on('click', '#btn_action', function (e) {
         // var form = $(this);
@@ -295,8 +295,8 @@
             success: function (response) {
                 if (response.success == true) {
                     $('#message').append('<div class="alert alert-success">' +
-                                         '<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>' + 
-                                         ' Data has been saved successfully' + 
+                                         '<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>' +
+                                         ' Data has been saved successfully' +
                                          '</div>');
                     $('.form-group').removeClass('has-error');
                     $('.text-danger').remove();
@@ -328,7 +328,7 @@
     })
 
 
-    
+
 
 
 
