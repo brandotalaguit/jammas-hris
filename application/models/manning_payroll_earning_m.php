@@ -11,6 +11,44 @@ class Manning_payroll_earning_m extends MY_Model
     protected $order_by = "manning_payroll_earning_id DESC, manning_payroll_earning.payroll_id ASC";
 
 
+    protected $earning_employment_status_ids = [REGULAR, PROBITIONAL, CO_TERMINOUS, PROJECT_BASED, RELIEVER];
+    protected $payroll_employment_status_ids = [REGULAR, PROBITIONAL, CO_TERMINOUS, PROJECT_BASED];
+
+    public $reliever_payroll = FALSE;
+
+    protected $payroll_fields = [
+                                    'lastname',
+                                    'firstname',
+                                    'middlename',
+                                    'employee_no',
+                                    'position_code',
+                                    'position',
+                                    'manning_payroll_earning_id',
+                                    'manning_payroll_earning.payroll_id',
+                                    'manning_payroll_earning.employee_id',
+                                    'daily_rate',
+                                    'semi_monthly_rate',
+                                    'monthly_rate',
+                                    'r_daily_rate',
+                                    'r_hourly_rate',
+                                    'r_semi_monthly_rate',
+                                    'r_monthly_rate',
+                                    'r_cola',
+                                    'r_allowance',
+                                    'r_13thmonth',
+                                    'r_adjustment',
+                                    'manning_payroll_earning.remarks as earning_remarks',
+
+                                    // deduction fields
+                                    'manning_payroll_deduction_id',
+                                    'employee_share_sss',
+                                    'employee_share_philhealth',
+                                    'employee_share_pagibig',
+                                    'other_deduction',
+                                    'adjustment',
+                                    'G.remarks as deduction_remarks',
+                                ];
+
     public $rules = array(
         'payroll_id' => ['field' => 'payroll_id', 'label' => 'Payroll Id', 'rules' => 'required|intval|is_natural_no_zero|xss_clean'],
         'project_employee_id' => ['field' => 'project_employee_id', 'label' => 'Project Employee', 'rules' => 'required|intval|xss_clean'],
@@ -71,6 +109,7 @@ class Manning_payroll_earning_m extends MY_Model
     public function get_payroll($payroll_id, $single = FALSE)
     {
         $this->load->model(['manning_payroll_m', 'projects']);
+        // $this->output->enable_profiler(TRUE);
 
         $sum_income = $sum_deduction = $sum_basic = "";
         $deduction_field = ['late_amount', 'absent_rate', 'absent_rate_per_day'];
@@ -98,38 +137,7 @@ class Manning_payroll_earning_m extends MY_Model
             }
         }
 
-        $select = [
-                    'lastname',
-                    'firstname',
-                    'middlename',
-                    'employee_no',
-                    'position_code',
-                    'position',
-                    'manning_payroll_earning_id',
-                    'manning_payroll_earning.payroll_id',
-                    'manning_payroll_earning.employee_id',
-                    'daily_rate',
-                    'semi_monthly_rate',
-                    'monthly_rate',
-                    'r_daily_rate',
-                    'r_hourly_rate',
-                    'r_semi_monthly_rate',
-                    'r_monthly_rate',
-                    'r_cola',
-                    'r_allowance',
-                    'r_13thmonth',
-                    'r_adjustment',
-                    'manning_payroll_earning.remarks as earning_remarks',
-
-                    // deduction fields
-                    'manning_payroll_deduction_id',
-                    'employee_share_sss',
-                    'employee_share_philhealth',
-                    'employee_share_pagibig',
-                    'other_deduction',
-                    'adjustment',
-                    'G.remarks as deduction_remarks',
-                  ];
+        $select = $this->payroll_fields;
 
         $group_by = 'manning_payroll_earning_id';
         if ($single == TRUE)
@@ -141,8 +149,8 @@ class Manning_payroll_earning_m extends MY_Model
                       ];
 
             $sum_deduction = "sum(`employee_share_sss` + `employee_share_philhealth` + `employee_share_pagibig` + `other_deduction` + `adjustment` + {$tardiness}) as deduction";
-            $select[] = $sum_deduction;
 
+            $select[] = $sum_deduction;
             $group_by = 'manning_payroll_earning_m.payroll_id';
         }
         else
@@ -150,21 +158,12 @@ class Manning_payroll_earning_m extends MY_Model
             $select = array_merge($select_earning, $select);
         }
 
-        if (in_array('lastname', $select))
-        $this->db->order_by('lastname, firstname, middlename');
-
-        $this->db->group_by($group_by);
         $sum_income .=  "+ `r_cola` + `r_allowance` + `r_adjustment`";
         $select_income = "sum(" . $sum_income . ") as earning";
         $sum_basic = "sum( r_hourly_rate + r_semi_monthly_rate + r_monthly_rate) as sum_basic";
 
         $tardiness = "`r_late_amount` + `r_absent_rate` + `r_absent_rate_per_day`";
         $select_tardiness = "sum({$tardiness}) as tardiness";
-
-        $this->db->join('manning_payroll as A', 'A.payroll_id = manning_payroll_earning.payroll_id', 'left');
-        $this->db->join('manning as E', 'E.manning_id = manning_payroll_earning.employee_id', 'left');
-        $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
-        $this->db->join('manning_payroll_deduction as G', 'manningPayrollEarningId = manning_payroll_earning_id', 'left');
 
         $deduction_sql = "(
                             SELECT GROUP_CONCAT(concat(deduction_category,'#',amount) SEPARATOR '|') as deductions, employee_id
@@ -175,30 +174,57 @@ class Manning_payroll_earning_m extends MY_Model
                                 GROUP BY employee_id
                           )";
 
-        $select[] = 'H.deductions';
-        $this->db->join($deduction_sql . ' as H', 'H.employee_id = E.manning_id', 'left');
-
-
         $select[] = $select_income;
         $select[] = $select_tardiness;
         $select[] = $sum_basic;
+        $select[] = 'H.deductions';
 
         $this->db->select($select);
+
+        $this->db->join('manning_payroll as A', 'A.payroll_id = manning_payroll_earning.payroll_id', 'left');
+        $this->db->join('manning as E', 'E.manning_id = manning_payroll_earning.employee_id', 'left');
+        $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
+        $this->db->join('manning_payroll_deduction as G', 'manningPayrollEarningId = manning_payroll_earning_id', 'left');
+        $this->db->join($deduction_sql . ' as H', 'H.employee_id = E.manning_id', 'left');
+
+        $this->db->group_by($group_by);
+
+        if ($this->reliever_payroll == TRUE)
+            $this->db->where('E.employment_status_id', RELIEVER);
+        else
+            $this->db->where_in('E.employment_status_id', $this->payroll_employment_status_ids);
 
         // ONLY INCLUDE actived deduction
         $this->db->where('G.is_actived', 1);
         $this->db->having('earning >', 0);
+
+        if (in_array('lastname', $select))
+        $this->db->order_by('lastname, firstname, middlename');
+
         return parent::get_by(['manning_payroll_earning.payroll_id'=>$payroll_id], $single);
     }
 
     public function get_manning_payroll_earning($payroll_id = NULL, $manning_payroll_earning_id = NULL, $single = FALSE)
     {
-        $this->db->select('manning_payroll_earning.*, lastname, firstname, middlename, position_code, position, rate, daily_rate, semi_monthly_rate, monthly_rate');
+        $this->db->select('manning_payroll_earning.*, lastname, firstname, middlename, position_code, position, rate, daily_rate, semi_monthly_rate, monthly_rate, employment_status_id');
         $this->db->join('manning_payroll as A', 'A.payroll_id = manning_payroll_earning.payroll_id', 'left');
         $this->db->join('manning as E', 'E.manning_id = manning_payroll_earning.employee_id', 'left');
         $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
 
         return $manning_payroll_earning_id !== NULL ? parent::get($manning_payroll_earning_id, $single) : parent::get_by(['manning_payroll_earning.payroll_id' => $payroll_id]);
+    }
+
+    public function update_payroll_reliever($payroll_id)
+    {
+        $this->load->model('manning_payroll_m');
+
+        $this->db->where('employment_status_id', RELIEVER);
+        $this->db->where("(r_hourly_rate > 0 || r_daily_rate > 0 || r_semi_monthly_rate > 0 || r_monthly_rate > 0)", NULL, FALSE);
+        $result = self::get_manning_payroll_earning($payroll_id);
+
+        // update manning payroll set w_reliever to 0 / 1
+        $data['w_reliever'] = (bool) count($result);
+        $this->manning_payroll_m->save($data, $payroll_id);
     }
 
     public function update_payroll_data($payroll_id)
@@ -209,15 +235,18 @@ class Manning_payroll_earning_m extends MY_Model
         $this->load->model('manning_payroll_m');
 
         $payroll = $this->manning_payroll_m->get($payroll_id);
-        if ($payroll->IsFinal == 1)
-        {
-            $this->session->set_flashdata('message', '<strong>Access Denied.</strong> <p class="lead">This payroll is already finalized.</p>');
-            return redirect("manning_payroll");
-        }
+        // if ($payroll->IsFinal == 1)
+        // {
+        //     $this->session->set_flashdata('message', '<strong>Access Denied.</strong> <p class="lead">This payroll is already finalized.</p>');
+        //     return redirect("manning_payroll");
+        // }
 
         $project_id = $payroll->project_id;
-        // regular, project-based, probitionary & co-terminous
-        $status_ids = [1,2,3,5];
+        // regular, project-based, probitionary & co-terminous, reliever status
+        // --------------------------------------------------------------------
+        // DO NOT forget to UPDATE save earning METHOD
+        // --------------------------------------------------------------------
+        $status_ids = $this->earning_employment_status_ids;
         $implode_ids = implode(',', $status_ids);
         $now = date('Y-m-d H:i:s');
         $post = [];
@@ -237,7 +266,7 @@ class Manning_payroll_earning_m extends MY_Model
                                 'r_daily_rate' => $employee->daily_rate,
                                 'r_semi_monthly_rate' => $employee->semi_monthly_rate,
                                 'r_monthly_rate' => $employee->monthly_rate,
-                                'r_allowance' => $employee->allowance,
+                                'r_allowance' => 0.00,
                                 'created_at' => $now,
                                 'updated_at' => $now,
                           ];
@@ -291,11 +320,15 @@ class Manning_payroll_earning_m extends MY_Model
                     `r_absent_rate_per_day` = round(((daily_rate/8) * no_absences_per_day) * -1,2),
                     `r_absent_rate` = round(((daily_rate/8) * no_absences_per_hr) * -1,2),
                     `r_incentive` = 0,
-                    `r_13thmonth` = round(((daily_rate/8) * no_hrs)/12,2),
+                    `r_13thmonth` = IF(rate = 2, round((semi_monthly_rate*2)/12,2),
+                                        IF(rate = 3, round(monthly_rate/12,2),
+                                                round(((daily_rate/8) * no_hrs)/12,2))),
                     `C`.`updated_at` = ?
                 WHERE `C`.`payroll_id` =  ? AND C.is_actived = 1";
         $this->db->query($sql, [$now, $payroll_id]);
         $update_affected = $this->db->affected_rows();
+
+        self::update_payroll_reliever($payroll_id);
 
         $this->session->set_flashdata('message', '<strong>Success.</strong> <p class="lead">This payroll entries has been successfully updated.</p>');
         return redirect("manning_payroll/earning/{$payroll_id}");
@@ -370,7 +403,9 @@ class Manning_payroll_earning_m extends MY_Model
                         `r_absent_rate_per_day` = round(((daily_rate/8) * no_absences_per_day) * -1,2),
                         `r_absent_rate` = round(((daily_rate/8) * no_absences_per_hr) * -1,2),
                         `r_incentive` = 0,
-                        `r_13thmonth` = round(((daily_rate/8) * no_hrs)/12,2),
+                        `r_13thmonth` = IF(rate = 2, round((semi_monthly_rate*2)/12,2),
+                                            IF(rate = 3, round(monthly_rate/12,2),
+                                                    round(((daily_rate/8) * no_hrs)/12,2))),
                         `C`.`updated_at` = ?
                     WHERE `C`.`payroll_id` =  ? AND C.is_actived = 1";
 
@@ -391,8 +426,12 @@ class Manning_payroll_earning_m extends MY_Model
         else
         {
             $project_id = $payroll->project_id;
-            // regular, project-based, probitionary & co-terminous
-            $status_ids = [1,2,3,5];
+            // regular, project-based, probitionary & co-terminous, reliever status
+            // --------------------------------------------------------------------
+            // DO NOT forget to UPDATE update payroll data METHOD
+            // --------------------------------------------------------------------
+            $status_ids = $this->earning_employment_status_ids;
+
             $post = [];
             $manning = $this->db
                             ->where([
@@ -413,7 +452,7 @@ class Manning_payroll_earning_m extends MY_Model
                                     'r_daily_rate' => $employee->daily_rate,
                                     'r_semi_monthly_rate' => $employee->semi_monthly_rate,
                                     'r_monthly_rate' => $employee->monthly_rate,
-                                    'r_allowance' => $employee->allowance,
+                                    'r_allowance' => 0.00,
                                     'created_at' => $now,
                                     'updated_at' => $now,
                               ];
@@ -600,8 +639,8 @@ class Manning_payroll_earning_m extends MY_Model
 
     public function distinct_rate($project_id)
     {
-        // regular, project-based ,probitional & co-terminous
-        $status = "1,2,3,5";
+        // regular, project-based , probitional, co-terminous, reliever
+        $status = implode(',', $this->earning_employment_status_ids);
 
         $param = [$project_id];
 

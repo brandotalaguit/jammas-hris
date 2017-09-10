@@ -66,15 +66,6 @@ class Manning_payroll extends Admin_Controller
         $this->data['projects'] = $this->projects->get_projects();
         // die(dump($this->data['projects']));
         $this->data['months'] = $this->manning_payroll_m->get_month();
-        $this->data['page_title'] .= anchor('manning_payroll/edit'
-                                            , '<i class="fa fa-plus"></i> New Payroll'
-                                            , [
-                                                'data-toggle'   => 'modal',
-                                                'data-target'   => '#payroll-modal',
-                                                'data-backdrop' => 'static',
-                                                'data-keyboard' => 'false',
-                                                'class'         => 'btn btn-primary',
-                                            ]);
 
 
         // Load view
@@ -345,6 +336,8 @@ class Manning_payroll extends Admin_Controller
                         ];
 
                 $this->manning_payroll_m->save($post, $id);
+
+                $this->manning_payroll_earning_m->update_payroll_reliever($id);
 
                 $this->db->order_by('payroll_id');
                 $data['payroll'] = $this->manning_payroll_m->get_manning_payroll($id);
@@ -730,6 +723,31 @@ class Manning_payroll extends Admin_Controller
         $this->load->model('manning_payroll_deduction_m');
         $affected = $this->manning_payroll_deduction_m->generate_deduction($payroll_id);
 
+        $this->data['reliever_payroll'] = FALSE;
+        $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id);
+        $this->data['payroll_info'] = $payroll_info;
+        $this->data['page_title'] = 'P A Y R O L L &nbsp; R E G I S T E R';
+
+        return parent::load_view('manning_payroll/payroll');
+
+    }
+
+    public function print_reliever_payroll($payroll_id)
+    {
+        // $this->output->enable_profiler(TRUE);
+
+        $this->db->select('manning_payroll.*, b.title, tin, po, business_style');
+        $this->db->join('projects b', 'b.project_id = manning_payroll.project_id', 'left');
+        $payroll_info = $this->manning_payroll_m->get($payroll_id);
+
+        if_fail_dump($payroll_info, 'The page you requested does not exists.');
+
+        $now = date('Y-m-d H:i:s');
+        $this->manning_payroll_m->save(['date_printed' => $now, 'IsPayrollPrinted' => 1], $payroll_id);
+
+        $this->load->model('manning_payroll_deduction_m');
+        // $affected = $this->manning_payroll_deduction_m->generate_deduction($payroll_id);
+        $this->data['reliever_payroll'] = $this->manning_payroll_earning_m->reliever_payroll = TRUE;
         $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id);
         $this->data['payroll_info'] = $payroll_info;
         $this->data['page_title'] = 'P A Y R O L L &nbsp; R E G I S T E R';
@@ -842,10 +860,9 @@ class Manning_payroll extends Admin_Controller
         $this->load_view('manning_payroll/pagibig_contribution2');
     }
 
-    public function philhealth_contribution()
+    public function contribution_report()
     {
         $this->load->model('manning_payroll_deduction_m');
-        $this->output->enable_profiler(TRUE);
         $field_arr = array(
                             'employee_no',
                             'lastname',
@@ -856,7 +873,6 @@ class Manning_payroll extends Admin_Controller
                             'SUM(gross_income) gross_income',
                         );
 
-        // $validation = $this->manning_payroll_deduction_m->get_deduction();
         $validation = $this->manning_payroll_deduction_m->validate_search_form();
         if ($validation['success'] == FALSE)
         {

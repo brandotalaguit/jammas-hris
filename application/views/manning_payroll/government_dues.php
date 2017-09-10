@@ -116,6 +116,7 @@
 
 				<?php $ctr = 0; ?>
 			    <?php $company_share = $employee_share = $total_share = 0; ?>
+
 				<?php foreach ($proj['project_data'] as $row): ?>
 	<!-- start result here -->
 				<tr>
@@ -155,12 +156,12 @@
 					</td>
 
 					<?php if ($contribution == 'sss'): ?>
-					<td>
+					<td class="text-right">
 						<?php
-							echo nf($tmp_1 + $tmp_2);
+							echo nf($row->$tmp_1 + $row->$tmp_2);
 							?>
 					</td>
-					<td>
+					<td class="text-right">
 						<?php
 							echo nf($row->employee_compensation_program_sss);
 							?>

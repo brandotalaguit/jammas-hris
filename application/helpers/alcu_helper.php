@@ -365,7 +365,7 @@ function payroll_date($str='', $format = 'm/d/Y')
     return php_date($str, $format);
 }
 
-function proper_date($str = '', $format = 'F j, Y')
+function proper_date($str = '', $format = 'M j, Y')
 {
     return php_date($str, $format);
 }

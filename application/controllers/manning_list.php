@@ -300,6 +300,12 @@ class Manning_list extends Admin_Controller
 		$this->form_validation->set_rules($rules);
 		$this->form_validation->set_message('greater_than', 'The %s field is required.');
 
+		if (empty($_POST['employee_no']) && ! empty($_POST['project_id']))
+		{
+			$max = str_pad($this->manning->max_proj_id($_POST['project_id']), 5, 0, STR_PAD_LEFT);
+			$_POST['employee_no'] = 'PRJ-' . str_pad($_POST['project_id'], 4, '0', STR_PAD_LEFT).'-'. $max;
+		}
+
 		// Process the form
 		if ($this->form_validation->run() == TRUE)
 		{
@@ -354,14 +360,6 @@ class Manning_list extends Admin_Controller
 				'remarks',
 				)
 			);
-
-			if (empty($data['employee_no']))
-			{
-				$max = str_pad($this->manning->max_proj_id($data['project_id']), 5, 0, STR_PAD_LEFT);
-				$data['employee_no'] = 'PRJ-' . str_pad($data['project_id'], 4, '0', STR_PAD_LEFT).'-'. $max;
-				// dd($data['employee_no']);
-			}
-
 
 			$this->manning->save($data, $id);
 

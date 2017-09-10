@@ -65,9 +65,9 @@
 	        			<tr>
 	        				<td>SSS</td>
 	        				<td>
-	        					<label class="radio-inline">
+	        					<!-- <label class="radio-inline">
 	        					  <input type="radio" name="mode_of_payment_sss" id="sss1" value="1" <?php $config->mode_of_payment_sss == '1' ? $check = TRUE : $check = FALSE; echo set_radio('mode_of_payment_sss', '1', $check);?> >
-	        					</label>
+	        					</label> -->
 	        				</td>
 	        				<td>
 	        					<label class="radio-inline">
@@ -84,9 +84,9 @@
 	        	</table>
 	        </div>
 	        <div class="clearfix"></div>
-	        
+
 	    </div><!-- /.box-body -->
-	    
+
 	    <div class="box-body clearfix">
 	    	        <div class="row">
 	    	        	<div class="col-md-4">
@@ -106,7 +106,7 @@
 	    		        		</div>
 	    	        		</div>
 
-	    	                
+
 	    	        	</div>
 	    	        	<div class="col-md-8">
 	    	        		        <div class="form-group">
@@ -120,18 +120,18 @@
 	    <div class="box-footer clearfix">
 
 	        <?= form_submit([
-		        	'name' => 'btn_action', 
+		        	'name' => 'btn_action',
 		        	'value' => 'SUBMIT SETTINGS',
 		        	'class' => 'btn btn-lg btn-block btn-primary',
 		        	'style' => 'font-weight: bold;'
 	        	]); ?>
 	    </div>
 	</div>
-	
+
 </div>
 
 
 
-	
+
 </div>
 <?php echo form_close(); ?>

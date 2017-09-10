@@ -5,6 +5,7 @@
 	$GLOBALS['tardiness'] = $tardiness = ['r_late_amount', 'r_absent_rate', 'r_absent_rate_per_day'];
 	$GLOBALS['earning'] = $GLOBALS['deduction'] = array();
 
+	$GLOBALS['reliever_payroll'] = $reliever_payroll;
 
     function get_earnings($payroll, $fields, $totalOnly = FALSE)
     {
@@ -67,17 +68,20 @@
 	       		$GLOBALS['earning']['r_cola']['multiplier'] += '';
 	       	}
         	// 13th month benefits
-	       	if (empty($GLOBALS['earning']['r_13thmonth']))
-	       		$GLOBALS['earning']['r_13thmonth'] = array(
-	   												'description' => '13th Month',
-	   												'amount' => $payroll->r_13thmonth,
-	   												'multiplier' => '',
-	   											);
-	       	else
-	       	{
-	       		$GLOBALS['earning']['r_13thmonth']['amount'] += $payroll->r_13thmonth;
-	       		$GLOBALS['earning']['r_13thmonth']['multiplier'] += '';
-	       	}
+        	if ( ! $GLOBALS['reliever_payroll'])
+        	{
+		       	if (empty($GLOBALS['earning']['r_13thmonth']))
+		       		$GLOBALS['earning']['r_13thmonth'] = array(
+		   												'description' => '13th Month',
+		   												'amount' => $payroll->r_13thmonth,
+		   												'multiplier' => '',
+		   											);
+		       	else
+		       	{
+		       		$GLOBALS['earning']['r_13thmonth']['amount'] += $payroll->r_13thmonth;
+		       		$GLOBALS['earning']['r_13thmonth']['multiplier'] += '';
+		       	}
+        	}
 	       	// allowance
    	    	if (empty($GLOBALS['earning']['r_allowance']))
    	    		$GLOBALS['earning']['r_allowance'] = array(
@@ -95,11 +99,15 @@
 							'amount' => $payroll->r_cola,
 							'multiplier' => '',
 						);
-	       	$data[] = array(
-							'description' => '13th Month',
-							'amount' => $payroll->r_13thmonth,
-							'multiplier' => '',
-						);
+	       	if ( ! $GLOBALS['reliever_payroll'])
+	       	{
+		       	$data[] = array(
+								'description' => '13th Month',
+								'amount' => $payroll->r_13thmonth,
+								'multiplier' => '',
+							);
+	       	}
+
 	       	$data[] = array(
 							'description' => 'Allowance',
 							'amount' => $payroll->r_allowance,
@@ -109,6 +117,7 @@
         else
         {
 	       	$data[] = $GLOBALS['earning']['r_cola'];
+	       	if ( ! $GLOBALS['reliever_payroll'])
 	       	$data[] = $GLOBALS['earning']['r_13thmonth'];
 	       	$data[] = $GLOBALS['earning']['r_allowance'];
         }
@@ -180,7 +189,7 @@
 						<br>
 						<br>
 						<b><?php echo $payroll_info->title; ?></b>
-						<br><small>Run Date <?php echo php_date(date('Y-m-d H:i:sA'), 'Y-m-d H:iA'); ?></small>
+						<br><small>Run Date <?php echo php_date(date('Y-m-d H:i:s'), 'Y-m-d H:iA'); ?></small>
 					</h5>
 	    		</th>
 	    	</tr>
@@ -215,11 +224,12 @@
 
 			<?php if (count($payroll)): ?>
 					<?php
-						$this->load->model('projects');
 
 						$fields = $payroll_info->fields;
 						$project = $this->projects->get($payroll_info->project_id);
-						$reg_deduction = $this->manning_payroll_deduction_m->deduction_field();
+						// dump($this->manning_payroll_deduction_m->deduction_field());
+						// $reg_deduction = $reliever_payroll ? [] : $this->manning_payroll_deduction_m->deduction_field();
+						$reg_deduction = $this->manning_payroll_deduction_m->deduction_field($reliever_payroll);
 
 					    $fields = 'hourly_rate,' . $fields;
 					    $fields = 'daily_rate,' . $fields;

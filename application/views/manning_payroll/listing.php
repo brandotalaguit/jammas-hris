@@ -31,10 +31,10 @@
                 <h3 class="box-title">
                 <?php echo anchor('manning_payroll', '<strong><i class="fa fa-home"></i> Payroll</strong>', ['class' => 'btn btn-default'])?>
                 <a class="btn btn-info" data-toggle="modal" href='#modal-id'>Project Information</a>
-                
+
                 <?php echo form_submit([
-                                            'name' => 'btn_action', 
-                                            'value' => 'Save as Final', 
+                                            'name' => 'btn_action',
+                                            'value' => 'Save as Final',
                                             'onclick' => "return confirm('Are you sure you want to finalized this data? This will enable you to print payroll and payslip')",
                                             'class' => 'btn btn-primary'
                                         ]); ?>
@@ -56,18 +56,20 @@
                 <th width='10%' rowspan="2">Employee Name</th>
                 <th width='2%' rowspan="2">Position</th>
 
-                <?php 
+                <?php
                     // if ($project->rate_daily == 1)
                     // {
                     //     $tmp = $payroll->fields;
                     //     $payroll->fields = 'daily_rate,' . $tmp;
                     // }
 
-                    if (in_array('hourly_rate', $distinct_rate))
+
+                    if (!in_array('hourly_rate', $distinct_rate) || strpos($payroll->fields, 'hourly_rate') === false)
                     {
                         $tmp = $payroll->fields;
                         $payroll->fields = 'hourly_rate,' . $tmp;
                     }
+
                 ?>
 
 
@@ -81,17 +83,17 @@
 
                 <th width='2%' rowspan="2">COLA</th>
                 <th width='2%'>Allowance</th>
-                
+
                 <?php $arr_subtotal = array(); ?>
 
                 <?php foreach (explode(',', $payroll->fields) as $rate): ?>
 
-                    <?php 
+                    <?php
                         $rate_data = explode('|', $billing_rates[$rate]);
                         $rate_basis = $rate_data[0];
                         $rate_title = $rate_data[1];
                         $rate_abbr = $rate_data[2];
-                        
+
                      ?>
 
                      <?php if (in_array($rate, array_keys($billing_rates))): ?>
@@ -103,33 +105,33 @@
                                 <th width='2%' rowspan="2">Amount</th>
                             <?php #endif ?>
 
-                         
+
                      <?php endif ?>
 
                 <?php $arr_subtotal[$rate] = 0.00; ?>
                 <?php $arr_subtotal[$rate.'_amount'] = 0.00; ?>
-                    
+
                 <?php endforeach ?>
 
-                <?php 
-                        // $arr_subtotal['semi_monthly_rate'] = 0.00; 
+                <?php
+                        // $arr_subtotal['semi_monthly_rate'] = 0.00;
                         // $arr_subtotal['semi_monthly_rate_amount'] = 0.00;
-                        // $arr_subtotal['monthly_rate'] = 0.00; 
+                        // $arr_subtotal['monthly_rate'] = 0.00;
                         // $arr_subtotal['monthly_rate_amount'] = 0.00;
 
-                        // $arr_subtotal['cola'] = 0.00; 
-                        // $arr_subtotal['cola_amount'] = 0.00; 
-                        // $arr_subtotal['allowance'] = 0.00; 
-                        // $arr_subtotal['allowance_amount'] = 0.00; 
+                        // $arr_subtotal['cola'] = 0.00;
+                        // $arr_subtotal['cola_amount'] = 0.00;
+                        // $arr_subtotal['allowance'] = 0.00;
+                        // $arr_subtotal['allowance_amount'] = 0.00;
                     ?>
 
                 <th width='5%' rowspan="1">Total</th>
-       
+
             </tr>
             </thead>
             <tbody>
-            <?php 
-            $subtotal = $grandtotal = $total_semi_monthly = $total_monthly = $total_cola = $total_allowance = 0.000; 
+            <?php
+            $subtotal = $grandtotal = $total_semi_monthly = $total_monthly = $total_cola = $total_allowance = 0.000;
             // dump($earning[1]);
             ?>
             <?php if (count($earning)): ?>
@@ -137,30 +139,42 @@
 
                 <?php foreach ($earning as $billing): ?>
                     <?php #die(dump($billing)); ?>
-                    <tr <?php echo $this->session->flashdata('id') == $billing->manning_payroll_earning_id ? "class='success'" : ''; ?> >
-                        <td class="text-center">
-                            <?php 
-                                if ($billing->w_adjustment == 1) 
+                    <tr <?php echo $this->session->flashdata('id') == $billing->manning_payroll_earning_id ? "class='success'" : '';  ?> >
+                        <td class="text-center" >
+                            <?php
+                                if ($billing->w_adjustment == 1)
                                     echo 'Adj.';
+                                elseif ($billing->employment_status_id == RELIEVER)
+                                    echo 'R';
                                 else
                                     echo ++$counter;
                             ?>
                         </td>
-                        <td><?php echo $billing->lastname . ', ' . $billing->firstname . ' ' . $billing->middlename;?></td>
+                        <td <?php if ($billing->employment_status_id == RELIEVER) echo "class='bg-orange' " ?>>
+                            <?php
+                                    echo $billing->lastname . ', ' . $billing->firstname . ' ' . $billing->middlename;
+                                    if ($billing->employment_status_id == RELIEVER) echo " <p class = 'label label-danger'>RELIEVER</p>";
+                                ?>
+
+                        </td>
                             <?php
                                 $position_rates = 0.00;
                                 if (in_array('hourly_rate', $distinct_rate))
                                 $position_rates = nf($billing->daily_rate);
 
                                 if (in_array('semi_monthly_rate', $distinct_rate))
-                                $position_rates = nf($billing->semi_monthly_rate);
+                                {
+                                    $position_rates = nf($billing->semi_monthly_rate);
+                                }
 
                                 if (in_array('monthly_rate', $distinct_rate))
-                                $position_rates = nf($billing->monthly_rate);
+                                {
+                                    $position_rates = nf($billing->monthly_rate);
+                                }
                             ?>
                         <td title="<?php echo t($position_rates) ?>">
-                            <?php 
-                                if ($billing->remarks) 
+                            <?php
+                                if ($billing->remarks)
                                     echo $billing->remarks;
                                 else
                                     echo t($billing->position);
@@ -181,13 +195,13 @@
                             <code class='deci allowance'><?php echo nf($billing->r_allowance) ?></code>
                         </td>
 
-            <?php 
-                //dump($payroll->fields);
-                $subtotal = 0.000; 
-                
-                $total_cola += $billing->r_cola; 
-                $total_allowance += $billing->r_allowance; 
-                
+            <?php
+                // dump($payroll->fields);
+                $subtotal = 0.000;
+
+                $total_cola += $billing->r_cola;
+                $total_allowance += $billing->r_allowance;
+
                 $subtotal += $billing->r_cola;
                 $subtotal += $billing->r_allowance;
 
@@ -219,7 +233,7 @@
                         <td>
                         <?php #if ($billing->rate > 1 && in_array($rate_basis, ['no_hrs']) && (in_array('monthly_rate', $distinct_rate) || in_array('semi_monthly_rate', $distinct_rate))): ?>
                         <?php #else: ?>
-                            <a href="#" class="editable" data-url="<?php echo base_url("manning_payroll/$billing->manning_payroll_earning_id/edit_earning"); ?>" id="<?php echo $billing->manning_payroll_earning_id; ?>" 
+                            <a href="#" class="editable" data-url="<?php echo base_url("manning_payroll/$billing->manning_payroll_earning_id/edit_earning"); ?>" id="<?php echo $billing->manning_payroll_earning_id; ?>"
                                 data-name="<?php echo $rate_basis ?>" data-type="text" data-title="<?php echo $rate_title?>" data-pk="<?php echo $billing->manning_payroll_earning_id; ?>" >
                                 <!-- please clear the issue of decimal places to be used 2 OR 4 -->
                                 <?php echo nf(floatval($billing->$rate_basis)) ?>
@@ -228,10 +242,10 @@
                         <?php #endif ?>
                         </td>
                         <td><?php echo nf(floatval($billing->$rate_pbt)); ?></td>
-                 
+
                  <?php endif ?>
 
-            <?php 
+            <?php
                 // dump($rate_basis);
                 $arr_subtotal[$rate] += floatval($billing->$rate_basis);
                 $arr_subtotal[$rate.'_amount'] += floatval($billing->$rate_pbt);
@@ -244,10 +258,10 @@
 
             <?php endforeach ?>
 
-            <?php 
-               
+            <?php
+
              ?>
-             
+
             <th>
                 <!-- sub-total -->
                 <?php echo nf(floatval($subtotal)); ?>
@@ -269,7 +283,7 @@
 
             <tfoot>
             <tr>
-                
+
                 <th class="lead text-right" colspan="3"><strong>TOTAL</strong></th>
 
                 <?php if (in_array('semi_monthly_rate', $distinct_rate)): ?>
@@ -306,8 +320,8 @@
         #    echo $pagination;
         ?>
         <div class="pull-right">
-            
-       
+
+
         </div>
     </div>
 </div>
@@ -318,7 +332,7 @@ $(function(){
  $('.right-side').addClass('strech');
 
 })
-   
+
 
 
 </script>
@@ -330,4 +344,4 @@ $(function(){
  * User: Brando
  * Date: 9/1/14
  * Time: 2:17 PM
- */ 
+ */

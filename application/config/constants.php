@@ -41,6 +41,12 @@ define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 // define('DECIMAL_PLACES', 4);
 define('DECIMAL_PLACES', 2);
 
+define('REGULAR', 1);
+define('RELIEVER', 35);
+define('PROBITIONAL', 3);
+define('CO_TERMINOUS', 5);
+define('PROJECT_BASED', 2);
+
 
 /* End of file constants.php */
 /* Location: ./application/config/constants.php */

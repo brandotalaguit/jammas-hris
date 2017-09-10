@@ -7,7 +7,7 @@
     <h4 class="modal-title">Contribution and Deduction Report Options</h4>
 </div>
 <?php // echo $form_url; ?>
-    <?php echo form_open('manning_payroll/philhealth_contribution', ['class'=>'form-horizontal', 'role' => 'form', 'id'=>'form-contribution', 'target' => '_blank']); ?>
+    <?php echo form_open('manning_payroll/contribution_report', ['class'=>'form-horizontal', 'role' => 'form', 'id'=>'form-contribution', 'target' => '_blank']); ?>
     <div class="modal-body">
 
         <div class="form-group">

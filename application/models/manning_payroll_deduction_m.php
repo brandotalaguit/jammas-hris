@@ -85,8 +85,15 @@ class Manning_payroll_deduction_m extends MY_Model
         parent::__construct();
     }
 
-    public static function deduction_field()
+    public static function deduction_field($reliever = FALSE)
     {
+        if ($reliever)
+            return array(
+                'late_amount' => ['label' => 'Tardiness', 'abbr' => 'Tardiness', 'payroll' => 'r_late_amount', 'multiplier' => 'late_minutes'],
+                'absent_rate' => ['label' => 'Absent per Hours', 'abbr' => 'Absent/Hrs', 'payroll' => 'r_absent_rate', 'multiplier' => 'no_absences_per_hr'],
+                'absent_rate_per_day' => ['label' => 'Absent', 'abbr' => 'Absent', 'payroll' => 'r_absent_rate_per_day', 'multiplier' => 'no_absences_per_day'],
+            );
+
         return array(
             'employee_share_sss' => ['label' => 'SSS', 'abbr' => 'SSS', 'payroll' => 'employee_share_sss', 'multiplier' => ''],
             'employee_share_philhealth' => ['label' => 'PhilHealth', 'abbr' => 'PhilHealth', 'payroll' => 'employee_share_philhealth', 'multiplier' => ''],
@@ -332,7 +339,7 @@ class Manning_payroll_deduction_m extends MY_Model
         $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
         $this->db->join('projects as G', 'G.project_id = A.project_id', 'left');
 
-        $this->db->order_by('lastname, firstname, middlename, date_printed ASC');
+        $this->db->order_by('lastname, firstname, middlename, payroll_period ASC');
 
 
         if ($payroll_id == NULL && $manning_payroll_earning_id == NULL)
@@ -391,7 +398,8 @@ class Manning_payroll_deduction_m extends MY_Model
         $this->db->query($sql, [$payroll_id, $payroll_date_end, $payroll_id]);
 
         parent::delete_by(['payroll_id'=>$payroll_id]);
-        $sql = "INSERT INTO manning_payroll_deduction(
+
+                $sql = "INSERT INTO manning_payroll_deduction(
                     manningPayrollEarningId, payroll_id, employee_id, gross_income, sum_basic,
                     employee_share_sss, employer_share_sss, employee_compensation_program_sss, total_monthly_premium_sss,
                     employee_share_philhealth, employer_share_philhealth, total_monthly_premium_philhealth,
@@ -399,10 +407,11 @@ class Manning_payroll_deduction_m extends MY_Model
                     other_deduction, created_at, updated_at
                 )
                 SELECT  a.manning_payroll_earning_id, payroll_id, a.employee_id, gross_income, monthly_basic,
-                    IF({$mode_sss} = 3, b.employee_share, IF({$mode_sss} = 1, b.employee_share, 0)),
-                    IF({$mode_sss} = 3, b.employer_share, IF({$mode_sss} = 1, b.employer_share, 0)),
-                    IF({$mode_sss} = 3, b.employee_compensation_program, IF({$mode_sss} = 1, b.employee_compensation_program, 0)),
-                    IF({$mode_sss} = 3, b.total_monthly_premium, IF({$mode_sss} = 1, b.total_monthly_premium, 0)),
+
+                    abs(sum_employee_sss - b.employee_share),
+                    abs(sum_employer_sss - b.employer_share),
+                    abs(sum_employee_compensation_program_sss - b.employee_compensation_program),
+                    abs(sum_monthly_sss - b.total_monthly_premium),
 
                     IF({$mode_philhealth} = {$payroll_period}, d.employee_share, abs(sum_employee_philhealth - d.employee_share)),
                     IF({$mode_philhealth} = {$payroll_period}, d.employer_share, abs(sum_employer_philhealth - d.employer_share)),
@@ -420,6 +429,7 @@ class Manning_payroll_deduction_m extends MY_Model
                         FROM manning_payroll_earning MPE
                         WHERE MPE.payroll_id = ? and is_actived
                         GROUP BY manning_payroll_earning_id
+                        HAVING pay_basic > 0
                     ) as a
                 LEFT JOIN (
                         SELECT employee_id, COALESCE(sum($wage), 0) monthly_gross_income, COALESCE(sum(r_hourly_rate + r_semi_monthly_rate + r_monthly_rate), 0) monthly_basic
@@ -435,13 +445,17 @@ class Manning_payroll_deduction_m extends MY_Model
                             COALESCE(SUM(total_monthly_premium_philhealth), 0) sum_monthly_philhealth,
                             COALESCE(SUM(employee_share_pagibig), 0) sum_employee_pagibig,
                             COALESCE(SUM(employer_share_pagibig), 0) sum_employer_pagibig,
-                            COALESCE(SUM(total_monthly_premium_pagibig), 0) sum_monthly_pagibig
+                            COALESCE(SUM(total_monthly_premium_pagibig), 0) sum_monthly_pagibig,
+                            COALESCE(SUM(employee_share_sss), 0) sum_employee_sss,
+                            COALESCE(SUM(employer_share_sss), 0) sum_employer_sss,
+                            COALESCE(SUM(employee_compensation_program_sss), 0) sum_employee_compensation_program_sss,
+                            COALESCE(SUM(total_monthly_premium_sss), 0) sum_monthly_sss
                     FROM manning_payroll_deduction MPD
                     LEFT JOIN manning_payroll ON manning_payroll.payroll_id = MPD.payroll_id and manning_payroll.is_actived
                     WHERE payroll_month = ? and payroll_year = ? and IsFinal = 1 and MPD.is_actived
                     GROUP BY manning_payroll.project_id, employee_id
                 ) as employee_deduction ON employee_deduction.employee_id = a.employee_id
-                LEFT JOIN sss_premium_contribution_matrix as b on pay_basic >= b.salary_range_start AND pay_basic <= b.salary_range_end
+                LEFT JOIN sss_premium_contribution_matrix as b on monthly_basic >= b.salary_range_start AND monthly_basic <= b.salary_range_end
 
                 LEFT JOIN pagibig_premium_contribution_matrix as c
                     on monthly_basic >= c.salary_range_start AND monthly_basic <= c.salary_range_end AND monthly_basic > 0
