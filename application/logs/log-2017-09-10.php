@@ -11,3 +11,5 @@ ERROR - 2017-09-10 22:15:43 --> Severity: Notice  --> Undefined variable: payrol
 ERROR - 2017-09-10 22:16:35 --> Severity: Notice  --> Undefined variable: payroll_id C:\xampp\htdocs\jammas-hris\application\controllers\manning_payroll.php 340
 ERROR - 2017-09-10 22:34:12 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\jammas-hris\application\views\manning_payroll\finalize.php 30
 ERROR - 2017-09-10 22:34:12 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\jammas-hris\application\views\manning_payroll\finalize.php 30
+ERROR - 2017-09-10 23:12:31 --> Severity: Notice  --> Undefined variable: reliever_payroll C:\xampp\htdocs\jammas-hris\application\views\manning_payroll\payslip.php 8
+ERROR - 2017-09-10 23:12:31 --> Severity: Notice  --> Undefined variable: reliever_payroll C:\xampp\htdocs\jammas-hris\application\views\manning_payroll\payslip.php 235

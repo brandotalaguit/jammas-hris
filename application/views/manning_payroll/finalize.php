@@ -32,7 +32,12 @@
 			        echo anchor('manning_payroll/print_reliever_payroll/' . $payroll->payroll_id, '<i class="fa fa-print"></i> Reliever', ['class' => 'btn btn-warning', 'target' => '_blank', 'title' => 'Print Reliever Payroll']);
 		        ?>
 
-		        <?php echo anchor('manning_payroll/print_payslip/' . $payroll->payroll_id, '<i class="fa fa-print"></i> Print Payslip', ['class' => 'btn btn-success', 'title' => 'Print Payslip', 'target' => '_blank'])?>
+		        <?php
+		        	echo anchor('manning_payroll/print_payslip/' . $payroll->payroll_id, '<i class="fa fa-print"></i> Print Payslip', ['class' => 'btn btn-success', 'title' => 'Print Payslip', 'target' => '_blank']);
+		        	echo "&nbsp;";
+		        	if ($payroll->w_reliever)
+		        	echo anchor('manning_payroll/print_reliever_payslip/' . $payroll->payroll_id, '<i class="fa fa-print"></i> Reliever', ['class' => 'btn btn-success', 'target' => '_blank', 'title' => 'Print Reliever Payslip']);
+		        	?>
 		    </div><!-- /.box-footer-->
 		</div><!-- /.box -->
 	</div>

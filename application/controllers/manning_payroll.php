@@ -1173,6 +1173,27 @@ class Manning_payroll extends Admin_Controller
         $now = date('Y-m-d H:i:s');
         $this->manning_payroll_m->save(['DatePayslipPrinted' => $now, 'IsPayslipPrinted' => 1], $payroll_id);
 
+        $this->data['reliever_payroll'] = $this->manning_payroll_earning_m->reliever_payroll = FALSE;
+
+        $affected = $this->manning_payroll_deduction_m->generate_deduction($payroll_id);
+        $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id);
+        $this->db->select('manning_payroll.*, b.title, tin, po, business_style');
+        $this->db->join('projects b', 'b.project_id = manning_payroll.project_id', 'left');
+        $this->data['payroll_info'] = $this->manning_payroll_m->get($payroll_id);
+
+        $this->data['page_title'] = 'PAYSLIP';
+        return parent::load_view('manning_payroll/payslip');
+    }
+
+    public function print_reliever_payslip($payroll_id)
+    {
+        $this->load->model('manning_payroll_deduction_m');
+
+        $now = date('Y-m-d H:i:s');
+        $this->manning_payroll_m->save(['DatePayslipPrinted' => $now, 'IsPayslipPrinted' => 1], $payroll_id);
+
+        $this->data['reliever_payroll'] = $this->manning_payroll_earning_m->reliever_payroll = TRUE;
+
         $affected = $this->manning_payroll_deduction_m->generate_deduction($payroll_id);
         $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id);
         $this->db->select('manning_payroll.*, b.title, tin, po, business_style');

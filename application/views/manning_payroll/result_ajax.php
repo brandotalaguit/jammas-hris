@@ -55,6 +55,8 @@
                         if ($row->w_reliever)
                         echo anchor('manning_payroll/print_reliever_payroll/' . $row->payroll_id, '<i class="fa fa-print"></i> Reliever', ['class' => 'btn btn-warning', 'target' => '_blank', 'title' => 'Print Reliever Payroll']);
                         echo anchor('manning_payroll/print_payslip/' . $row->payroll_id, '<i class="fa fa-print"></i> Payslip', ['class' => 'btn btn-success', 'target' => '_blank', 'title' => 'Print Payslip']);
+                        if ($row->w_reliever)
+                        echo anchor('manning_payroll/print_reliever_payslip/' . $row->payroll_id, '<i class="fa fa-print"></i> Reliever', ['class' => 'btn btn-success', 'target' => '_blank', 'title' => 'Print Reliever Payslip']);
                     ?>
                     <?php else: ?>
                         <a class="btn btn-info" href="<?php echo base_url('manning_payroll/edit/' . $row->payroll_id) ?>"
