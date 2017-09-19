@@ -408,18 +408,18 @@ class Manning_payroll_deduction_m extends MY_Model
                 )
                 SELECT  a.manning_payroll_earning_id, payroll_id, a.employee_id, gross_income, monthly_basic,
 
-                    abs(sum_employee_sss - b.employee_share),
-                    abs(sum_employer_sss - b.employer_share),
-                    abs(sum_employee_compensation_program_sss - b.employee_compensation_program),
-                    abs(sum_monthly_sss - b.total_monthly_premium),
+                    abs(IFNULL(sum_employee_sss,0) - b.employee_share),
+                    abs(IFNULL(sum_employer_sss,0) - b.employer_share),
+                    abs(IFNULL(sum_employee_compensation_program_sss,0) - b.employee_compensation_program),
+                    abs(IFNULL(sum_monthly_sss,0) - b.total_monthly_premium),
 
-                    IF({$mode_philhealth} = {$payroll_period}, d.employee_share, abs(sum_employee_philhealth - d.employee_share)),
-                    IF({$mode_philhealth} = {$payroll_period}, d.employer_share, abs(sum_employer_philhealth - d.employer_share)),
-                    IF({$mode_philhealth} = {$payroll_period}, d.total_monthly_premium, abs(sum_monthly_philhealth - d.total_monthly_premium)),
+                    IF({$mode_philhealth} = {$payroll_period}, d.employee_share, abs(IFNULL(sum_employee_philhealth,0) - d.employee_share)),
+                    IF({$mode_philhealth} = {$payroll_period}, d.employer_share, abs(IFNULL(sum_employer_philhealth,0) - d.employer_share)),
+                    IF({$mode_philhealth} = {$payroll_period}, d.total_monthly_premium, abs(IFNULL(sum_monthly_philhealth,0) - d.total_monthly_premium)),
 
-                    IF({$mode_pagibig} = {$payroll_period}, c.employee_share, abs(sum_employee_pagibig - c.employee_share)),
-                    IF({$mode_pagibig} = {$payroll_period}, c.employer_share, abs(sum_employer_pagibig - c.employer_share)),
-                    IF({$mode_pagibig} = {$payroll_period}, c.total_monthly_premium, abs(sum_monthly_pagibig - c.total_monthly_premium)),
+                    IF({$mode_pagibig} = {$payroll_period}, c.employee_share, IF($mode_pagibig != 3, 0, abs(IFNULL(sum_employee_pagibig,0) - c.employee_share))),
+                    IF({$mode_pagibig} = {$payroll_period}, c.employer_share, IF($mode_pagibig != 3, 0, abs(IFNULL(sum_employer_pagibig,0) - c.employer_share))),
+                    IF({$mode_pagibig} = {$payroll_period}, c.total_monthly_premium, IF($mode_pagibig != 3, 0, abs(IFNULL(sum_monthly_pagibig,0) - c.total_monthly_premium))),
 
                     sum_other_deduction_amount, '{$now}', '{$now}'
                 FROM (
@@ -470,8 +470,9 @@ class Manning_payroll_deduction_m extends MY_Model
                 ) as other ON a.employee_id = other.employee_id AND b.is_actived AND c.is_actived AND d.is_actived
                 HAVING monthly_basic > 0
         ";
-        $this->db->query($sql, [$payroll_id, $payroll->payroll_month, $payroll->payroll_year, $payroll->payroll_month, $payroll->payroll_year, $payroll_date_end]);
+        $dd = $this->db->query($sql, [$payroll_id, $payroll->payroll_month, $payroll->payroll_year, $payroll->payroll_month, $payroll->payroll_year, $payroll_date_end]);
         // die(dump($this->db->last_query()));
+        // dd($dd->result());
         return $this->db->affected_rows();
     }
 

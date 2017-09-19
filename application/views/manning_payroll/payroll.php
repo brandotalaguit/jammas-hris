@@ -230,7 +230,6 @@
 						// dump($this->manning_payroll_deduction_m->deduction_field());
 						// $reg_deduction = $reliever_payroll ? [] : $this->manning_payroll_deduction_m->deduction_field();
 						$reg_deduction = $this->manning_payroll_deduction_m->deduction_field($reliever_payroll);
-
 					    $fields = 'hourly_rate,' . $fields;
 					    $fields = 'daily_rate,' . $fields;
 					    $fields = 'semi_monthly_rate,' . $fields;
@@ -258,7 +257,9 @@
 			                        echo "Monthly Rate: " . nf($row->semi_monthly_rate);
 			                        else
 			                        echo "Basic Rate: " . nf($row->daily_rate);
-			                    ?>
+
+			                    	echo "<p><small>Trans No.: {$row->manning_payroll_deduction_id}</small></p>" ;
+								 ?>
 							</td>
 							<td>
 								<table border="0" cellpadding="0" cellspacing="0" width="100%">

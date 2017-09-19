@@ -119,6 +119,20 @@
 
 				<?php foreach ($proj['project_data'] as $row): ?>
 	<!-- start result here -->
+				<?php
+                    	$tmp_1 = 'employer_share_' . $contribution;
+						$tmp_2 = 'employee_share_' . $contribution;
+						$tmp_3 = 'total_monthly_premium_' . $contribution;
+
+						$company_share += $row->$tmp_1;
+						$employee_share += $row->$tmp_2;
+						$total_share += $row->$tmp_3;
+						if ($contribution == 'sss')
+						$ecc_share += $row->employee_compensation_program_sss;
+
+						if ($row->$tmp_1 + $row->$tmp_2 ==  0)
+						continue;
+					?>
 				<tr>
 					<td>
 						<?php echo ++$ctr;?>.
@@ -144,13 +158,11 @@
 
 					<td class="text-right">
 	                    <?php
-	                    	$tmp_1 = 'employer_share_' . $contribution;
 	                    	echo nf($row->$tmp_1);
 	                    	?>
 					</td>
 					<td class="text-right">
 						<?php
-							$tmp_2 = 'employee_share_' . $contribution;
 							echo nf($row->$tmp_2);
 							?>
 					</td>
@@ -170,18 +182,10 @@
 
 					<td class="text-right">
 						<?php
-							$tmp_3 = 'total_monthly_premium_' . $contribution;
 							echo nf($row->$tmp_3);
 							?>
 					</td>
 				</tr>
-				<?php
-						$company_share += $row->$tmp_1;
-						$employee_share += $row->$tmp_2;
-						$total_share += $row->$tmp_3;
-						if ($contribution == 'sss')
-						$ecc_share += $row->employee_compensation_program_sss;
-					?>
 	<!-- end result here -->
 				<?php endforeach ?>
 		</tbody>
