@@ -287,10 +287,13 @@ class Manning_payroll_earning_m extends MY_Model
         $excess_affected = $this->db->affected_rows();
 
 
+        $join_proj_qry = "(SELECT with_13th_month, projects.project_id as proj_id
+                            FROM projects WHERE projects.project_id = {$payroll->project_id}) as D";
         // update payroll entries
         $sql = "UPDATE `manning_payroll_earning` as C
                     LEFT JOIN manning as A ON C.employee_id = A.manning_id
                     LEFT JOIN manning_payroll as B ON C.payroll_id = B.payroll_id
+                    LEFT JOIN $join_proj_qry ON proj_id = B.project_id
                 SET
                     r_allowance = if(allowance_mode_of_payment=1, round((allowance * no_hrs)/8,2),
                                     if(allowance_mode_of_payment=2, allowance,
@@ -320,9 +323,10 @@ class Manning_payroll_earning_m extends MY_Model
                     `r_absent_rate_per_day` = round(((daily_rate/8) * no_absences_per_day) * -1,2),
                     `r_absent_rate` = round(((daily_rate/8) * no_absences_per_hr) * -1,2),
                     `r_incentive` = 0,
-                    `r_13thmonth` = IF(rate = 2, round(semi_monthly_rate/12,2),
+                    `r_13thmonth` = IF(with_13th_month = 1, IF(rate = 2, round(semi_monthly_rate/12,2),
                                         IF(rate = 3, round((monthly_rate * 0.50)/12,2),
                                                 round(((daily_rate/8) * no_hrs)/12,2))),
+                                                0.00),
                     `C`.`updated_at` = ?
                 WHERE `C`.`payroll_id` =  ? AND C.is_actived = 1";
         $this->db->query($sql, [$now, $payroll_id]);
@@ -343,6 +347,9 @@ class Manning_payroll_earning_m extends MY_Model
         ! $employee_id || $param['employee_id'] = $employee_id;
 
         $payroll = $this->manning_payroll_m->get($payroll_id, TRUE);
+
+        $join_proj_qry = "(SELECT with_13th_month, projects.project_id as proj_id
+                            FROM projects WHERE projects.project_id = {$payroll->project_id}) as D";
 
         $count = parent::count($param);
 
@@ -373,6 +380,7 @@ class Manning_payroll_earning_m extends MY_Model
             $sql = "UPDATE `manning_payroll_earning` as C
                         LEFT JOIN manning as A ON C.employee_id = A.manning_id
                         LEFT JOIN manning_payroll as B ON C.payroll_id = B.payroll_id
+                        LEFT JOIN $join_proj_qry ON proj_id = B.project_id
                     SET
                         $set
                         r_allowance = if(allowance_mode_of_payment=1, round((allowance * no_hrs)/8,2),
@@ -403,9 +411,10 @@ class Manning_payroll_earning_m extends MY_Model
                         `r_absent_rate_per_day` = round(((daily_rate/8) * no_absences_per_day) * -1,2),
                         `r_absent_rate` = round(((daily_rate/8) * no_absences_per_hr) * -1,2),
                         `r_incentive` = 0,
-                        `r_13thmonth` = IF(rate = 2, round(semi_monthly_rate/12,2),
+                        `r_13thmonth` = IF(with_13th_month = 1, IF(rate = 2, round(semi_monthly_rate/12,2),
                                             IF(rate = 3, round((monthly_rate * 0.50)/12,2),
                                                     round(((daily_rate/8) * no_hrs)/12,2))),
+                                                    0.00),
                         `C`.`updated_at` = ?
                     WHERE `C`.`payroll_id` =  ? AND C.is_actived = 1";
 
@@ -440,22 +449,38 @@ class Manning_payroll_earning_m extends MY_Model
                                      'is_actived' => 1
                                     ])
                             ->where_in('employment_status_id', $status_ids)
+                            ->join($join_proj_qry, 'proj_id = project_id', 'left')
                             ->get('manning')
                             ->result();
+
             if (count($manning))
             {
                 foreach ($manning as $employee)
                 {
-                    $post[] = [
-                                    'payroll_id' => $payroll->payroll_id,
-                                    'employee_id' => $employee->manning_id,
-                                    'r_daily_rate' => $employee->daily_rate,
-                                    'r_semi_monthly_rate' => $employee->semi_monthly_rate,
-                                    'r_monthly_rate' => $employee->monthly_rate,
-                                    'r_allowance' => 0.00,
-                                    'created_at' => $now,
-                                    'updated_at' => $now,
-                              ];
+                    $arr = [
+                                'payroll_id' => $payroll->payroll_id,
+                                'employee_id' => $employee->manning_id,
+                                'r_daily_rate' => 0.00,
+                                'r_allowance' => 0.00,
+                                'created_at' => $now,
+                                'updated_at' => $now,
+                            ];
+
+                    if ($employee->rate == 2)
+                    {
+                        $arr['r_semi_monthly_rate'] = $employee->semi_monthly_rate;
+                        if ($employee->with_13th_month == 1)
+                        $arr['r_13thmonth'] = round($employee->semi_monthly_rate/12, 2);
+                    }
+
+                    if ($employee->rate == 3)
+                    {
+                        $arr['r_monthly_rate'] = $employee->monthly_rate;
+                        if ($employee->with_13th_month == 1)
+                        $arr['r_13thmonth'] = round(($employee->monthly_rate * 0.50)/12, 2);
+                    }
+
+                    $post[] = $arr;
                 }
                 $affected = $this->db->insert_batch('manning_payroll_earning', $post);
             }

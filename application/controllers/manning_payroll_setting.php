@@ -22,9 +22,10 @@ class Manning_payroll_setting extends Admin_Controller {
 	    {
 	        // post data
 	        $data = $this->manning_payroll_setting_m->array_from_post([
-                'mode_of_payment_pagibig', 
-                'mode_of_payment_philhealth', 
-                'mode_of_payment_sss', 
+                'mode_of_payment_pagibig',
+                'mode_of_payment_philhealth',
+                'mode_of_payment_sss',
+                'with_13th_month',
             ]);
 
 	        $now = date('Y-m-d H:i:s');
@@ -34,17 +35,18 @@ class Manning_payroll_setting extends Admin_Controller {
 
 	        $save_option = $_POST['save_option'];
 
-	        	
-        	$sql = "UPDATE projects 
-        				SET 
-        					mode_of_payment_pagibig = ?, 
+
+        	$sql = "UPDATE projects
+        				SET
+        					mode_of_payment_pagibig = ?,
         					mode_of_payment_philhealth = ?,
         					mode_of_payment_sss = ?,
+        					with_13th_month = ?,
         					created_at = ?,
         					updated_at = ?
         			WHERE is_actived";
 
-	        if ($save_option == 2) 
+	        if ($save_option == 2)
 	        {
 		        $where = implode(",", $_POST['projects']);
 	        	$sql .= " AND project_id IN ({$where})";
@@ -58,21 +60,21 @@ class Manning_payroll_setting extends Admin_Controller {
 
 	        unset($data['created_at']);
 	        unset($data['updated_at']);
-	        
+
 	        $this->manning_payroll_setting_m->save($data, 1);
 
 	        $msg = "<h4>Success.</h4><p>Payroll setting has been successfully applied to {$affected} project(s).</p>";
 
 	        $payroll_id = $this->uri->segment(4, 0);
-	        if ($payroll_id) 
+	        if ($payroll_id)
 	        {
 	        	$this->load->model('manning_payroll_m');
 	        	$payroll = $this->manning_payroll_m->get($payroll_id);
-	        	if ( ! empty($payroll)) 
+	        	if ( ! empty($payroll))
 	        	{
 	        		if ($save_option == 2)
 			        $msg = "<h4>Success.</h4><p>Payroll setting has been successfully applied to this project(s).</p>";
-	        		$payroll->IsFinal || parent::redirect_to($msg, 'manning_payroll/earning/' . $payroll_id, FALSE);
+	        		!$payroll->IsFinal || parent::redirect_to($msg, 'manning_payroll/earning/' . $payroll_id, FALSE);
 	        	}
 	        }
 
@@ -90,16 +92,16 @@ class Manning_payroll_setting extends Admin_Controller {
 	public function _check_projects($projects)
 	{
 		$save_option = intval($this->input->post('save_option', TRUE));
-		if ($save_option == 2) 
+		if ($save_option == 2)
 		{
-			if ( ! count($projects)) 
+			if ( ! count($projects))
 			{
 				$this->form_validation->set_message('_check_projects', "To apply changes please select at-least one project");
 				return FALSE;
 			}
 		}
 
-		if ($save_option == 0) 
+		if ($save_option == 0)
 		{
 			$this->form_validation->set_message('_check_projects', "Please select save option");
 			return FALSE;

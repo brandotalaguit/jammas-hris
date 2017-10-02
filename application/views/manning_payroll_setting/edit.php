@@ -88,6 +88,19 @@
 	    </div><!-- /.box-body -->
 
 	    <div class="box-body clearfix">
+	    			<div class="row">
+	    				<div class="col-md-12">
+	    					<div class="form-group">
+	    						<label>Benefits</label>
+	    						<div class="checkbox margin">
+	    							<label>
+	    								<input type="checkbox" value="1" name="with_13th_month" <?php $config->with_13th_month == '1' ? $check = TRUE : $check = FALSE; echo set_checkbox('with_13th_month', '1', $check);?>>
+	    								13th Month Benefit
+	    							</label>
+	    						</div>
+	    					</div>
+	    				</div>
+	    			</div>
 	    	        <div class="row">
 	    	        	<div class="col-md-4">
 	    	        		<div class="form-group">

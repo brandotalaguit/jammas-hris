@@ -3,7 +3,7 @@
 	<label>Project Payroll Setting </label>
 	<?= anchor('manning_payroll_setting/index/' . $project->project_id . '/' . $payroll->payroll_id, 'Change Setting', ['class' => 'btn btn-primary btn-xs pull-right']); ?>
 </p>
-	
+
 <div class="table-responsive">
 	<table class="table table-hover table-bordered">
 		<thead>
@@ -30,19 +30,19 @@
 			<!-- <tr>
 				<th>Allowance</th>
 				<td class="text-center">
-					<?php $project->mode_of_payment_allowance == '1' ? $check = TRUE : $check = FALSE;?> 
+					<?php $project->mode_of_payment_allowance == '1' ? $check = TRUE : $check = FALSE;?>
 					<?php if ($check): ?>
 						<i class="fa fa-check-square-o fa-2x"></i>
 					<?php endif ?>
 				</td>
 				<td class="text-center">
-					<?php $project->mode_of_payment_allowance == '2' ? $check = TRUE : $check = FALSE;?> 
+					<?php $project->mode_of_payment_allowance == '2' ? $check = TRUE : $check = FALSE;?>
 					<?php if ($check): ?>
 						<i class="fa fa-check-square-o fa-2x"></i>
 					<?php endif ?>
 				</td>
 				<td class="text-center">
-					<?php $project->mode_of_payment_allowance == '3' ? $check = TRUE : $check = FALSE;?> 
+					<?php $project->mode_of_payment_allowance == '3' ? $check = TRUE : $check = FALSE;?>
 					<?php if ($check): ?>
 						<i class="fa fa-check-square-o fa-2x"></i>
 					<?php endif ?>
@@ -51,19 +51,19 @@
 			<tr>
 				<th>PAGIBIG</th>
 				<td class="text-center">
-					<?php $project->mode_of_payment_pagibig == '1' ? $check = TRUE : $check = FALSE;?> 
+					<?php $project->mode_of_payment_pagibig == '1' ? $check = TRUE : $check = FALSE;?>
 					<?php if ($check): ?>
 						<i class="fa fa-check-square-o fa-2x"></i>
 					<?php endif ?>
 				</td>
 				<td class="text-center">
-					<?php $project->mode_of_payment_pagibig == '2' ? $check = TRUE : $check = FALSE;?> 
+					<?php $project->mode_of_payment_pagibig == '2' ? $check = TRUE : $check = FALSE;?>
 					<?php if ($check): ?>
 						<i class="fa fa-check-square-o fa-2x"></i>
 					<?php endif ?>
 				</td>
 				<td class="text-center">
-					<?php $project->mode_of_payment_pagibig == '3' ? $check = TRUE : $check = FALSE;?> 
+					<?php $project->mode_of_payment_pagibig == '3' ? $check = TRUE : $check = FALSE;?>
 					<?php if ($check): ?>
 						<i class="fa fa-check-square-o fa-2x"></i>
 					<?php endif ?>
@@ -72,19 +72,19 @@
 			<tr>
 				<th>PHILHEALTH</th>
 				<td class="text-center">
-					<?php $project->mode_of_payment_philhealth == '1' ? $check = TRUE : $check = FALSE;?> 
+					<?php $project->mode_of_payment_philhealth == '1' ? $check = TRUE : $check = FALSE;?>
 					<?php if ($check): ?>
 						<i class="fa fa-check-square-o fa-2x"></i>
 					<?php endif ?>
 				</td>
 				<td class="text-center">
-					<?php $project->mode_of_payment_philhealth == '2' ? $check = TRUE : $check = FALSE;?> 
+					<?php $project->mode_of_payment_philhealth == '2' ? $check = TRUE : $check = FALSE;?>
 					<?php if ($check): ?>
 						<i class="fa fa-check-square-o fa-2x"></i>
 					<?php endif ?>
 				</td>
 				<td class="text-center">
-					<?php $project->mode_of_payment_philhealth == '3' ? $check = TRUE : $check = FALSE;?> 
+					<?php $project->mode_of_payment_philhealth == '3' ? $check = TRUE : $check = FALSE;?>
 					<?php if ($check): ?>
 						<i class="fa fa-check-square-o fa-2x"></i>
 					<?php endif ?>
@@ -93,19 +93,19 @@
 			<tr>
 				<th>SSS</th>
 				<td class="text-center">
-					<?php $project->mode_of_payment_sss == '1' ? $check = TRUE : $check = FALSE;?> 
+					<?php $project->mode_of_payment_sss == '1' ? $check = TRUE : $check = FALSE;?>
 					<?php if ($check): ?>
 						<i class="fa fa-check-square-o fa-2x"></i>
 					<?php endif ?>
 				</td>
 				<td class="text-center">
-					<?php $project->mode_of_payment_sss == '2' ? $check = TRUE : $check = FALSE;?> 
+					<?php $project->mode_of_payment_sss == '2' ? $check = TRUE : $check = FALSE;?>
 					<?php if ($check): ?>
 						<i class="fa fa-check-square-o fa-2x"></i>
 					<?php endif ?>
 				</td>
 				<td class="text-center">
-					<?php $project->mode_of_payment_sss == '3' ? $check = TRUE : $check = FALSE;?> 
+					<?php $project->mode_of_payment_sss == '3' ? $check = TRUE : $check = FALSE;?>
 					<?php if ($check): ?>
 						<i class="fa fa-check-square-o fa-2x"></i>
 					<?php endif ?>
@@ -113,4 +113,20 @@
 			</tr>
 		</tbody>
 	</table>
+
+				<?php $project->with_13th_month == '1' ? $check = TRUE : $check = FALSE;?>
+				<?php if ($check): ?>
+	<p>
+		<label>Benefits</label>
+		<div class="checkbox margin">
+			<label>
+				<h4>
+					<i class="fa fa-check-square-o fa-2x"></i>
+					13th Month Benefits
+				</h4>
+			</label>
+		</div>
+	</p>
+				<?php endif ?>
+
 </div>

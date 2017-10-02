@@ -12,6 +12,7 @@ class Manning_payroll_setting_m extends MY_Model {
 	    'mode_of_payment_pagibig' => ['field' => 'mode_of_payment_pagibig', 'label' => 'PAGIBIG mode of payment', 'rules' => 'intval|is_natural_no_zero|required|xss_clean'],
 	    'mode_of_payment_philhealth' => ['field' => 'mode_of_payment_philhealth', 'label' => 'PHILHEALTH mode of payment', 'rules' => 'intval|is_natural_no_zero|required|xss_clean'],
 	    'mode_of_payment_sss' => ['field' => 'mode_of_payment_sss', 'label' => 'SSS mode of payment', 'rules' => 'intval|is_natural_no_zero|required|xss_clean'],
+	    'with_13th_month' => ['field' => 'with_13th_month', 'label' => '13th Month', 'rules' => 'intval|xss_clean'],
 	    'save_option' => ['field' => 'save_option', 'label' => 'Save option', 'rules' => 'intval|is_natural_no_zero|required|xss_clean'],
 	    'projects[]' => ['field' => 'projects', 'label' => 'Project', 'rules' => 'xss_clean|callback__check_projects'],
 	);
@@ -19,7 +20,7 @@ class Manning_payroll_setting_m extends MY_Model {
 	public function __construct()
 	{
 		parent::__construct();
-		
+
 	}
 
 	public function get_new()
@@ -30,6 +31,7 @@ class Manning_payroll_setting_m extends MY_Model {
 		$payroll->mode_of_payment_pagibig = 0;
 		$payroll->mode_of_payment_philhealth = 0;
 		$payroll->mode_of_payment_sss = 0;
+		$payroll->with_13th_month = 0;
 		$payroll->save_option = 0;
 		$payroll->projects = array();
 

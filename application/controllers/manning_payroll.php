@@ -725,6 +725,7 @@ class Manning_payroll extends Admin_Controller
 
         $this->data['reliever_payroll'] = FALSE;
         $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id);
+
         $this->data['payroll_info'] = $payroll_info;
         $this->data['page_title'] = 'P A Y R O L L &nbsp; R E G I S T E R';
 

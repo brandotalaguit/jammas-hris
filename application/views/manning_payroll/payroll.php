@@ -6,7 +6,6 @@
 	$GLOBALS['earning'] = $GLOBALS['deduction'] = array();
 
 	$GLOBALS['reliever_payroll'] = $reliever_payroll;
-
     function get_earnings($payroll, $fields, $totalOnly = FALSE)
     {
     	$billing_rates = $GLOBALS['billing_rates'];
@@ -22,26 +21,27 @@
         	{
         		if ($totalOnly == FALSE)
         		{
+        			$payroll_data = get_key($payroll, $rate_data['payroll'], 0);
 
 		           	if (empty($GLOBALS['earning'][$wage_name]))
 		           	{
 		           		$GLOBALS['earning'][$wage_name] = array(
 	           												'description' => $rate_data['abbr'],
 	           												'amount' => $payroll->$rate_data['payroll'],
-	           												'multiplier' => $payroll->$rate_data['payroll'] == 0 ? '' : $payroll->$rate_data['multiplier'],
+	           												'multiplier' => $payroll_data ? get_key($payroll, $rate_data['multiplier'], '') : '',
 	           											);
 		           	}
 		           	else
 		           	{
 		           		$GLOBALS['earning'][$wage_name]['amount'] += $payroll->$rate_data['payroll'];
-		           		$GLOBALS['earning'][$wage_name]['multiplier'] += $payroll->$rate_data['payroll'] == 0 ? '' : $payroll->$rate_data['multiplier'];
+		           		$GLOBALS['earning'][$wage_name]['multiplier'] += $payroll_data ? get_key($payroll, $rate_data['multiplier'], '') : '';
 		           	}
 
 		            $data[] = array(
 		                        'name' => $wage_name,
 		                        'description' => $rate_data['abbr'],
 		                        'amount' => $payroll->$rate_data['payroll'],
-								'multiplier' => $payroll->$rate_data['payroll'] == 0 ? '' : $payroll->$rate_data['multiplier'],
+								'multiplier' => $payroll_data ? get_key($payroll, $rate_data['multiplier'], '') : '',
 		                      );
 
         		}
@@ -258,7 +258,8 @@
 			                        else
 			                        echo "Basic Rate: " . nf($row->daily_rate);
 
-			                    	echo "<p><small>Trans No.: {$row->manning_payroll_deduction_id}</small></p>" ;
+			                    	echo "<p><small>Trans No.: {$row->manning_payroll_deduction_id}</small>" ;
+			                    	echo "<br><small>MID: {$row->employee_id}</small></p>" ;
 								 ?>
 							</td>
 							<td>
@@ -283,11 +284,28 @@
 									<?php $deduct = explode('#', $deduction); ?>
 									<?php if (count($deduct)): ?>
 									<tr>
-										<td width="50%"><?php echo $deduct[0] ?></td>
+										<td width="50%"><?php $deduct_name = $deduct[0]; echo $deduct_name ?></td>
 										<td class="text-right" width="15%">&nbsp;<?php #echo $earning['multiplier'] ?></td>
-										<td class="text-right" width="35%"><?php echo nf($deduct[1]) ?></td>
+										<td class="text-right" width="35%"><?php $deduct_amount = $deduct[1]; echo nf($deduct_amount) ?></td>
 									</tr>
 									<?php $deduction_subtotal += $deduct[1]; ?>
+
+									<!-- store other deduction -->
+									<?php
+										if ( isset($GLOBALS['deduction'][$deduct_name]))
+										{
+											$GLOBALS['deduction'][$deduct_name]['amount'] += $deduct_amount;
+										}
+										else
+										{
+											$GLOBALS['deduction'][$deduct_name] = array(
+																			'description' => $deduct_name,
+																			'amount' => $deduct_amount,
+																			'multiplier' => 0
+																		);
+										}
+									 ?>
+									<!-- end other deduction -->
 									<?php endif ?>
 								<?php endforeach ?>
 								<?php endif ?>
@@ -371,11 +389,13 @@
 								?>
 								<table border="0" cellpadding="0" cellspacing="0" width="100%">
 								<?php foreach ($earnings as $earning): ?>
+									<?php if ($earning['amount'] > 0): ?>
 									<tr>
 										<td width="50%"><?php echo $earning['description'] ?></td>
 										<td class="text-right" width="15%"><?php if ($earning['multiplier'] > 0) echo nf($earning['multiplier']) ?></td>
 										<td class="text-right" width="35%"><?php echo nf($earning['amount']) ?></td>
 									</tr>
+									<?php endif ?>
 								<?php endforeach ?>
 								</table>
 							</td>
@@ -388,6 +408,7 @@
 										<td class="text-right" width="35%"><?php echo nf($deduction['amount']) ?></td>
 									</tr>
 								<?php endforeach ?>
+
 								</table>
 							</td>
 							<td>

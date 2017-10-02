@@ -492,3 +492,14 @@ function on_fail($expression, $output)
     if (! $expression)
     return $output;
 }
+
+function is_greater_than($expression, $value)
+{
+    if (isset($expression))
+    {
+        dump($expression);
+        if ( (float) $expression > $value)
+            return TRUE;
+    }
+    return FALSE;
+}

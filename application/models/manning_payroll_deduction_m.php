@@ -359,6 +359,7 @@ class Manning_payroll_deduction_m extends MY_Model
         $now = date('Y-m-d H:i:s');
         $deduction_field = ['late_amount', 'absent_rate', 'absent_rate_per_day'];
         $payroll_period = substr($payroll->payroll_period, 0, 1);
+        $payroll_date_start = $payroll->date_start;
         $payroll_date_end = $payroll->date_end;
 
         $project = $this->projects->get($payroll->project_id);
@@ -470,7 +471,7 @@ class Manning_payroll_deduction_m extends MY_Model
                 ) as other ON a.employee_id = other.employee_id AND b.is_actived AND c.is_actived AND d.is_actived
                 HAVING monthly_basic > 0
         ";
-        $dd = $this->db->query($sql, [$payroll_id, $payroll->payroll_month, $payroll->payroll_year, $payroll->payroll_month, $payroll->payroll_year, $payroll_date_end]);
+        $dd = $this->db->query($sql, [$payroll_id, $payroll->payroll_month, $payroll->payroll_year, $payroll->payroll_month, $payroll->payroll_year, $payroll_date_start]);
         // die(dump($this->db->last_query()));
         // dd($dd->result());
         return $this->db->affected_rows();
