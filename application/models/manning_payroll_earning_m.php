@@ -11,7 +11,7 @@ class Manning_payroll_earning_m extends MY_Model
     protected $order_by = "manning_payroll_earning_id DESC, manning_payroll_earning.payroll_id ASC";
 
 
-    protected $earning_employment_status_ids = [REGULAR, PROBITIONAL, CO_TERMINOUS, PROJECT_BASED, RELIEVER];
+    protected $earning_employment_status_ids = [REGULAR, PROBITIONAL, CO_TERMINOUS, PROJECT_BASED, RELIEVER, EXTRA_RELIEVER];
     protected $payroll_employment_status_ids = [REGULAR, PROBITIONAL, CO_TERMINOUS, PROJECT_BASED];
 
     public $reliever_payroll = FALSE;
@@ -190,7 +190,7 @@ class Manning_payroll_earning_m extends MY_Model
         $this->db->group_by($group_by);
 
         if ($this->reliever_payroll == TRUE)
-            $this->db->where('E.employment_status_id', RELIEVER);
+            $this->db->where_in('E.employment_status_id', [RELIEVER, EXTRA_RELIEVER]);
         else
             $this->db->where_in('E.employment_status_id', $this->payroll_employment_status_ids);
 
@@ -218,7 +218,8 @@ class Manning_payroll_earning_m extends MY_Model
     {
         $this->load->model('manning_payroll_m');
 
-        $this->db->where('employment_status_id', RELIEVER);
+        // $this->db->where('employment_status_id', RELIEVER);
+        $this->db->where_in('employment_status_id', [RELIEVER, EXTRA_RELIEVER]);
         $this->db->where("(r_hourly_rate > 0 || r_daily_rate > 0 || r_semi_monthly_rate > 0 || r_monthly_rate > 0)", NULL, FALSE);
         $result = self::get_manning_payroll_earning($payroll_id);
 
@@ -235,11 +236,15 @@ class Manning_payroll_earning_m extends MY_Model
         $this->load->model('manning_payroll_m');
 
         $payroll = $this->manning_payroll_m->get($payroll_id);
-        // if ($payroll->IsFinal == 1)
-        // {
-        //     $this->session->set_flashdata('message', '<strong>Access Denied.</strong> <p class="lead">This payroll is already finalized.</p>');
-        //     return redirect("manning_payroll");
-        // }
+
+        if ($payroll->IsFinal == 1)
+        {
+            // $this->session->set_flashdata('message', '<strong>Access Denied.</strong> <p class="lead">This payroll is already finalized.</p>');
+            // return redirect("manning_payroll");
+
+            // remove all deduction to recompute previous payroll deduction and force user to finalize again this payroll
+            self::remove_payroll_deductions($payroll_id);
+        }
 
         $project_id = $payroll->project_id;
         // regular, project-based, probitionary & co-terminous, reliever status
@@ -336,6 +341,19 @@ class Manning_payroll_earning_m extends MY_Model
 
         $this->session->set_flashdata('message', '<strong>Success.</strong> <p class="lead">This payroll entries has been successfully updated.</p>');
         return redirect("manning_payroll/earning/{$payroll_id}");
+    }
+
+    public function remove_payroll_deductions($payroll_id)
+    {
+        $this->load->model([
+                            'manning_payroll_deduction_detail_m',
+                            'manning_payroll_deduction_m',
+                            'manning_payroll_m'
+                           ]);
+
+        $this->manning_payroll_deduction_detail_m->delete_by(['PayrollId' => $payroll_id]);
+        $this->manning_payroll_deduction_m->delete_by(['payroll_id' => $payroll_id]);
+        $this->manning_payroll_m->save(['IsFinal' => 0], $payroll_id);
     }
 
     public function save_earning($payroll_id, $employee_id = NULL, $post = NULL, $manning_payroll_earning_id = NULL)

@@ -46,6 +46,7 @@ define('RELIEVER', 35);
 define('PROBITIONAL', 3);
 define('CO_TERMINOUS', 5);
 define('PROJECT_BASED', 2);
+define('EXTRA_RELIEVER', 39);
 
 
 /* End of file constants.php */

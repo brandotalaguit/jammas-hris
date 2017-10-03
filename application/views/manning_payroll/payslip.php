@@ -397,11 +397,29 @@
 													<?php $deduct = explode('#', $deduction); ?>
 													<?php if (count($deduct)): ?>
 													<tr>
-														<td width="50%"><?php echo $deduct[0] ?></td>
+														<td width="50%"><?php $deduct_name = $deduct[0]; echo $deduct_name ?></td>
 														<td class="text-right" width="15%">&nbsp;<?php #echo $earning['multiplier'] ?></td>
-														<td class="text-right" width="35%"><?php echo nf($deduct[1]) ?></td>
+														<td class="text-right" width="35%"><?php $deduct_amount = $deduct[1]; echo nf($deduct_amount) ?></td>
 													</tr>
 													<?php #$deduction_subtotal += $deduct[1]; ?>
+
+													<!-- store other deduction -->
+													<?php
+														if ( isset($GLOBALS['deduction'][$deduct_name]))
+														{
+															$GLOBALS['deduction'][$deduct_name]['amount'] += $deduct_amount;
+														}
+														else
+														{
+															$GLOBALS['deduction'][$deduct_name] = array(
+																							'description' => $deduct_name,
+																							'amount' => $deduct_amount,
+																							'multiplier' => 0
+																						);
+														}
+													 ?>
+													<!-- end other deduction -->
+
 													<?php endif ?>
 												<?php endforeach ?>
 												<?php endif ?>

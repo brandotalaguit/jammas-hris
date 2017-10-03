@@ -146,14 +146,20 @@
                                     echo 'Adj.';
                                 elseif ($billing->employment_status_id == RELIEVER)
                                     echo 'R';
+                                elseif ($billing->employment_status_id == EXTRA_RELIEVER)
+                                    echo 'XR';
                                 else
                                     echo ++$counter;
                             ?>
                         </td>
-                        <td <?php if ($billing->employment_status_id == RELIEVER) echo "class='bg-orange' " ?>>
+                        <td
+                            <?php if ($billing->employment_status_id == RELIEVER) echo "class='bg-orange' "; ?>
+                            <?php if ($billing->employment_status_id == EXTRA_RELIEVER) echo "class='bg-red' "; ?>
+                            >
                             <?php
                                     echo $billing->lastname . ', ' . $billing->firstname . ' ' . $billing->middlename;
                                     if ($billing->employment_status_id == RELIEVER) echo " <p class = 'label label-danger'>RELIEVER</p>";
+                                    if ($billing->employment_status_id == EXTRA_RELIEVER) echo " <p class = 'label label-danger'>EXTRA-RELIEVER</p>";
                                 ?>
 
                         </td>

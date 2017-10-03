@@ -747,11 +747,12 @@ class Manning_payroll extends Admin_Controller
         $this->manning_payroll_m->save(['date_printed' => $now, 'IsPayrollPrinted' => 1], $payroll_id);
 
         $this->load->model('manning_payroll_deduction_m');
-        // $affected = $this->manning_payroll_deduction_m->generate_deduction($payroll_id);
+        $affected = $this->manning_payroll_deduction_m->generate_deduction($payroll_id);
+
         $this->data['reliever_payroll'] = $this->manning_payroll_earning_m->reliever_payroll = TRUE;
         $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id);
         $this->data['payroll_info'] = $payroll_info;
-        $this->data['page_title'] = 'P A Y R O L L &nbsp; R E G I S T E R';
+        $this->data['page_title'] = 'P A Y R O L L &nbsp; R E G I S T E R - R E L I E V E R';
 
         return parent::load_view('manning_payroll/payroll');
 
