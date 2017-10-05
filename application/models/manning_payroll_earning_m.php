@@ -106,7 +106,7 @@ class Manning_payroll_earning_m extends MY_Model
         return $data;
     }
 
-    public function get_payroll($payroll_id, $single = FALSE)
+    public function get_payroll($payroll_id, $manning_id = NULL, $single = FALSE)
     {
         $this->load->model(['manning_payroll_m', 'projects']);
         // $this->output->enable_profiler(TRUE);
@@ -197,6 +197,9 @@ class Manning_payroll_earning_m extends MY_Model
         // ONLY INCLUDE actived deduction
         $this->db->where('G.is_actived', 1);
         $this->db->having('earning >', 0);
+
+        if ($manning_id !== NULL)
+        $this->db->where('E.manning_id', $manning_id);
 
         if (in_array('lastname', $select))
         $this->db->order_by('lastname, firstname, middlename');

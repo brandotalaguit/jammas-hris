@@ -174,17 +174,19 @@
 
     }
 
-	function display_button()
+	$GLOBALS['pid'] = $this->uri->segment(3);
+	$GLOBALS['method'] = $this->uri->segment(2);
+	function display_button($manning_id)
 	{
+		$pid = $GLOBALS['pid'];
+		$method = $GLOBALS['method'];
 		return '<div class="row no-print margin">
 				<p>
 					<span class="pull-right">
 						<button class="btn btn-default btn-md" onclick="window.print()">
-							<span class="fa fa-print" aria-hidden="true"></span> Print
+							<span class="fa fa-print" aria-hidden="true"></span> Print All
 						</button>
-						<button class="btn btn-primary btn-md">
-							<span class="fa fa-download" aria-hidden="true"></span> Generate PDF
-						</button>
+						<a href="' . base_url('manning_payroll/'.$method.'/' . $pid . '/' . $manning_id) . '" target="_blank" class="btn btn-primary btn-md">Print this payslip</a>
 					</span>
 				</p>
 			</div>';
@@ -246,10 +248,9 @@
 <div class="row">
 	<div class="col-xs-12">
 
-
 <div class="box matrix content invoice">
 
-	<?php echo display_button(); ?>
+	<?php echo display_button($row->employee_id); ?>
 	<!-- <div class="row"> -->
 		<!-- <div class="col-xs-3"> -->
 	<table class="table-responsive" border="0" cellspacing="0" cellpadding="0" style="width: 100%">
@@ -484,7 +485,7 @@
 						</tbody>
 				    </table>
 
-					<?php echo display_button(); ?>
+					<?php echo display_button($row->employee_id); ?>
 			</td>
 		</tr>
 	</table>
@@ -505,7 +506,7 @@
 
 <?php endforeach ?>
 
-<div class="row">
+<div class="row hidden-print">
 	<div class="col-xs-12 table-responsive">
 	<table class="table table-bordered table-condensed" cellpadding="0" cellspacing="0" border="0">
 		<thead>

@@ -1168,7 +1168,7 @@ class Manning_payroll extends Admin_Controller
         $this->load_view('manning_payroll/sss_contribution2');
     }
 
-    public function print_payslip($payroll_id)
+    public function print_payslip($payroll_id, $manning_id = NULL)
     {
         $this->load->model('manning_payroll_deduction_m');
 
@@ -1177,8 +1177,10 @@ class Manning_payroll extends Admin_Controller
 
         $this->data['reliever_payroll'] = $this->manning_payroll_earning_m->reliever_payroll = FALSE;
 
+        if ($manning_id !== NULL)
         $affected = $this->manning_payroll_deduction_m->generate_deduction($payroll_id);
-        $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id);
+
+        $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id, $manning_id);
         $this->db->select('manning_payroll.*, b.title, tin, po, business_style');
         $this->db->join('projects b', 'b.project_id = manning_payroll.project_id', 'left');
         $this->data['payroll_info'] = $this->manning_payroll_m->get($payroll_id);
@@ -1187,7 +1189,7 @@ class Manning_payroll extends Admin_Controller
         return parent::load_view('manning_payroll/payslip');
     }
 
-    public function print_reliever_payslip($payroll_id)
+    public function print_reliever_payslip($payroll_id, $manning_id = NULL)
     {
         $this->load->model('manning_payroll_deduction_m');
 
@@ -1196,13 +1198,16 @@ class Manning_payroll extends Admin_Controller
 
         $this->data['reliever_payroll'] = $this->manning_payroll_earning_m->reliever_payroll = TRUE;
 
+        if ($manning_id !== NULL)
         $affected = $this->manning_payroll_deduction_m->generate_deduction($payroll_id);
-        $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id);
+
+        $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id, $manning_id);
+
         $this->db->select('manning_payroll.*, b.title, tin, po, business_style');
         $this->db->join('projects b', 'b.project_id = manning_payroll.project_id', 'left');
         $this->data['payroll_info'] = $this->manning_payroll_m->get($payroll_id);
 
-        $this->data['page_title'] = 'PAYSLIP';
+        $this->data['page_title'] = 'RELIEVER PAYSLIP';
         return parent::load_view('manning_payroll/payslip');
     }
 
