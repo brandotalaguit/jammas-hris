@@ -55,7 +55,7 @@
                                         'data-backdrop' => 'static',
                                         'data-keyboard' => 'false',
                                     ]);
-                        echo anchor("manning_payroll/update_payroll_data/{$row->payroll_id}", '<i class="fa fa-refresh"></i> &nbsp;', ['class' => 'btn bg-olive', 'title' => 'Update Payroll Data']);
+                        echo anchor("manning_payroll/update_payroll_data/{$row->payroll_id}", '<i class="fa fa-refresh"></i> &nbsp;', ['class' => 'btn bg-olive', 'title' => 'Update Payroll Data', 'onclick' => "return confirm('You are about to REFRESH this record. This is cannot be undone. Are you sure?');"]);
                         echo anchor('manning_payroll/earning/' . $row->payroll_id, '<i class="fa fa-th"></i> Earning', ['class' => 'btn btn-primary', 'title' => 'Edit Earning']);
                      ?>
                     <?php if ($row->IsFinal == 1): ?>
