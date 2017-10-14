@@ -790,6 +790,83 @@ class Manning_payroll extends Admin_Controller
         return $this->load->view('manning_payroll/contribution', $data);
     }
 
+    public function reliever($payroll_id, $project_id)
+    {
+        $this->load->model(array('manning'));
+
+        $not_exists_in = "NOT manning_id IN(SELECT employee_id FROM manning_payroll_earning WHERE is_actived AND payroll_id = {$payroll_id})";
+        $field = 'manning_id as id, CONCAT(upper(lastname), ", ", upper(firstname), " ", upper(middlename)) as text';
+        $orderby = 'lastname, firstname, middlename';
+
+        $this->db->select($field, FALSE)->where($not_exists_in, NULL, FALSE)->order_by($orderby);
+        $data['reliever'] = $this->manning->get_by(['employment_status_id' => RELIEVER]);
+
+        $this->db->select($field, FALSE)->where($not_exists_in, NULL, FALSE)->order_by($orderby);
+        $data['extra_reliever'] = $this->manning->get_by(['employment_status_id' => EXTRA_RELIEVER]);
+
+        $data['form_class'] = ['class' => 'form-control deci'];
+        $data['hidden'] = ['mr_rate' => 1, 'mr_payroll_id' => $payroll_id];
+
+        return $this->load->view('manning_payroll/reliever', $data);
+    }
+
+    public function add_reliever()
+    {
+        // dump($this->input->post());
+        $now = date('Y-m-d H:i:s');
+        $rate = $this->input->post('mr_rate');
+        $e_cola = $this->input->post('mr_e_cola');
+        $payroll_id = $this->input->post('mr_payroll_id');
+        $daily_rate = $this->input->post('mr_daily_rate');
+
+        foreach ($this->input->post('mr_manning_id') as $key => $id)
+        {
+            $post1[] = [
+                        'mr_manning_id' => $id,
+                        'mr_rate' => $rate,
+                        'mr_e_cola' => $e_cola,
+                        'mr_payroll_id' => $payroll_id,
+                        'mr_daily_rate' => $daily_rate,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                       ];
+            $post2[] = [
+                        'payroll_id' => $payroll_id,
+                        'employee_id' => $id,
+                        'r_daily_rate' => $daily_rate,
+                        'r_allowance' => 0.00,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                       ];
+        }
+
+        // dd($post1);
+        if (count($post1))
+        {
+            $this->db->insert_batch('manning_reliever', $post1);
+            $this->db->insert_batch('manning_payroll_earning', $post2);
+        }
+
+        $this->session->set_flashdata('success', '<h3>Success</h3>Employee(s) has been successfully added to this payroll');
+
+        redirect('manning_payroll/earning/' . $payroll_id ,'refresh');
+    }
+
+    public function delete_reliever($manning_reliever_id, $payroll_id, $manning_payroll_earning_id)
+    {
+        $this->load->model('manning_reliever');
+
+        $query = $this->manning_reliever->get_by(['manning_reliever_id' => $manning_reliever_id, 'mr_payroll_id' => $payroll_id]);
+        if (count($query))
+        {
+            $this->manning_reliever->delete($manning_reliever_id);
+            $this->manning_payroll_earning_m->delete($manning_payroll_earning_id);
+            return redirect('manning_payroll/earning/' . $payroll_id, 'refresh');
+        }
+
+        return FALSE;
+    }
+
     public function pagibig_contribution()
     {
         // $this->output->enable_profiler(TRUE);
@@ -1045,6 +1122,8 @@ class Manning_payroll extends Admin_Controller
         else
         $this->load_view('manning_payroll/government_dues');
     }
+
+
 
     public function philhealth_contribution_project()
     {

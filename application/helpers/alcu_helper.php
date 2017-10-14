@@ -26,15 +26,25 @@ function btn_edit($uri, $title = NULL)
 	));
 }
 
-function btn_delete($uri, $title = '')
+function btn_delete($uri, $title = '', $small = FALSE, $btn_default = FALSE)
 {
+    $class = 'btn ';
+
+    if ($small)
+    $class .= 'btn-xs ';
+
+    if ($btn_default)
+    $class .= 'btn-default ';
+    else
+    $class .= 'btn-danger ';
+
     return anchor($uri, '<i class="fa fa-trash-o"></i>' . $title, array(
         'onclick'=>"return confirm('You are about to delete a record. This is cannot be undone. Are you sure?');",
-        'class'=> 'btn btn-danger'
+        'class'=> $class
     ));
 }
 
-function delete_link($uri, $title = NULL)
+function delete_link($uri, $title = NULL, $small = FALSE)
 {
 	return anchor($uri, '<i class="glyphicon glyphicon-trash"></i> ' . $title, array(
 		'onclick'=>"return confirm('You are about to delete a record. This is cannot be undone. Are you sure?');",

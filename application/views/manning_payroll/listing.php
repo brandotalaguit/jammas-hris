@@ -23,6 +23,9 @@
     </div>
 </div>
 
+<div class="modal fade" id="add-reliever-modal">
+</div>
+
 <div class="box box-primary">
     <div class="box-header">
         <div class="row">
@@ -31,6 +34,15 @@
                 <h3 class="box-title">
                 <?php echo anchor('manning_payroll', '<strong><i class="fa fa-home"></i> Payroll</strong>', ['class' => 'btn btn-default'])?>
                 <a class="btn btn-info" data-toggle="modal" href='#modal-id'>Project Information</a>
+                <?= anchor('manning_payroll/reliever/' . $this->uri->segment(3) . '/' . $project->project_id
+                                                            , '<i class="fa fa-plus-circle"></i> Reliever'
+                                                            , [
+                                                                'data-toggle'   => 'modal',
+                                                                'data-target'   => '#add-reliever-modal',
+                                                                'data-backdrop' => 'static',
+                                                                'data-keyboard' => 'false',
+                                                                'class'         => 'btn btn-primary',
+                                                            ]); ?>
 
                 <?php echo form_submit([
                                             'name' => 'btn_action',
@@ -158,8 +170,17 @@
                             >
                             <?php
                                     echo $billing->lastname . ', ' . $billing->firstname . ' ' . $billing->middlename;
-                                    if ($billing->employment_status_id == RELIEVER) echo " <p class = 'label label-danger'>RELIEVER</p>";
-                                    if ($billing->employment_status_id == EXTRA_RELIEVER) echo " <p class = 'label label-danger'>EXTRA-RELIEVER</p>";
+
+                                    if ($billing->employment_status_id == RELIEVER)
+                                    echo " <p class = 'label label-danger'>RELIEVER</p>";
+
+                                    if ($billing->employment_status_id == EXTRA_RELIEVER)
+                                    echo " <p class = 'label label-danger'>EXTRA-RELIEVER</p>";
+
+                                    if ( ! empty($billing->manning_reliever_id))
+                                    {
+                                        echo ' | ' . btn_delete('manning_payroll/delete_reliever/' . $billing->manning_reliever_id . '/' . $this->uri->segment(3) . '/' . $billing->manning_payroll_earning_id , ' Delete', TRUE, TRUE);
+                                    }
                                 ?>
 
                         </td>

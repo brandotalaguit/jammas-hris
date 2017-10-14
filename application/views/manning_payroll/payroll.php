@@ -256,7 +256,12 @@
 			                        elseif ($row->monthly_rate > 0)
 			                        echo "Monthly Rate: " . nf($row->semi_monthly_rate);
 			                        else
-			                        echo "Basic Rate: " . nf($row->daily_rate);
+			                        {
+			                        	if ( ! empty($row->manning_reliever_id))
+				                        echo "Basic Rate: " . nf($row->mr_daily_rate);
+		                        		else
+				                        echo "Basic Rate: " . nf($row->daily_rate);
+			                        }
 
 			                    	echo "<p><small>Trans No.: {$row->manning_payroll_deduction_id}</small>" ;
 			                    	echo "<br><small>MID: {$row->employee_id}</small></p>" ;

@@ -155,7 +155,11 @@ class Manning_payroll_earning_m extends MY_Model
         }
         else
         {
-            $select = array_merge($select_earning, $select);
+            $select = array_merge($select_earning, $select, [
+                                                                'mr_daily_rate',
+                                                                'mr_e_cola',
+                                                                'manning_reliever_id',
+                                                            ]);
         }
 
         $sum_income .=  "+ `r_cola` + `r_allowance` + `r_adjustment`";
@@ -178,7 +182,6 @@ class Manning_payroll_earning_m extends MY_Model
         $select[] = $select_tardiness;
         $select[] = $sum_basic;
         $select[] = 'H.deductions';
-
         $this->db->select($select);
 
         $this->db->join('manning_payroll as A', 'A.payroll_id = manning_payroll_earning.payroll_id', 'left');
@@ -186,6 +189,7 @@ class Manning_payroll_earning_m extends MY_Model
         $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
         $this->db->join('manning_payroll_deduction as G', 'manningPayrollEarningId = manning_payroll_earning_id', 'left');
         $this->db->join($deduction_sql . ' as H', 'H.employee_id = E.manning_id', 'left');
+        $this->db->join('manning_reliever as I', 'mr_manning_id = E.manning_id AND mr_payroll_id = A.payroll_id AND I.is_actived', 'left');
 
         $this->db->group_by($group_by);
 
@@ -209,10 +213,11 @@ class Manning_payroll_earning_m extends MY_Model
 
     public function get_manning_payroll_earning($payroll_id = NULL, $manning_payroll_earning_id = NULL, $single = FALSE)
     {
-        $this->db->select('manning_payroll_earning.*, lastname, firstname, middlename, position_code, position, rate, daily_rate, semi_monthly_rate, monthly_rate, employment_status_id');
+        $this->db->select('manning_payroll_earning.*, lastname, firstname, middlename, position_code, position, rate, daily_rate, semi_monthly_rate, monthly_rate, employment_status_id, mr_daily_rate, mr_e_cola, manning_reliever_id');
         $this->db->join('manning_payroll as A', 'A.payroll_id = manning_payroll_earning.payroll_id', 'left');
         $this->db->join('manning as E', 'E.manning_id = manning_payroll_earning.employee_id', 'left');
         $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
+        $this->db->join('manning_reliever as G', 'mr_manning_id = E.manning_id AND mr_payroll_id = A.payroll_id AND G.is_actived', 'left');
 
         return $manning_payroll_earning_id !== NULL ? parent::get($manning_payroll_earning_id, $single) : parent::get_by(['manning_payroll_earning.payroll_id' => $payroll_id]);
     }
@@ -297,7 +302,8 @@ class Manning_payroll_earning_m extends MY_Model
 
         $join_proj_qry = "(SELECT with_13th_month, projects.project_id as proj_id
                             FROM projects WHERE projects.project_id = {$payroll->project_id}) as D";
-        // update payroll entries
+
+        // update payroll entries for regular project employee
         $sql = "UPDATE `manning_payroll_earning` as C
                     LEFT JOIN manning as A ON C.employee_id = A.manning_id
                     LEFT JOIN manning_payroll as B ON C.payroll_id = B.payroll_id
@@ -314,19 +320,18 @@ class Manning_payroll_earning_m extends MY_Model
                     `r_monthly_rate` = IF(rate=3, round(monthly_rate,2), 0),
                     `r_regular_ot_day` = round(((daily_rate/8) * 1.25) * rw_ot_day,2),
                     `r_straight_duty` = round((daily_rate/8) * sd_day,2),
-                    -- `r_straight_ot_day` =round( straight_ot_day,2),
                     `r_night_diff` = round(((daily_rate/8) * 0.10) * nd_day,2),
                     `r_night_ot_diff` = round((((daily_rate/8) * 1.25) * 0.10) * nd_ot_day,2),
                     `r_legal_holiday` = round(((daily_rate+if(e_cola > 0, 10, 0))/8) * lg_day,2),
                     `r_legal_ot_holiday` = round((((daily_rate/8) * 2.60)) * lg_ot_day,2),
                     `r_rest_day_rate` = round(((daily_rate/8) * 1.30) * rd_day,2),
                     `r_rest_day_ot_rate` = round(((((daily_rate/8) * 1.30) * 0.30) + (((daily_rate/8) * 1.30))) * rd_ot_day,2),
-                    `r_rest_day_special_holiday` = round(((daily_rate/8) * 1.50) * rd_sh_day/*((daily_rate/8) * 0.50) * rd_sh_day*/,2),
+                    `r_rest_day_special_holiday` = round(((daily_rate/8) * 1.50) * rd_sh_day,2),
                     `r_rest_day_special_ot_holiday` = round(((daily_rate/8) * 1.95) * rd_sh_ot_day,2),
                     `r_rest_day_legal_holiday` = round((((daily_rate/8) * 1.30) * 2) * rd_lg_hl,2),
                     `r_rest_day_legal_ot_holiday` = round(((daily_rate/8) * 3.38) * rd_lg_ot_hl,2),
                     `r_special_holiday` = round((((daily_rate+if(e_cola > 0, 10, 0))/8) * 0.30) * sp_day,2),
-                    `r_special_ot_holiday` = round(((daily_rate/8) * 1.95) * sp_ot_day/*(((daily_rate/8) * 0.30) * 1.30) * sp_ot_day*/,2),
+                    `r_special_ot_holiday` = round(((daily_rate/8) * 1.95) * sp_ot_day,2),
                     `r_late_amount` = round(((daily_rate/8)/60) * late_minutes * -1,2),
                     `r_absent_rate_per_day` = round(((daily_rate/8) * no_absences_per_day) * -1,2),
                     `r_absent_rate` = round(((daily_rate/8) * no_absences_per_hr) * -1,2),
@@ -338,8 +343,50 @@ class Manning_payroll_earning_m extends MY_Model
                     `C`.`updated_at` = ?
                 WHERE `C`.`payroll_id` =  ? AND C.is_actived = 1";
         $this->db->query($sql, [$now, $payroll_id]);
-        $update_affected = $this->db->affected_rows();
+        // $update_affected = $this->db->affected_rows();
 
+        // update payroll entries for reliever and extra-reliever
+        $sql2 = "UPDATE `manning_payroll_earning` as C
+                    LEFT JOIN manning as A ON C.employee_id = A.manning_id
+                    LEFT JOIN manning_payroll as B ON C.payroll_id = B.payroll_id
+                    LEFT JOIN $join_proj_qry ON proj_id = B.project_id
+                    INNER JOIN manning_reliever F ON mr_manning_id = C.employee_id AND mr_payroll_id = {$payroll_id} AND F.is_actived
+                SET
+                    r_allowance = if(allowance_mode_of_payment=1, round((allowance * no_hrs)/8,2),
+                                    if(allowance_mode_of_payment=2, allowance,
+                                    if(allowance_mode_of_payment=3 AND payroll_period='2nd', allowance,
+                                            0.00))),
+                    `r_cola` = if(mr_e_cola > 0 AND no_hrs > 0, round((mr_e_cola/8) * (no_hrs),2), 0.00),
+                    `r_hourly_rate` = IF(rate= 1, round((mr_daily_rate/8) * no_hrs,2), 0),
+                    `r_daily_rate` = round(mr_daily_rate * rw_day,2),
+                    `r_semi_monthly_rate` = IF(rate=2, round(semi_monthly_rate,2), 0),
+                    `r_monthly_rate` = IF(rate=3, round(monthly_rate,2), 0),
+                    `r_regular_ot_day` = round(((mr_daily_rate/8) * 1.25) * rw_ot_day,2),
+                    `r_straight_duty` = round((mr_daily_rate/8) * sd_day,2),
+                    `r_night_diff` = round(((mr_daily_rate/8) * 0.10) * nd_day,2),
+                    `r_night_ot_diff` = round((((mr_daily_rate/8) * 1.25) * 0.10) * nd_ot_day,2),
+                    `r_legal_holiday` = round(((mr_daily_rate+if(mr_e_cola > 0, 10, 0))/8) * lg_day,2),
+                    `r_legal_ot_holiday` = round((((mr_daily_rate/8) * 2.60)) * lg_ot_day,2),
+                    `r_rest_day_rate` = round(((mr_daily_rate/8) * 1.30) * rd_day,2),
+                    `r_rest_day_ot_rate` = round(((((mr_daily_rate/8) * 1.30) * 0.30) + (((mr_daily_rate/8) * 1.30))) * rd_ot_day,2),
+                    `r_rest_day_special_holiday` = round(((mr_daily_rate/8) * 1.50) * rd_sh_day,2),
+                    `r_rest_day_special_ot_holiday` = round(((mr_daily_rate/8) * 1.95) * rd_sh_ot_day,2),
+                    `r_rest_day_legal_holiday` = round((((mr_daily_rate/8) * 1.30) * 2) * rd_lg_hl,2),
+                    `r_rest_day_legal_ot_holiday` = round(((mr_daily_rate/8) * 3.38) * rd_lg_ot_hl,2),
+                    `r_special_holiday` = round((((mr_daily_rate+if(mr_e_cola > 0, 10, 0))/8) * 0.30) * sp_day,2),
+                    `r_special_ot_holiday` = round(((mr_daily_rate/8) * 1.95) * sp_ot_day,2),
+                    `r_late_amount` = round(((mr_daily_rate/8)/60) * late_minutes * -1,2),
+                    `r_absent_rate_per_day` = round(((mr_daily_rate/8) * no_absences_per_day) * -1,2),
+                    `r_absent_rate` = round(((mr_daily_rate/8) * no_absences_per_hr) * -1,2),
+                    `r_incentive` = 0,
+                    `r_13thmonth` = IF(with_13th_month = 1, IF(rate = 2, round(semi_monthly_rate/12,2),
+                                        IF(rate = 3, round((monthly_rate * 0.50)/12,2),
+                                                round(((mr_daily_rate/8) * no_hrs)/12,2))),
+                                                0.00),
+                    `C`.`updated_at` = ?
+                WHERE `C`.`payroll_id` =  ? AND C.is_actived = 1";
+        $this->db->query($sql2, [$now, $payroll_id]);
+        // dd($this->db->last_query());
         self::update_payroll_reliever($payroll_id);
 
         $this->session->set_flashdata('message', '<strong>Success.</strong> <p class="lead">This payroll entries has been successfully updated.</p>');
@@ -361,7 +408,10 @@ class Manning_payroll_earning_m extends MY_Model
 
     public function save_earning($payroll_id, $employee_id = NULL, $post = NULL, $manning_payroll_earning_id = NULL)
     {
-        $this->load->model(['manning_payroll_m', 'manning']);
+        $this->load->model(['manning_payroll_m', 'manning', 'manning_reliever']);
+
+        $e_cola = 0.00;
+        $daily_rate = 0.00;
 
         $now = date('Y-m-d H:i:s');
         $param = ['payroll_id' => $payroll_id];
@@ -376,18 +426,6 @@ class Manning_payroll_earning_m extends MY_Model
 
         if ($count)
         {
-            if ($manning_payroll_earning_id !== NULL)
-            {
-                $sql = "UPDATE {$this->table_name} as A LEFT JOIN manning as B ON A.employee_id = B.manning_id
-                            SET A.is_actived = 0, A.updated_at = NOW(), A.deleted_at = NOW()
-                            WHERE is_resigned = 1 AND A.is_actived = 1 AND B.manning_id IS NOT NULL";
-                $this->db->query($sql);
-                $affected = $this->db->affected_rows();
-
-                if ($affected)
-                $this->session->set_flashdata('message', "{$affected} employee(s) resigned and was removed to this payroll");
-            }
-
             $set = '';
             if ($post !== NULL)
             {
@@ -397,44 +435,60 @@ class Manning_payroll_earning_m extends MY_Model
                 }
             }
 
+            if ( ! empty($employee_id))
+            {
+                $reliever = $this->manning_reliever->get_by(['mr_manning_id' => $employee_id, 'mr_payroll_id' => $payroll_id], TRUE);
+                if ( ! empty($reliever))
+                {
+                    $e_cola = get_key($reliever, 'mr_e_cola', 0.00);
+                    $daily_rate = get_key($reliever, 'mr_daily_rate', 0.00);
+                }
+                else
+                {
+                    $employee = $this->manning->get($employee_id);
+
+                    $e_cola = get_key($employee, 'e_cola', 0.00);
+                    $daily_rate = get_key($employee, 'daily_rate', 0.00);
+                }
+            }
 
             $sql = "UPDATE `manning_payroll_earning` as C
                         LEFT JOIN manning as A ON C.employee_id = A.manning_id
                         LEFT JOIN manning_payroll as B ON C.payroll_id = B.payroll_id
                         LEFT JOIN $join_proj_qry ON proj_id = B.project_id
+                        LEFT JOIN manning_reliever as E ON A.manning_id = mr_manning_id AND B.payroll_id = mr_payroll_id AND E.is_actived
                     SET
                         $set
                         r_allowance = if(allowance_mode_of_payment=1, round((allowance * no_hrs)/8,2),
                             if(allowance_mode_of_payment=2, allowance,
                             if(allowance_mode_of_payment=3 AND payroll_period='2nd', allowance,
                                     0.00))),
-                        `r_cola` = if(e_cola > 0 AND no_hrs > 0, round((e_cola/8) * (no_hrs),2), 0.00),
-                        `r_hourly_rate` = IF(rate= 1, round((daily_rate/8) * no_hrs,2), 0),
-                        `r_daily_rate` = round(daily_rate * rw_day,2),
+                        `r_cola` = if({$e_cola} > 0 AND no_hrs > 0, round(({$e_cola}/8) * (no_hrs),2), 0.00),
+                        `r_hourly_rate` = IF(rate= 1, round(({$daily_rate}/8) * no_hrs,2), 0),
+                        `r_daily_rate` = round({$daily_rate} * rw_day,2),
                         `r_semi_monthly_rate` = IF(rate=2, round(semi_monthly_rate,2), 0),
                         `r_monthly_rate` = IF(rate=3, round(monthly_rate,2), 0),
-                        `r_regular_ot_day` = round(((daily_rate/8) * 1.25) * rw_ot_day,2),
-                        `r_straight_duty` = round((daily_rate/8) * sd_day,2),
-                        -- `r_straight_ot_day` =round( straight_ot_day,2),
-                        `r_night_diff` = round(((daily_rate/8) * 0.10) * nd_day,2),
-                        `r_night_ot_diff` = round((((daily_rate/8) * 1.25) * 0.10) * nd_ot_day,2),
-                        `r_legal_holiday` = round(((daily_rate+if(e_cola > 0, 10, 0))/8) * lg_day,2),
-                        `r_legal_ot_holiday` = round((((daily_rate/8) * 2.60)) * lg_ot_day,2),
-                        `r_rest_day_rate` = round(((daily_rate/8) * 1.30) * rd_day,2),
-                        `r_rest_day_ot_rate` = round(((((daily_rate/8) * 1.30) * 0.30) + (((daily_rate/8) * 1.30))) * rd_ot_day,2),
-                        `r_rest_day_special_holiday` = round(((daily_rate/8) * 1.50) * rd_sh_day/*((daily_rate/8) * 0.50) * rd_sh_day*/,2),
-                        `r_rest_day_special_ot_holiday` = round(((daily_rate/8) * 1.95) * rd_sh_ot_day,2),
-                        `r_rest_day_legal_holiday` = round((((daily_rate/8) * 1.30) * 2) * rd_lg_hl,2),
-                        `r_rest_day_legal_ot_holiday` = round(((daily_rate/8) * 3.38) * rd_lg_ot_hl,2),
-                        `r_special_holiday` = round((((daily_rate+if(e_cola > 0, 10, 0))/8) * 0.30) * sp_day,2),
-                        `r_special_ot_holiday` = round(((daily_rate/8) * 1.95) * sp_ot_day/*(((daily_rate/8) * 0.30) * 1.30) * sp_ot_day*/,2),
-                        `r_late_amount` = round(((daily_rate/8)/60) * late_minutes * -1,2),
-                        `r_absent_rate_per_day` = round(((daily_rate/8) * no_absences_per_day) * -1,2),
-                        `r_absent_rate` = round(((daily_rate/8) * no_absences_per_hr) * -1,2),
+                        `r_regular_ot_day` = round((({$daily_rate}/8) * 1.25) * rw_ot_day,2),
+                        `r_straight_duty` = round(({$daily_rate}/8) * sd_day,2),
+                        `r_night_diff` = round((({$daily_rate}/8) * 0.10) * nd_day,2),
+                        `r_night_ot_diff` = round(((({$daily_rate}/8) * 1.25) * 0.10) * nd_ot_day,2),
+                        `r_legal_holiday` = round((({$daily_rate}+if({$e_cola} > 0, 10, 0))/8) * lg_day,2),
+                        `r_legal_ot_holiday` = round(((({$daily_rate}/8) * 2.60)) * lg_ot_day,2),
+                        `r_rest_day_rate` = round((({$daily_rate}/8) * 1.30) * rd_day,2),
+                        `r_rest_day_ot_rate` = round((((({$daily_rate}/8) * 1.30) * 0.30) + ((({$daily_rate}/8) * 1.30))) * rd_ot_day,2),
+                        `r_rest_day_special_holiday` = round((({$daily_rate}/8) * 1.50) * rd_sh_day,2),
+                        `r_rest_day_special_ot_holiday` = round((({$daily_rate}/8) * 1.95) * rd_sh_ot_day,2),
+                        `r_rest_day_legal_holiday` = round(((({$daily_rate}/8) * 1.30) * 2) * rd_lg_hl,2),
+                        `r_rest_day_legal_ot_holiday` = round((({$daily_rate}/8) * 3.38) * rd_lg_ot_hl,2),
+                        `r_special_holiday` = round(((({$daily_rate}+if({$e_cola} > 0, 10, 0))/8) * 0.30) * sp_day,2),
+                        `r_special_ot_holiday` = round((({$daily_rate}/8) * 1.95) * sp_ot_day,2),
+                        `r_late_amount` = round((({$daily_rate}/8)/60) * late_minutes * -1,2),
+                        `r_absent_rate_per_day` = round((({$daily_rate}/8) * no_absences_per_day) * -1,2),
+                        `r_absent_rate` = round((({$daily_rate}/8) * no_absences_per_hr) * -1,2),
                         `r_incentive` = 0,
                         `r_13thmonth` = IF(with_13th_month = 1, IF(rate = 2, round(semi_monthly_rate/12,2),
                                             IF(rate = 3, round((monthly_rate * 0.50)/12,2),
-                                                    round(((daily_rate/8) * no_hrs)/12,2))),
+                                                    round((({$daily_rate}/8) * no_hrs)/12,2))),
                                                     0.00),
                         `C`.`updated_at` = ?
                     WHERE `C`.`payroll_id` =  ? AND C.is_actived = 1";
@@ -446,7 +500,7 @@ class Manning_payroll_earning_m extends MY_Model
             {
                 $sql .= " AND manning_payroll_earning_id = ?";
                 $this->db->query($sql, [$now, $payroll_id, $manning_payroll_earning_id]);
-                // dump($this->db->last_query());
+                // dd($this->db->last_query());
                 // stop processing and return affected row
                 return $this->db->affected_rows();
             }
