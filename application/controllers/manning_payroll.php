@@ -794,7 +794,7 @@ class Manning_payroll extends Admin_Controller
     {
         $this->load->model(array('manning'));
 
-        $not_exists_in = "NOT manning_id IN(SELECT employee_id FROM manning_payroll_earning WHERE is_actived AND payroll_id = {$payroll_id})";
+        $not_exists_in = "NOT manning_id IN(SELECT employee_id FROM manning_payroll_earning WHERE manning_payroll_earning.is_actived AND payroll_id = {$payroll_id})";
         $field = 'manning_id as id, CONCAT(upper(lastname), ", ", upper(firstname), " ", upper(middlename)) as text';
         $orderby = 'lastname, firstname, middlename';
 
