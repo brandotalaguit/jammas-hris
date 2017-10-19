@@ -60,22 +60,35 @@
             <div class="col-sm-8">
 
                 <?php
-                    echo form_input(array_merge($form_class, ['name' => 'mr_daily_rate', 'id' => 'mr_daily_rate', 'value' => set_value('mr_daily_rate', 481.00)]));
+                    echo form_input(array_merge($form_class, ['name' => 'mr_daily_rate', 'id' => 'mr_daily_rate', 'value' => set_value('mr_daily_rate', 502.00)]));
                     ?>
 
             </div>
         </div>
 
-        <!-- <label for="allowance" class="col-sm-3 control-label">Allowance</label>
+        <label for="mr_allowance" class="col-sm-3 control-label">Allowance</label>
         <div class="form-group">
             <div class="col-sm-8">
 
                 <?php
-                    #echo form_input(array_merge($form_class, ['name' => 'allowance', 'id' => 'allowance', 'value' => set_value('allowance', 0.00)]));
+                    echo form_input(array_merge($form_class, ['name' => 'mr_allowance', 'id' => 'mr_allowance', 'value' => set_value('mr_allowance', 0.00)]));
                     ?>
 
             </div>
-        </div> -->
+        </div>
+
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">Allowance Mode of Payment</label>
+            <div class="col-sm-8">
+                <label class="radio-inline">
+                  <input type="radio" name="mr_allowance_mode_of_payment" id="allowanceMode1" value="1" > Daily
+                </label>
+                <label class="radio-inline">
+                  <input type="radio" name="mr_allowance_mode_of_payment" id="allowanceMode2" value="2" > Semi-Monthly
+                </label>
+            </div>
+        </div>
 
     </div>
     <div class="modal-footer clearfix">
@@ -167,6 +180,14 @@
     $('#form-contribution').submit(function(e) {
 
     })
+
+    $('#form-contribution').on('keyup keypress', function(e) {
+      var keyCode = e.keyCode || e.which;
+      if (keyCode === 13) {
+        e.preventDefault();
+        return false;
+      }
+    });
 
 
 

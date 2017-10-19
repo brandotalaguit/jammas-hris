@@ -71,7 +71,7 @@
                     <i class="ion ion-document-text"></i><span>PHILHEALTH Contribution Matrix</span>
                 </a>
             </li>
-             
+
             <!-- <li class="<?php echo $controller == 'employee' ? 'active' : ''; ?>">
                 <a href="<?php echo site_url('employee'); ?>">
                     <i class="ion ion-android-social"></i> <span>Employees</span>
@@ -84,7 +84,7 @@
                 </a>
             </li>
             <?php endif; ?>
-            
+
            <!--  <li class="<?php echo $controller == 'manning_list' ? 'active' : ''; ?>">
                 <a href="<?php echo site_url('manning_list'); ?>">
                     <i class="fa fa-rub"></i> <span>Manning</span>
@@ -104,7 +104,7 @@
                     <!-- <li><a href="charts/inline.html"><i class="fa fa-angle-double-right"></i> Inline charts</a></li> -->
                 </ul>
             </li>
-            
+
         </ul>
     </section>
     <!-- /.sidebar -->

@@ -818,6 +818,11 @@ class Manning_payroll extends Admin_Controller
         $e_cola = $this->input->post('mr_e_cola');
         $payroll_id = $this->input->post('mr_payroll_id');
         $daily_rate = $this->input->post('mr_daily_rate');
+        $allowance = $this->input->post('mr_allowance');
+        $allowance_mode_of_payment = $this->input->post('mr_allowance_mode_of_payment');
+
+        if (intval($allowance_mode_of_payment) == 0)
+        $allowance = 0.00;
 
         foreach ($this->input->post('mr_manning_id') as $key => $id)
         {
@@ -827,6 +832,8 @@ class Manning_payroll extends Admin_Controller
                         'mr_e_cola' => $e_cola,
                         'mr_payroll_id' => $payroll_id,
                         'mr_daily_rate' => $daily_rate,
+                        'mr_allowance' => $allowance,
+                        'mr_allowance_mode_of_payment' => $allowance_mode_of_payment,
                         'created_at' => $now,
                         'updated_at' => $now,
                        ];

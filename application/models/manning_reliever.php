@@ -16,6 +16,8 @@ class Manning_reliever extends MY_Model
 		'mr_rate' => ['field' => 'mr_rate', 'label' => 'Rate Type', 'rules' => 'intval|is_natural_no_zero|xss_clean'],
 		'mr_daily_rate' => ['field' => 'mr_daily_rate', 'label' => 'Daily Rate', 'rules' => 'trim|required|to_decimal|greater_than[0]|xss_clean'],
 		'mr_e_cola' => ['field' => 'mr_e_cola', 'label' => 'E-Cola', 'rules' => 'trim|to_decimal|required|xss_clean'],
+		'mr_allowance' => ['field' => 'mr_allowance', 'label' => 'Allowance', 'rules' => 'trim|to_decimal|xss_clean'],
+		'mr_allowance_mode_of_payment' => ['field' => 'mr_allowance_mode_of_payment', 'label' => 'Allowance Mode of Payment', 'rules' => 'trim|intval|is_natural_no_zero|xss_clean'],
 	);
 
 	function __construct()
@@ -30,8 +32,10 @@ class Manning_reliever extends MY_Model
 		// $employee->mr_project_id = '0';
 		$employee->mr_payroll_id = '0';
 		$employee->mr_rate = '1';
-		$employee->mr_daily_rate = '481.00';
+		$employee->mr_daily_rate = '502.00';
 		$employee->mr_e_cola = '10.00';
+		$employee->mr_allowance = '0.00';
+		$employee->mr_allowance_mode_of_payment = '0';
 
 		return $employee;
 	}

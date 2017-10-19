@@ -44,6 +44,15 @@ class updateDatabase extends CI_Controller {
 					$this->db->query($create_table);
 				}
 
+				if ( ! $this->db->field_exists('with_13th_month', 'jammas-hris`.`projects'))
+				{
+						$sql4 = "ALTER TABLE `manning_reliever`
+								ADD COLUMN `mr_allowance` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '' AFTER `mr_e_cola`,
+								ADD COLUMN `mr_allowance_mode_of_payment` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '' AFTER `mr_allowance`;
+								";
+						$this->db->query($sql4);
+						$this->session->set_flashdata('message', 'Database has been successfully updated. You can now input allowance rate for reliever');
+				}
 
 				redirect('manning_payroll', 'refresh');
 

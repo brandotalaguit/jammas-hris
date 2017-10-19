@@ -106,7 +106,7 @@ class Manning extends MY_Model
 		$employee->address2 = '';
 		$employee->contract_remarks = '';
 		$employee->rate = '0';
-		$employee->daily_rate = '481.00';
+		$employee->daily_rate = '502.00';
 		$employee->semi_monthly_rate = '0.00';
 		$employee->monthly_rate = '0.00';
 		$employee->e_cola = '10.00';

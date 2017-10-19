@@ -352,9 +352,9 @@ class Manning_payroll_earning_m extends MY_Model
                     LEFT JOIN $join_proj_qry ON proj_id = B.project_id
                     INNER JOIN manning_reliever F ON mr_manning_id = C.employee_id AND mr_payroll_id = {$payroll_id} AND F.is_actived
                 SET
-                    r_allowance = if(allowance_mode_of_payment=1, round((allowance * no_hrs)/8,2),
-                                    if(allowance_mode_of_payment=2, allowance,
-                                    if(allowance_mode_of_payment=3 AND payroll_period='2nd', allowance,
+                    r_allowance = if(mr_allowance_mode_of_payment=1, round((mr_allowance * no_hrs)/8,2),
+                                    if(mr_allowance_mode_of_payment=2, mr_allowance,
+                                    if(mr_allowance_mode_of_payment=3 AND payroll_period='2nd', mr_allowance,
                                             0.00))),
                     `r_cola` = if(mr_e_cola > 0 AND no_hrs > 0, round((mr_e_cola/8) * (no_hrs),2), 0.00),
                     `r_hourly_rate` = IF(rate= 1, round((mr_daily_rate/8) * no_hrs,2), 0),
@@ -442,6 +442,8 @@ class Manning_payroll_earning_m extends MY_Model
                 {
                     $e_cola = get_key($reliever, 'mr_e_cola', 0.00);
                     $daily_rate = get_key($reliever, 'mr_daily_rate', 0.00);
+                    $allowance = get_key($reliever, 'mr_allowance', 0.00);
+                    $allowance_mode_of_payment = get_key($reliever, 'mr_allowance_mode_of_payment', 0);
                 }
                 else
                 {
@@ -449,6 +451,8 @@ class Manning_payroll_earning_m extends MY_Model
 
                     $e_cola = get_key($employee, 'e_cola', 0.00);
                     $daily_rate = get_key($employee, 'daily_rate', 0.00);
+                    $allowance = get_key($employee, 'allowance', 0.00);
+                    $allowance_mode_of_payment = get_key($employee, 'allowance_mode_of_payment', 0);
                 }
             }
 
@@ -459,9 +463,9 @@ class Manning_payroll_earning_m extends MY_Model
                         LEFT JOIN manning_reliever as E ON A.manning_id = mr_manning_id AND B.payroll_id = mr_payroll_id AND E.is_actived
                     SET
                         $set
-                        r_allowance = if(allowance_mode_of_payment=1, round((allowance * no_hrs)/8,2),
-                            if(allowance_mode_of_payment=2, allowance,
-                            if(allowance_mode_of_payment=3 AND payroll_period='2nd', allowance,
+                        r_allowance = if({$allowance_mode_of_payment}=1, round(({$allowance} * no_hrs)/8,2),
+                            if({$allowance_mode_of_payment}=2, {$allowance},
+                            if({$allowance_mode_of_payment}=3 AND payroll_period='2nd', {$allowance},
                                     0.00))),
                         `r_cola` = if({$e_cola} > 0 AND no_hrs > 0, round(({$e_cola}/8) * (no_hrs),2), 0.00),
                         `r_hourly_rate` = IF(rate= 1, round(({$daily_rate}/8) * no_hrs,2), 0),

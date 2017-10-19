@@ -3,21 +3,21 @@
         <meta charset="UTF-8">
         <title><?php echo config_item('site_title') ?></title>
         <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
-        
+
         <!-- bootstrap 3.0.2 -->
         <?php echo link_tag('public/css/bootstrap.min.css'); ?>
-        
+
         <!-- font Awesome -->
         <?php echo link_tag('public/css/font-awesome.min.css'); ?>
-        
+
         <!-- Ionicons -->
         <?php echo link_tag('public/css/ionicons.min.css'); ?>
-        
+
         <!-- Theme style -->
         <?php echo link_tag('public/css/AdminLTE.css'); ?>
 
         <?php echo link_tag('public/css/override.css'); ?>
-        
+
 
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -48,7 +48,7 @@
                 </a>
                 <div class="navbar-right">
                     <ul class="nav navbar-nav">
-                        
+
                         <!-- User Account: style can be found in dropdown.less -->
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -67,7 +67,7 @@
                                     </p>
                                 </li>
                                 <!-- Menu Body -->
-                                <!-- 
+                                <!--
                                 <li class="user-body">
                                     <div class="col-xs-4 text-center">
                                         <a href="#">Followers</a>
@@ -82,15 +82,15 @@
                                  -->
                                 <!-- Menu Footer-->
                                 <li class="user-footer">
-                                    <?php 
+                                    <?php
                                         // Filter user account per user
-                                        if ($this->session->userdata('AccountType') === 'S') 
+                                        if ($this->session->userdata('AccountType') === 'S')
                                         {
                                      ?>
                                         <div class="pull-left">
                                             <a href="<?php echo base_url("user/" . $this->session->userdata('Id') . "/edit" ) ?>" class="btn btn-default btn-flat">Profile</a>
                                         </div>
-                                    <?php 
+                                    <?php
                                         }
                                      ?>
 
@@ -104,9 +104,9 @@
                 </div>
             </nav>
         </header>
-        
+
         <div class="wrapper row-offcanvas row-offcanvas-left">
-            
+
             <?php echo $this->load->view('template\sidebar') ?>
 
             <!-- Right side column. Contains the navbar and content of the page -->
@@ -127,11 +127,11 @@
                 <section class="content <?= ! isset($invoice) || print("invoice ") ?>">
 
                 <?php if (validation_errors()): ?>
-                    
+
                     <div class="alert alert-danger alert-dismissable no-print">
                         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
                         <strong>The following errors have occurred.</strong>
-                        <ul>            
+                        <ul>
                             <?php echo validation_errors(); ?>
                         </ul>
                     </div>
@@ -140,7 +140,7 @@
 
 
                 <?php if ($this->session->flashdata('error')): ?>
-                    
+
                     <div class="alert alert-danger alert-dismissable no-print">
                         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
                         <strong>
@@ -162,7 +162,7 @@
                 <?php endif ?>
 
                 <?php if ($this->session->flashdata('message')): ?>
-                    
+
                     <div class="alert alert-info alert-dismissable no-print">
                         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
                         <strong>
@@ -171,8 +171,8 @@
                     </div>
 
                 <?php endif ?>
-                
-                <?php 
+
+                <?php
                     if ($this->session->flashdata('dialog_box'))
                     echo $this->session->flashdata('dialog_box');
                 ?>
@@ -186,15 +186,15 @@
 
         <!-- jQuery 2.0.2 -->
         <!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script> -->
-      
+
 
         <!-- Bootstrap -->
        <link href="<?php echo base_url('/assets') ?>/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet">
        <link rel="stylesheet" href="<?php echo base_url()?>assets/datepicker/css/datepicker3.css">
-       
+
        <script type="text/javascript" src="<?php echo base_url();?>public/js/bootstrap.min.js" ></script>
        <script src="<?php echo base_url('/assets') ?>/bootstrap-editable/js/bootstrap-editable.js"></script>
-        
+
         <!-- AdminLTE App -->
        <script type="text/javascript" src="<?php echo base_url();?>public/js/AdminLTE/app.js" ></script>
 
@@ -202,7 +202,7 @@
        <script src="<?php echo base_url()?>assets/js/autoNumeric.js"></script>
        <script src="<?php echo base_url()?>assets/js/jquery.number.js"></script>
        <script src="<?php echo base_url()?>public/js/plugins/input-mask/jquery.inputmask.js"></script>
-       
+
        <!-- bootstrap datepicker -->
        <script src="<?php echo base_url()?>assets/datepicker/js/bootstrap-datepicker.js"></script>
 
@@ -210,7 +210,7 @@
        <script src="<?php echo base_url()?>assets/js/jquery-ui.min.js"></script>
        <?php echo link_tag('assets/css/jquery-ui.structure.min.css'); ?>
        <?php echo link_tag('assets/css/jquery-ui.min.css'); ?>
-       
+
        <script src="<?php echo base_url()?>assets/js/selectize.js"></script>
        <?php echo link_tag('assets/css/selectize.bootstrap3.css'); ?>
        <!-- select2 -->
@@ -226,7 +226,7 @@
             //get a reference to the select element
             $select = $('#project_bill_id');
             //request the JSON data and parse into the select element
-            
+
 
             $select.select2();
 
@@ -238,7 +238,7 @@
                 $select.html(output);
 
             });
-            
+
             $select.val(0).trigger("change");
 
          });
@@ -246,7 +246,7 @@
        });
        </script>
 
-       
+
        <!-- Custom JS -->
        <script type="text/javascript" src="<?php echo base_url();?>assets/js/scripts.js" ></script>
 
@@ -258,7 +258,7 @@
             $.fn.editable.defaults.mode = 'popup';
             $.fn.editableform.buttons = '<div class="editable-buttons"><div class="btn-group" style="display:inline-flex"><button type="submit" class="btn btn-primary btn-sm editable-submit" title="Save Changes"><i class="glyphicon glyphicon-ok"></i></button><button type="button" class="btn btn-default btn-sm editable-cancel" title="Cancel"><i class="glyphicon glyphicon-remove"></i></button></div></div>';
 
-            
+
             //make editable
             $('#billing a.editable').editable({
                 tpl: '<input style="width:60px;">',
@@ -272,8 +272,8 @@
                     $('.deci').number(true, 2)
                 },
                 success: function (data, newValue) {
-                    // if ( ! data.errors) 
-                    if ( data.success == true) 
+                    // if ( ! data.errors)
+                    if ( data.success == true)
                     {
                         console.log(data.newValue)
                         console.log(data)
@@ -291,9 +291,9 @@
                             $(this).closest('tr').find('td.allowance>code.allowance').html(data.allowance)
                             $('#total_allowance').html(data.total_allowance)
                         }
-                        
+
                         $('#spanValue,span.deci,code.deci').number(true, 2)
-                        
+
                         var msg = 'Record <span class="deci">' + newValue + '</span> has been successfully updated!'
                         // var total_amt = '<span class="deci">' + (newValue * data.rate)  + '</span>'
                         var total_amt = '<span class="deci">' + data.total_amt  + '</span>'
@@ -301,15 +301,15 @@
 
                         $(this).closest('tr').find('th:last').html('<span class="deci">' + data.subtotal + '</span>')
                         $(this).closest('table').find('th:last').html('<span class="deci">' + data.grandtotal + '</span>')
-                        
+
                         $(this).closest('table').find('th' + data.rate_name).html('<span class="deci">' + data.column1total + '</span>')
                         $(this).closest('table').find('th' + data.rate_name + '_amount').html('<span class="deci">' + data.column2total + '</span>')
 
                         $('#msg').addClass('alert-success').removeClass('alert-danger').html(msg).show()
                         $(this).closest('a.editable').focus()
                         $(this).closest('tr').addClass('success')
-                    } 
-                    else if(data.errors) 
+                    }
+                    else if(data.errors)
                     {
                         $('#msg').addClass('alert-danger').removeClass('alert-success').html('<strong>' + data.errors + '</strong>').show()
                     }
@@ -340,29 +340,29 @@
                     } else {
                         $(this).closest('td').next('td').next('td').find('.editable').editable('show');
                     }
-                } 
+                }
             });
 
 
             $('input').on('click', function(){this.select();})
             $('#msg').hide();
 
-            <?php 
-            if ($this->router->fetch_class() == 'Project_billing_info') 
+            <?php
+            if ($this->router->fetch_class() == 'Project_billing_info')
             {
                 echo "$('multiple-select2').selectize({ plugins: ['remove_button', 'drag_drop']});";
             }
             ?>
             // $('.multiple-select2').select2();
 
-            window.setTimeout(function() { 
+            window.setTimeout(function() {
                 $(".alert").fadeTo(500, 0).slideUp(500, function(){
                       $(this).remove();
                   });
             }, 10000);
         });
        </script>
-       
+
     </body>
 </html>
 
