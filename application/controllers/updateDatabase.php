@@ -44,7 +44,7 @@ class updateDatabase extends CI_Controller {
 					$this->db->query($create_table);
 				}
 
-				if ( ! $this->db->field_exists('with_13th_month', 'jammas-hris`.`projects'))
+				if ( ! $this->db->field_exists('mr_allowance', 'jammas-hris`.`projects'))
 				{
 						$sql4 = "ALTER TABLE `manning_reliever`
 								ADD COLUMN `mr_allowance` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '' AFTER `mr_e_cola`,
