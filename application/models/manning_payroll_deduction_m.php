@@ -210,6 +210,11 @@ class Manning_payroll_deduction_m extends MY_Model
             $this->db->group_by('payroll_date');
         }
 
+        if (count($this->input->post('pay_period')))
+        {
+            $this->db->where_in('payroll_period', $this->input->post('pay_period'));
+        }
+
         $this->db->where('payroll_year', $payroll_year);
         return $this->fields($field_arr)->group_by('manning_id')
                     ->get_manning_payroll_deduction();
@@ -241,6 +246,11 @@ class Manning_payroll_deduction_m extends MY_Model
              else
              {
                  $this->db->group_by('payroll_date');
+             }
+
+             if (count($this->input->post('pay_period')))
+             {
+                 $this->db->where_in('payroll_period', $this->input->post('pay_period'));
              }
 
              $result = $this->fields($field_arr)

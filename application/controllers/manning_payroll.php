@@ -948,6 +948,7 @@ class Manning_payroll extends Admin_Controller
 
     public function contribution_report()
     {
+        // $this->output->enable_profiler(TRUE);
         $this->load->model('manning_payroll_deduction_m');
         $field_arr = array(
                             'employee_no',

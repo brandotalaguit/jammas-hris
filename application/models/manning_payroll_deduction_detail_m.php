@@ -84,6 +84,11 @@ class Manning_payroll_deduction_detail_m extends MY_Model
             $this->db->group_by('payroll_date');
         }
 
+        if (count($this->input->post('pay_period')))
+        {
+            $this->db->where_in('payroll_period', $this->input->post('pay_period'));
+        }
+
         $this->db->select($field, FALSE);
 
         $this->db->join('deductions as H', 'H.deduction_id = DeductionId', 'left');

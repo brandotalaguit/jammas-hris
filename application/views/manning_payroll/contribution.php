@@ -50,6 +50,24 @@
         </div>
 
         <div class="form-group">
+            <label for="input_period" class="col-sm-3 control-label"><b>Payroll Period</b></label>
+            <div class="col-sm-8 checkbox-group required">
+                <div class="checkbox-inline">
+                    <label>
+                        <input type="checkbox" name="pay_period[]" id="first_period" value="1st">
+                        1st Pay Period
+                    </label>
+                </div>
+                <div class="checkbox-inline">
+                    <label>
+                        <input type="checkbox" name="pay_period[]" id="second_period" value="2nd">
+                        2nd Pay Period
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
             <label for="input" class="col-sm-3 control-label"><b>Filter</b></label>
             <div class="col-sm-8">
                 <div class="radio-inline">

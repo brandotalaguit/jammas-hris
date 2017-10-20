@@ -9,6 +9,9 @@ class updateDatabase extends CI_Controller {
 
 	public function index()
 	{
+
+		$this->load->library('session');
+
 		$sql1 = "ALTER TABLE `jammas-hris`.`manning_payroll_setting`
 				ADD COLUMN `with_13th_month` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '' AFTER `is_actived`;";
 		$sql2 = "ALTER TABLE `jammas-hris`.`projects`
@@ -44,7 +47,7 @@ class updateDatabase extends CI_Controller {
 					$this->db->query($create_table);
 				}
 
-				if ( ! $this->db->field_exists('mr_allowance', 'jammas-hris`.`projects'))
+				if ( ! $this->db->field_exists('mr_allowance', 'jammas-hris`.`manning_reliever'))
 				{
 						$sql4 = "ALTER TABLE `manning_reliever`
 								ADD COLUMN `mr_allowance` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '' AFTER `mr_e_cola`,
