@@ -172,6 +172,25 @@ class Manning_payroll extends Admin_Controller
         $this->manning_payroll_earning_m->update_payroll_data($payroll_id);
     }
 
+    public function test($payroll_id = 280)
+    {
+        $this->load->model(array('manning_payroll_m', 'manning_reliever', 'manning_payroll_deduction_m'));
+        // remove deductions reliever and extra-reliever
+        $this->db->select('mr_manning_id')->where('mr_payroll_id', $payroll_id);
+        $relievers = $this->manning_reliever->get();
+        dump($relievers);
+
+        foreach ($relievers as $row)
+        $reliever[] = $row->mr_manning_id;
+
+        $this->db->where_in('employee_id', $reliever)->where('payroll_id', $payroll_id);
+        $remove_reliever_govt_dues = $this->manning_payroll_deduction_m->get();
+        dump($remove_reliever_govt_dues);
+
+        dd($this->db->last_query());
+
+    }
+
     public function modal($payroll_id = NULL)
     {
         $this->load->model('manning_payroll_m');
@@ -336,6 +355,10 @@ class Manning_payroll extends Admin_Controller
                         ];
 
                 $this->manning_payroll_m->save($post, $id);
+
+                // generate deductions
+                $this->load->model('manning_payroll_deduction_m');
+                $affected = $this->manning_payroll_deduction_m->generate_deduction($id);
 
                 $this->manning_payroll_earning_m->update_payroll_reliever($id);
 
@@ -721,7 +744,7 @@ class Manning_payroll extends Admin_Controller
         $this->manning_payroll_m->save(['date_printed' => $now, 'IsPayrollPrinted' => 1], $payroll_id);
 
         $this->load->model('manning_payroll_deduction_m');
-        $affected = $this->manning_payroll_deduction_m->generate_deduction($payroll_id);
+        // $affected = $this->manning_payroll_deduction_m->generate_deduction($payroll_id);
 
         $this->data['reliever_payroll'] = FALSE;
         $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id);
@@ -747,7 +770,7 @@ class Manning_payroll extends Admin_Controller
         $this->manning_payroll_m->save(['date_printed' => $now, 'IsPayrollPrinted' => 1], $payroll_id);
 
         $this->load->model('manning_payroll_deduction_m');
-        $affected = $this->manning_payroll_deduction_m->generate_deduction($payroll_id);
+        // $affected = $this->manning_payroll_deduction_m->generate_deduction($payroll_id);
 
         $this->data['reliever_payroll'] = $this->manning_payroll_earning_m->reliever_payroll = TRUE;
         $this->data['payroll'] = $this->manning_payroll_earning_m->get_payroll($payroll_id);
@@ -1054,7 +1077,8 @@ class Manning_payroll extends Admin_Controller
                                         )
                                     );
                     empty($post['payroll_month']) || $this->db->where('payroll_month', $post['payroll_month']);
-                    $this->db->group_by('manning_id');
+                    // $this->db->group_by('manning_id');
+                    $this->db->where('A.project_id', $row->project_id);
                     $result = $this->deduction_detail->get_manning_payroll_deduction_detail();
 
                     $project[] = array(
@@ -1065,7 +1089,7 @@ class Manning_payroll extends Admin_Controller
                 }
 
             }
-            // die(dump($this->db->last_query()));
+            // dump($this->db->last_query());
             // die(dump($project));
         }
         else
@@ -1086,7 +1110,6 @@ class Manning_payroll extends Admin_Controller
                                                                                         $post['payroll_month']
                                                                                      )
                                   );
-
             }
 
             if ($post['scope'] == 2)
@@ -1098,6 +1121,9 @@ class Manning_payroll extends Admin_Controller
                                                                 $post['project_id'],
                                                                 $post['payroll_month']
                                                             );
+
+                // dump($this->db->last_query());
+                // dd($project);
             }
 
         }

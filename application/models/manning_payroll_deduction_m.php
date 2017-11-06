@@ -203,11 +203,11 @@ class Manning_payroll_deduction_m extends MY_Model
         if ($this->input->post('report_format') == 1)
         {
             ! $payroll_month || $this->db->group_by('payroll_month');
-            $this->db->group_by('payroll_year');
+            $this->db->group_by('payroll_date, manning_id');
         }
         else
         {
-            $this->db->group_by('payroll_date');
+            $this->db->group_by('payroll_date, manning_id, payroll_period');
         }
 
         if (count($this->input->post('pay_period')))
@@ -216,7 +216,8 @@ class Manning_payroll_deduction_m extends MY_Model
         }
 
         $this->db->where('payroll_year', $payroll_year);
-        return $this->fields($field_arr)->group_by('manning_id')
+        return $this->fields($field_arr)
+                    // ->group_by('manning_id')
                     ->get_manning_payroll_deduction();
     }
 
@@ -241,11 +242,11 @@ class Manning_payroll_deduction_m extends MY_Model
              if ($this->input->post('report_format') == 1)
              {
                  ! $payroll_month || $this->db->group_by('payroll_month');
-                 $this->db->group_by('payroll_year');
+                 $this->db->group_by('payroll_date, manning_id');
              }
              else
              {
-                 $this->db->group_by('payroll_date');
+                 $this->db->group_by('payroll_date, manning_id, payroll_period');
              }
 
              if (count($this->input->post('pay_period')))
@@ -255,7 +256,7 @@ class Manning_payroll_deduction_m extends MY_Model
 
              $result = $this->fields($field_arr)
                             // ->group_by('G.project_id, manning_id')
-                            ->group_by('manning_id')
+                            // ->group_by('manning_id')
                             ->get_manning_payroll_deduction();
 
              $project[] = array(

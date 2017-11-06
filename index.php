@@ -38,7 +38,7 @@ if (defined('ENVIRONMENT'))
 			// Display errors in output
            ini_set('display_errors', 1);
 		break;
-	
+
 		case 'testing':
 		case 'production':
 			error_reporting(0);
@@ -48,7 +48,7 @@ if (defined('ENVIRONMENT'))
 			exit('The application environment is not set correctly.');
 	}
 }
-
+error_reporting(E_ALL ^ E_DEPRECATED);
 /*
  *---------------------------------------------------------------
  * SYSTEM FOLDER NAME

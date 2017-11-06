@@ -224,15 +224,37 @@ class Manning_payroll_earning_m extends MY_Model
 
     public function update_payroll_reliever($payroll_id)
     {
-        $this->load->model('manning_payroll_m');
+        $this->load->model(array('manning_payroll_m', 'manning_reliever', 'manning_payroll_deduction_m'));
 
         // $this->db->where('employment_status_id', RELIEVER);
-        $this->db->where_in('employment_status_id', [RELIEVER, EXTRA_RELIEVER]);
+        /*$this->db->where_in('employment_status_id', [RELIEVER, EXTRA_RELIEVER]);
         $this->db->where("(r_hourly_rate > 0 || r_daily_rate > 0 || r_semi_monthly_rate > 0 || r_monthly_rate > 0)", NULL, FALSE);
-        $result = self::get_manning_payroll_earning($payroll_id);
+        $reliever = self::get_manning_payroll_earning($payroll_id);*/
+
+        // set gov't dues for reliever and extra-reliever to zero
+        $sql = "UPDATE manning_payroll_deduction a
+                    INNER JOIN manning_reliever b
+                    ON employee_id = mr_manning_id AND payroll_id = mr_payroll_id AND b.is_actived = 1
+                    SET
+                        employee_share_sss = 0.00,
+                        employer_share_sss = 0.00,
+                        employee_compensation_program_sss = 0.00,
+                        total_monthly_premium_sss = 0.00,
+                        employee_share_philhealth = 0.00,
+                        employer_share_philhealth = 0.00,
+                        total_monthly_premium_philhealth = 0.00,
+                        employee_share_pagibig = 0.00,
+                        employer_share_pagibig = 0.00,
+                        total_monthly_premium_pagibig = 0.00,
+                        a.updated_at = NOW()
+                    WHERE payroll_id = ? AND a.is_actived = 1
+                ";
+
+        $this->db->query($sql, array($payroll_id));
+        $affected = $this->db->affected_rows();
 
         // update manning payroll set w_reliever to 0 / 1
-        $data['w_reliever'] = (bool) count($result);
+        $data['w_reliever'] = (bool) count($affected);
         $this->manning_payroll_m->save($data, $payroll_id);
     }
 
@@ -293,7 +315,8 @@ class Manning_payroll_earning_m extends MY_Model
                     SET is_actived = 0, updated_at = ?
                     WHERE is_actived = 1 AND payroll_id = ?
                     AND EXISTS(SELECT 1 FROM manning
-                                WHERE manning_id = employee_id AND employment_status_id NOT IN({$implode_ids}) AND is_actived
+                                WHERE manning_id = employee_id AND
+                                ((employment_status_id NOT IN({$implode_ids}) AND is_actived) OR is_actived = 0)
                                )";
 
         $excess_employee_qry = $this->db->query($sql, [$now, $payroll_id]);
@@ -331,7 +354,7 @@ class Manning_payroll_earning_m extends MY_Model
                     `r_rest_day_legal_holiday` = round((((daily_rate/8) * 1.30) * 2) * rd_lg_hl,2),
                     `r_rest_day_legal_ot_holiday` = round(((daily_rate/8) * 3.38) * rd_lg_ot_hl,2),
                     `r_special_holiday` = round((((daily_rate+if(e_cola > 0, 10, 0))/8) * 0.30) * sp_day,2),
-                    `r_special_ot_holiday` = round(((daily_rate/8) * 1.95) * sp_ot_day,2),
+                    `r_special_ot_holiday` = round(((daily_rate/8) * 1.69) * sp_ot_day,2),
                     `r_late_amount` = round(((daily_rate/8)/60) * late_minutes * -1,2),
                     `r_absent_rate_per_day` = round(((daily_rate/8) * no_absences_per_day) * -1,2),
                     `r_absent_rate` = round(((daily_rate/8) * no_absences_per_hr) * -1,2),
@@ -374,7 +397,7 @@ class Manning_payroll_earning_m extends MY_Model
                     `r_rest_day_legal_holiday` = round((((mr_daily_rate/8) * 1.30) * 2) * rd_lg_hl,2),
                     `r_rest_day_legal_ot_holiday` = round(((mr_daily_rate/8) * 3.38) * rd_lg_ot_hl,2),
                     `r_special_holiday` = round((((mr_daily_rate+if(mr_e_cola > 0, 10, 0))/8) * 0.30) * sp_day,2),
-                    `r_special_ot_holiday` = round(((mr_daily_rate/8) * 1.95) * sp_ot_day,2),
+                    `r_special_ot_holiday` = round(((mr_daily_rate/8) * 1.69) * sp_ot_day,2),
                     `r_late_amount` = round(((mr_daily_rate/8)/60) * late_minutes * -1,2),
                     `r_absent_rate_per_day` = round(((mr_daily_rate/8) * no_absences_per_day) * -1,2),
                     `r_absent_rate` = round(((mr_daily_rate/8) * no_absences_per_hr) * -1,2),
@@ -485,7 +508,7 @@ class Manning_payroll_earning_m extends MY_Model
                         `r_rest_day_legal_holiday` = round(((({$daily_rate}/8) * 1.30) * 2) * rd_lg_hl,2),
                         `r_rest_day_legal_ot_holiday` = round((({$daily_rate}/8) * 3.38) * rd_lg_ot_hl,2),
                         `r_special_holiday` = round(((({$daily_rate}+if({$e_cola} > 0, 10, 0))/8) * 0.30) * sp_day,2),
-                        `r_special_ot_holiday` = round((({$daily_rate}/8) * 1.95) * sp_ot_day,2),
+                        `r_special_ot_holiday` = round((({$daily_rate}/8) * 1.69) * sp_ot_day,2),
                         `r_late_amount` = round((({$daily_rate}/8)/60) * late_minutes * -1,2),
                         `r_absent_rate_per_day` = round((({$daily_rate}/8) * no_absences_per_day) * -1,2),
                         `r_absent_rate` = round((({$daily_rate}/8) * no_absences_per_hr) * -1,2),
@@ -540,7 +563,10 @@ class Manning_payroll_earning_m extends MY_Model
                                 'payroll_id' => $payroll->payroll_id,
                                 'employee_id' => $employee->manning_id,
                                 'r_daily_rate' => 0.00,
+                                'r_semi_monthly_rate' => 0.00,
+                                'r_monthly_rate' => 0.00,
                                 'r_allowance' => 0.00,
+                                'r_13thmonth' => 0.00,
                                 'created_at' => $now,
                                 'updated_at' => $now,
                             ];
@@ -561,6 +587,7 @@ class Manning_payroll_earning_m extends MY_Model
 
                     $post[] = $arr;
                 }
+                // dd($post);
                 $affected = $this->db->insert_batch('manning_payroll_earning', $post);
             }
         }
