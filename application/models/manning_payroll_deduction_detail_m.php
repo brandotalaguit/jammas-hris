@@ -76,11 +76,14 @@ class Manning_payroll_deduction_detail_m extends MY_Model
 
         if ($this->input->post('report_format') == 1)
         {
-            $key = array_search('payroll_date', $field);
-            unset($field[$key]);
+            unset($field['payroll_date']);
+            $this->db->group_by('manning_id');
         }
         else
         {
+            unset($field['SUM(manning_payroll_deduction_detail.amount) amount']);
+            $field = array_merge($field, ['manning_payroll_deduction_detail.amount amount']);
+
             $this->db->group_by('payroll_date');
         }
 

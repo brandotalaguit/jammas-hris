@@ -57,7 +57,6 @@
 	$subtotal_company_share = $subtotal_employee_share = $subtotal_share = $company_share = $employee_share = $total_share = $ecc_share = 0;
 	$subtotal = array();
 	$title = FALSE;
-	// die(dump($project));
 ?>
 	<?php foreach ($project as $key => $proj): ?>
 
@@ -69,85 +68,72 @@
 			    <thead>
 			    	<tr>
 
-			    		<th colspan="6" class="text-center th-caption">
+			    		<th colspan="<?php echo '7' ?>" class="text-center th-caption">
 
 		    	<h4>JAMMAS INC.</h4>
 		    	<h5>
 		    		<p><?= $proj['project_title'] ?></p>
-		    		<p><?= $page_title ?></p>
-		    		<p><?= $this->input->post('report_format') == 1 ? 'SUMMARY' : 'DETAIL' ?></p>
+		    		<p>Thirteen Month Benefits <?php echo $report_type ?> Report</p>
 		    		<p><?= $covered_period ?></p>
 		    	</h5>
 		    	<small>Run Date <?php echo date('Y-m-d H:iA'); ?></small>
 		    <br/>
-
+		    <?php //dd(trim($report_type)) ?>
 			    		</th>
 			    	</tr>
-
 					<tr>
-				        <th class="text-center" width="2%"><div style="width: 10px;">#</div></th>
-				        <th width='13%' class="text-left">EMPLOYEE NO.</th>
-				        <th width='25%' class="text-left">EMPLOYEE NAME</th>
-				        <?php if ($this->input->post('report_format') == 2): ?>
-				        <th width='10%' class="text-left">DATE</th>
-				        <?php endif ?>
-
-				        <th width='12%' class="text-left">TYPE</th>
-				        <!-- <th width='20%' class="text-left">DESCRIPTION</th> -->
-				        <th width='10%' class="text-center">AMOUNT</th>
+				        <th width="1px" class="text-center"><div style="width: 10px;">#</div></th>
+				        <th width='15%' class="text-center">EMPLOYEE NO.</th>
+				        <th width='25%' class="text-center">LASTNAME</th>
+				        <th width='25%' class="text-center">FIRSTNAME</th>
+				        <th width='15%' class="text-center">MIDDLENAME</th>
+				        <?php /* if (trim($report_type) != 'Summary'): ?>
+				        <th width='10%' class="text-center">PAYROLL DATE</th>
+				        <?php endif */ ?>
+				        <th width='15%' class="text-center">AMOUNT</th>
 				    </tr>
-
 			    </thead>
 				<tbody>
 
 				<?php $ctr = 0; ?>
-			    <?php $company_share = $employee_share = $total = 0; ?>
+			    <?php $total_amount = 0; ?>
+
 				<?php foreach ($proj['project_data'] as $row): ?>
 	<!-- start result here -->
+				<?php
+						$total_amount += get_key($row, 'r_13thmonth', 0);
+					?>
 				<tr>
+					<td><?php echo ++$ctr;?>.</td>
+					<td><?php echo $row->employee_no;?></td>
+					<td><?php echo $row->lastname ?></td>
+					<td><?php echo $row->firstname ?></td>
+					<td><?php echo $row->middlename; ?></td>
+			        <?php /*if (trim($report_type) != 'Summary'): ?>
 					<td>
-						<?php echo ++$ctr;?>.
+	                    <?php
+	                    	$payroll_date = get_key($row, 'payroll_date', '');
+	                    	if ($payroll_date > '')
+                    		echo date('m/d/Y', strtotime($payroll_date));
+	                    ?>
 					</td>
-					<td>
-						<?php echo $row->employee_no;?>
-					</td>
-					<td>
-	                    <?php echo $row->lastname . ', ' . $row->firstname . ' ' . substr($row->middlename, 0, 1); ?>
-					</td>
-
-			        <?php if ($this->input->post('report_format') == 2): ?>
-					<?php if ( ! empty($row->payroll_date)): ?>
-					<td>
-						<?php echo date('m/d/Y', strtotime($row->payroll_date));?>
-					</td>
-					<?php endif ?>
-					<?php endif ?>
-
-					<!-- <td>PAYROLL</td> -->
-					<td>
-						<?php echo $row->deduction_category;?>
-					</td>
+					<?php endif*/ ?>
 					<td class="text-right">
 	                    <?php
-	                    	echo nf($row->amount);
-	                    	?>
+	                    	echo nf(get_key($row,'r_13thmonth', 0));
+	                    ?>
 					</td>
 				</tr>
-				<?php
-						$total += $row->amount;
-					?>
 	<!-- end result here -->
 				<?php endforeach ?>
-		</tbody>
 
-		<tfoot>
+		<!-- <tfoot> -->
 			<tr>
-
-				<th colspan = "<?php echo ($this->input->post('report_format') == 2) ? '5' : '4'; ?>">Sub-Total</th>
-
-				<th class="text-right"><?php echo nf($total); ?></th>
+				<th colspan="<?= '5' ?>">Sub-Total</th>
+				<th class="text-right"><?php echo nf($total_amount); ?></th>
 			</tr>
-		</tfoot>
+		<!-- </tfoot> -->
+		</tbody>
 		</table>
 		</div>
 	</div>

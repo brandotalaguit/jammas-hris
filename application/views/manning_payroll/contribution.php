@@ -128,6 +128,12 @@
                         Deduction
                     </label>
                 </div>
+                <div class="radio-inline">
+                    <label>
+                        <input type="radio" name="deduction_and_govtdue" id="input3" value="3" required="">
+                        13th Month Benefits
+                    </label>
+                </div>
             </div>
         </div>
 

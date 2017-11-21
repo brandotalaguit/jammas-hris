@@ -842,6 +842,7 @@ class Manning_payroll extends Admin_Controller
         $payroll_id = $this->input->post('mr_payroll_id');
         $daily_rate = $this->input->post('mr_daily_rate');
         $allowance = $this->input->post('mr_allowance');
+        $employment_status_id = $this->input->post('mr_employment_status_id');
         $allowance_mode_of_payment = $this->input->post('mr_allowance_mode_of_payment');
 
         if (intval($allowance_mode_of_payment) == 0)
@@ -857,6 +858,7 @@ class Manning_payroll extends Admin_Controller
                         'mr_daily_rate' => $daily_rate,
                         'mr_allowance' => $allowance,
                         'mr_allowance_mode_of_payment' => $allowance_mode_of_payment,
+                        'mr_employment_status_id' => $employment_status_id,
                         'created_at' => $now,
                         'updated_at' => $now,
                        ];
@@ -1001,6 +1003,11 @@ class Manning_payroll extends Admin_Controller
 
         foreach ($validation['form'] as $key => $value) {
             empty($_POST[$key]) || $post[$key] = $_POST[$key];
+        }
+
+        if ($post['deduction_and_govtdue'] == 3)
+        {
+            return self::get_thirteenth_month();
         }
 
         if ($post['deduction_and_govtdue'] == 1)
@@ -1157,7 +1164,55 @@ class Manning_payroll extends Admin_Controller
         $this->load_view('manning_payroll/government_dues');
     }
 
+    private function get_thirteenth_month()
+    {
+        // $this->output->enable_profiler(TRUE);
 
+        if ($this->input->post('scope') == 2)
+        {
+            $project_id = $this->input->post('project_id');
+            // scope project
+            if (in_array(-1, $project_id))
+            $this->db->where('project_id', NULL);
+            else
+            $this->db->where('project_id IN (' . implode(',', $project_id) . ')');
+
+            $data = [];
+            $projects = $this->projects->get();
+            foreach ($projects as $project)
+            {
+                $this->db->where('A.project_id', $project->project_id);
+
+                $data[] = array(
+                    'project_id' => $project->project_id,
+                    'project_title' => $project->title,
+                    'project_data' => $this->manning_payroll_earning_m->get_thirteenth_month(),
+                );
+                // dump($this->db->last_query());
+            }
+
+            // dd($data);
+            // return $data;
+        }
+        else
+        {
+            $data[] = array(
+                'project_id' => -1,
+                'project_title' => '',
+                'project_data' => $this->manning_payroll_earning_m->get_thirteenth_month(),
+            );
+        }
+
+        // dd($data);
+        // return $data;
+        $this->data['project'] = $data;
+        $this->data['invoice'] = TRUE;
+        $this->data['last_query'] = $this->db->last_query();
+
+        $this->data['report_type'] = ($this->input->post('report_format') == 1) ? ' Summary ' : ' Detailed ';
+        $this->data['covered_period'] = "FOR THE " . ( ! empty($this->input->post('payroll_month')) ? "MONTH OF " . $this->input->post('payroll_month') : "") . " YEAR " . $this->input->post('payroll_year');
+        return $this->load_view('manning_payroll/thirteenth_month');
+    }
 
     public function philhealth_contribution_project()
     {
@@ -1166,7 +1221,7 @@ class Manning_payroll extends Admin_Controller
 
         $validation = $this->manning_payroll_deduction_m->get_deduction();
 
-        // Fecth all row
+        // Fetch all row
         // $this->db->having('employee_share_philhealth >', 0);
 
         $field_arr = array(
@@ -1283,6 +1338,7 @@ class Manning_payroll extends Admin_Controller
 
     public function print_payslip($payroll_id, $manning_id = NULL)
     {
+        // $this->output->enable_profiler(TRUE);
         $this->load->model('manning_payroll_deduction_m');
 
         $now = date('Y-m-d H:i:s');

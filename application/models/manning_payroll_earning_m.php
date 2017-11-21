@@ -48,7 +48,16 @@ class Manning_payroll_earning_m extends MY_Model
                                     'adjustment',
                                     'G.remarks as deduction_remarks',
                                 ];
-
+    protected $thirteenth_month_field = [
+                                            'lastname',
+                                            'firstname',
+                                            'middlename',
+                                            'employee_no',
+                                            'position_code',
+                                            'position',
+                                            'manning_payroll_earning.employee_id',
+                                            'r_13thmonth',
+                                        ];
     public $rules = array(
         'payroll_id' => ['field' => 'payroll_id', 'label' => 'Payroll Id', 'rules' => 'required|intval|is_natural_no_zero|xss_clean'],
         'project_employee_id' => ['field' => 'project_employee_id', 'label' => 'Project Employee', 'rules' => 'required|intval|xss_clean'],
@@ -124,6 +133,10 @@ class Manning_payroll_earning_m extends MY_Model
         $wage[] = 'monthly_rate';
 
         $income_field = $this->projects->get_field();
+        // trigger the 13th month benefits
+        if ($project->with_13th_month != 1)
+        unset($income_field['13thmonth']);
+
         foreach ($wage as $earning)
         {
             $select_earning[] = $income_field[$earning]['payroll'];
@@ -194,9 +207,20 @@ class Manning_payroll_earning_m extends MY_Model
         $this->db->group_by($group_by);
 
         if ($this->reliever_payroll == TRUE)
-            $this->db->where_in('E.employment_status_id', [RELIEVER, EXTRA_RELIEVER]);
+        {
+            // $this->db->where_in('E.employment_status_id', [RELIEVER, EXTRA_RELIEVER]);
+            $employment_status = "( E.employment_status_id IN (" . RELIEVER . ", " .EXTRA_RELIEVER . ")
+                                    OR
+                                    I.mr_employment_status_id IN (" . RELIEVER . ", " .EXTRA_RELIEVER . ")
+                                  )";
+            $this->db->where($employment_status, NULL, FALSE);
+        }
         else
+        {
             $this->db->where_in('E.employment_status_id', $this->payroll_employment_status_ids);
+            $this->db->where("ISNULL(mr_employment_status_id) = 1", NULL, FALSE);
+        }
+
 
         // ONLY INCLUDE actived deduction
         $this->db->where('G.is_actived', 1);
@@ -213,7 +237,7 @@ class Manning_payroll_earning_m extends MY_Model
 
     public function get_manning_payroll_earning($payroll_id = NULL, $manning_payroll_earning_id = NULL, $single = FALSE)
     {
-        $this->db->select('manning_payroll_earning.*, lastname, firstname, middlename, position_code, position, rate, daily_rate, semi_monthly_rate, monthly_rate, employment_status_id, mr_daily_rate, mr_e_cola, manning_reliever_id');
+        $this->db->select('manning_payroll_earning.*, lastname, firstname, middlename, position_code, position, rate, daily_rate, semi_monthly_rate, monthly_rate, employment_status_id, mr_daily_rate, mr_e_cola, manning_reliever_id, mr_employment_status_id, r_employment_status_id');
         $this->db->join('manning_payroll as A', 'A.payroll_id = manning_payroll_earning.payroll_id', 'left');
         $this->db->join('manning as E', 'E.manning_id = manning_payroll_earning.employee_id', 'left');
         $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
@@ -225,11 +249,6 @@ class Manning_payroll_earning_m extends MY_Model
     public function update_payroll_reliever($payroll_id)
     {
         $this->load->model(array('manning_payroll_m', 'manning_reliever', 'manning_payroll_deduction_m'));
-
-        // $this->db->where('employment_status_id', RELIEVER);
-        /*$this->db->where_in('employment_status_id', [RELIEVER, EXTRA_RELIEVER]);
-        $this->db->where("(r_hourly_rate > 0 || r_daily_rate > 0 || r_semi_monthly_rate > 0 || r_monthly_rate > 0)", NULL, FALSE);
-        $reliever = self::get_manning_payroll_earning($payroll_id);*/
 
         // set gov't dues for reliever and extra-reliever to zero
         $sql = "UPDATE manning_payroll_deduction a
@@ -251,6 +270,28 @@ class Manning_payroll_earning_m extends MY_Model
                 ";
 
         $this->db->query($sql, array($payroll_id));
+        $affected = $this->db->affected_rows();
+
+        // set gov't dues for reliever and extra-reliever to zero DATA FROM MANNING
+        $sql = "UPDATE manning_payroll_deduction a
+                    INNER JOIN manning b
+                    ON employee_id = manning_id AND b.is_actived = 1
+                    SET
+                        employee_share_sss = 0.00,
+                        employer_share_sss = 0.00,
+                        employee_compensation_program_sss = 0.00,
+                        total_monthly_premium_sss = 0.00,
+                        employee_share_philhealth = 0.00,
+                        employer_share_philhealth = 0.00,
+                        total_monthly_premium_philhealth = 0.00,
+                        employee_share_pagibig = 0.00,
+                        employer_share_pagibig = 0.00,
+                        total_monthly_premium_pagibig = 0.00,
+                        a.updated_at = NOW()
+                    WHERE payroll_id = ? AND a.is_actived = 1 AND employment_status_id IN (?, ?)
+                ";
+
+        $this->db->query($sql, array($payroll_id, RELIEVER, EXTRA_RELIEVER));
         $affected = $this->db->affected_rows();
 
         // update manning payroll set w_reliever to 0 / 1
@@ -359,10 +400,10 @@ class Manning_payroll_earning_m extends MY_Model
                     `r_absent_rate_per_day` = round(((daily_rate/8) * no_absences_per_day) * -1,2),
                     `r_absent_rate` = round(((daily_rate/8) * no_absences_per_hr) * -1,2),
                     `r_incentive` = 0,
-                    `r_13thmonth` = IF(with_13th_month = 1, IF(rate = 2, round(semi_monthly_rate/12,2),
+                    `r_13thmonth` = IF(rate = 2, round(semi_monthly_rate/12,2),
                                         IF(rate = 3, round((monthly_rate * 0.50)/12,2),
                                                 round(((daily_rate/8) * no_hrs)/12,2))),
-                                                0.00),
+                    `r_employment_status_id` = A.employment_status_id,
                     `C`.`updated_at` = ?
                 WHERE `C`.`payroll_id` =  ? AND C.is_actived = 1";
         $this->db->query($sql, [$now, $payroll_id]);
@@ -402,10 +443,7 @@ class Manning_payroll_earning_m extends MY_Model
                     `r_absent_rate_per_day` = round(((mr_daily_rate/8) * no_absences_per_day) * -1,2),
                     `r_absent_rate` = round(((mr_daily_rate/8) * no_absences_per_hr) * -1,2),
                     `r_incentive` = 0,
-                    `r_13thmonth` = IF(with_13th_month = 1, IF(rate = 2, round(semi_monthly_rate/12,2),
-                                        IF(rate = 3, round((monthly_rate * 0.50)/12,2),
-                                                round(((mr_daily_rate/8) * no_hrs)/12,2))),
-                                                0.00),
+                    `r_13thmonth` = 0.00,
                     `C`.`updated_at` = ?
                 WHERE `C`.`payroll_id` =  ? AND C.is_actived = 1";
         $this->db->query($sql2, [$now, $payroll_id]);
@@ -513,12 +551,16 @@ class Manning_payroll_earning_m extends MY_Model
                         `r_absent_rate_per_day` = round((({$daily_rate}/8) * no_absences_per_day) * -1,2),
                         `r_absent_rate` = round((({$daily_rate}/8) * no_absences_per_hr) * -1,2),
                         `r_incentive` = 0,
-                        `r_13thmonth` = IF(with_13th_month = 1, IF(rate = 2, round(semi_monthly_rate/12,2),
+                        `r_13thmonth` = IF(r_employment_status_id IN(?,?), 0.00, IF(rate = 2, round(semi_monthly_rate/12,2),
                                             IF(rate = 3, round((monthly_rate * 0.50)/12,2),
-                                                    round((({$daily_rate}/8) * no_hrs)/12,2))),
-                                                    0.00),
+                                                    round((({$daily_rate}/8) * no_hrs)/12,2)))),
                         `C`.`updated_at` = ?
                     WHERE `C`.`payroll_id` =  ? AND C.is_actived = 1";
+
+                    /*`r_13thmonth` = IF(with_13th_month = 1, IF(rate = 2, round(semi_monthly_rate/12,2),
+                                        IF(rate = 3, round((monthly_rate * 0.50)/12,2),
+                                                round((({$daily_rate}/8) * no_hrs)/12,2))),
+                                                0.00),*/
 
             if ($employee_id !== NULL)
             $sql .= " AND C.employee_id = {$employee_id}";
@@ -526,13 +568,13 @@ class Manning_payroll_earning_m extends MY_Model
             if ($manning_payroll_earning_id !== NULL)
             {
                 $sql .= " AND manning_payroll_earning_id = ?";
-                $this->db->query($sql, [$now, $payroll_id, $manning_payroll_earning_id]);
+                $this->db->query($sql, [RELIEVER, EXTRA_RELIEVER, $now, $payroll_id, $manning_payroll_earning_id]);
                 // dd($this->db->last_query());
                 // stop processing and return affected row
                 return $this->db->affected_rows();
             }
 
-            $this->db->query($sql, [$now, $payroll_id]);
+            $this->db->query($sql, [RELIEVER, EXTRA_RELIEVER, $now, $payroll_id]);
         }
         else
         {
@@ -542,7 +584,6 @@ class Manning_payroll_earning_m extends MY_Model
             // DO NOT forget to UPDATE update payroll data METHOD
             // --------------------------------------------------------------------
             $status_ids = $this->earning_employment_status_ids;
-
             $post = [];
             $manning = $this->db
                             ->where([
@@ -565,6 +606,7 @@ class Manning_payroll_earning_m extends MY_Model
                                 'r_daily_rate' => 0.00,
                                 'r_semi_monthly_rate' => 0.00,
                                 'r_monthly_rate' => 0.00,
+                                'r_employment_status_id' => $employee->employment_status_id,
                                 'r_allowance' => 0.00,
                                 'r_13thmonth' => 0.00,
                                 'created_at' => $now,
@@ -574,14 +616,14 @@ class Manning_payroll_earning_m extends MY_Model
                     if ($employee->rate == 2)
                     {
                         $arr['r_semi_monthly_rate'] = $employee->semi_monthly_rate;
-                        if ($employee->with_13th_month == 1)
+                        if ($employee->with_13th_month == 1 && ! in_array($employee->employment_status_id, [RELIEVER, EXTRA_RELIEVER]))
                         $arr['r_13thmonth'] = round($employee->semi_monthly_rate/12, 2);
                     }
 
                     if ($employee->rate == 3)
                     {
                         $arr['r_monthly_rate'] = $employee->monthly_rate;
-                        if ($employee->with_13th_month == 1)
+                        if ($employee->with_13th_month == 1 && ! in_array($employee->employment_status_id, [RELIEVER, EXTRA_RELIEVER]))
                         $arr['r_13thmonth'] = round(($employee->monthly_rate * 0.50)/12, 2);
                     }
 
@@ -790,6 +832,116 @@ class Manning_payroll_earning_m extends MY_Model
 
         return $rate;
     }
+
+
+    public function get_thirteenth_month()
+    {
+
+
+
+        // select fields
+        $field = $this->thirteenth_month_field;
+
+        // payroll period
+        // if (count($this->input->post('pay_period')))
+        // $this->db->where_in('payroll_period', $this->input->post('pay_period'));
+
+        //  month
+        if ($this->input->post('payroll_month'))
+        $this->db->where('payroll_month', $this->input->post('payroll_month'));
+
+        // year
+        $this->db->where('payroll_year', $this->input->post('payroll_year'));
+
+        if ($this->input->post('scope') == 1)
+        {
+            // scope employee
+            $manning_id = $this->input->post('manning_id');
+            if (in_array(-1, $manning_id))
+            $this->db->where('manning_id', NULL);
+            else
+            {
+                $this->db->where('manning_id IN (' . implode(',', $manning_id) . ')');
+            }
+        }
+        /*else
+        {
+            // scope project
+            $project_id = $this->input->post('project_id');
+            if (in_array(-1, $project_id))
+            $this->db->where('A.project_id', NULL);
+            else
+            {
+                $this->db->where('A.project_id IN (' . implode(',', $project_id) . ')');
+            }
+        }*/
+
+        // payroll period
+        if ($this->input->post('pay_period'))
+        $this->db->where_in('payroll_period', $this->input->post('pay_period'));
+
+        $this->db->where('r_13thmonth >', 0);
+
+        $field = array_merge($field, ['payroll_date, A.payroll_id']);
+        if ($this->input->post('report_format') == 1)
+        {
+            // summarized and
+            // GROUP BY
+            unset($field['payroll_date']);
+            unset($field['r_13thmonth']);
+            unset($field['A.payroll_id']);
+
+            $field = array_merge($field, ['SUM(r_13thmonth) r_13thmonth', 'count(*) cnt_r13thmonth']);
+
+
+            $this->db->group_by('manning_id');
+        }
+
+        $this->db->select($field, FALSE);
+
+        $this->db->join('manning_payroll as A', 'A.payroll_id = '.$this->table_name.'.payroll_id', 'left');
+        $this->db->join('manning as E', 'E.manning_id = '.$this->table_name.'.employee_id', 'left');
+        $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
+        // $this->db->join('projects as G', 'G.project_id = A.project_id', 'left');
+
+        $this->db->order_by('lastname, firstname, middlename');
+
+        return parent::get();
+    }
+
+    /*public function filter_by_project($value='')
+    {
+        // limit to project
+        if (expr)
+        {
+            // all project
+        }
+        else
+        {
+            // selected projects
+        }
+
+        return $result;
+    }
+
+    public function filter_by_employee($value='')
+    {
+        // limit to employee
+        if (expr)
+        {
+            // all employee
+        }
+        else
+        {
+            // selected employees
+        }
+
+        return $result;
+    }*/
+
+
+
+
 
 }
 

@@ -1,11 +1,14 @@
-<?php
+<?php // $cnt1 = 1;
 	$this->load->model(['manning_payroll_earning_m', 'manning_payroll_deduction_m']);
+
+	$project = $this->projects->get($payroll_info->project_id);
 
 	$GLOBALS['billing_rates'] = $billing_rates = $this->projects->get_field();
 	$GLOBALS['tardiness'] = $tardiness = ['r_late_amount', 'r_absent_rate', 'r_absent_rate_per_day'];
 	$GLOBALS['earning'] = $GLOBALS['deduction'] = array();
 
 	$GLOBALS['reliever_payroll'] = $reliever_payroll;
+	$GLOBALS['with_13th_month'] = $project->with_13th_month;
 
     function get_earnings($payroll, $fields, $totalOnly = FALSE)
     {
@@ -27,21 +30,21 @@
 		           	{
 		           		$GLOBALS['earning'][$wage_name] = array(
 	           												'description' => $rate_data['abbr'],
-	           												'amount' => $payroll->$rate_data['payroll'],
-	           												'multiplier' => $payroll->$rate_data['payroll'] == 0 ? '' : $payroll->$rate_data['multiplier'],
+	           												'amount' => get_key($payroll, $rate_data['payroll'], 0),
+	           												'multiplier' => get_key($payroll, $rate_data['payroll'], 0) == 0 ? '' : get_key($payroll, $rate_data['multiplier'], ''),
 	           											);
 		           	}
 		           	else
 		           	{
-		           		$GLOBALS['earning'][$wage_name]['amount'] += $payroll->$rate_data['payroll'];
-		           		$GLOBALS['earning'][$wage_name]['multiplier'] += $payroll->$rate_data['payroll'] == 0 ? '' : $payroll->$rate_data['multiplier'];
+		           		$GLOBALS['earning'][$wage_name]['amount'] += get_key($payroll, $rate_data['payroll'], 0);
+		           		$GLOBALS['earning'][$wage_name]['multiplier'] = '';
 		           	}
 
 		            $data[] = array(
 		                        'name' => $wage_name,
 		                        'description' => $rate_data['abbr'],
-		                        'amount' => $payroll->$rate_data['payroll'],
-								'multiplier' => $payroll->$rate_data['payroll'] == 0 ? '' : $payroll->$rate_data['multiplier'],
+		                        'amount' => get_key($payroll, $rate_data['payroll'], 0),
+								'multiplier' => get_key($payroll, $rate_data['payroll'], 0) == 0 ? '' : get_key($payroll, $rate_data['multiplier'], ''),
 		                      );
 
         		}
@@ -65,25 +68,27 @@
 	    	else
 	    	{
 	    		$GLOBALS['earning']['r_cola']['amount'] += $payroll->r_cola;
-	    		$GLOBALS['earning']['r_cola']['multiplier'] += '';
+	    		$GLOBALS['earning']['r_cola']['multiplier'] = '';
 	    	}
 
 	        // 13th month benefits
-	        if ( ! $GLOBALS['reliever_payroll'])
-	        {
-		       	if (empty($GLOBALS['earning']['r_13thmonth']))
-		       		$GLOBALS['earning']['r_13thmonth'] = array(
-		   												'description' => '13th Month',
-		   												'amount' => $payroll->r_13thmonth,
-		   												'multiplier' => '',
-		   											);
-		       	else
-		       	{
-		       		$GLOBALS['earning']['r_13thmonth']['amount'] += $payroll->r_13thmonth;
-		       		$GLOBALS['earning']['r_13thmonth']['multiplier'] += '';
-		       	}
-	        }
-
+	    	if ($GLOBALS['with_13th_month'] == 1)
+	    	{
+		        if ( ! $GLOBALS['reliever_payroll'])
+		        {
+			       	if (empty($GLOBALS['earning']['r_13thmonth']))
+			       		$GLOBALS['earning']['r_13thmonth'] = array(
+			   												'description' => '13th Month',
+			   												'amount' => $payroll->r_13thmonth,
+			   												'multiplier' => '',
+			   											);
+			       	else
+			       	{
+			       		$GLOBALS['earning']['r_13thmonth']['amount'] += $payroll->r_13thmonth;
+			       		$GLOBALS['earning']['r_13thmonth']['multiplier'] = '';
+			       	}
+		        }
+		    }
 	       	// allowance
    	    	if (empty($GLOBALS['earning']['r_allowance']))
    	    		$GLOBALS['earning']['r_allowance'] = array(
@@ -94,7 +99,7 @@
    	    	else
    	    	{
    	    		$GLOBALS['earning']['r_allowance']['amount'] += $payroll->r_allowance;
-   	    		$GLOBALS['earning']['r_allowance']['multiplier'] += '';
+   	    		$GLOBALS['earning']['r_allowance']['multiplier'] = '';
    	    	}
 	       	$data[] = array(
 							'description' => 'E-COLA',
@@ -102,14 +107,17 @@
 							'multiplier' => '',
 						);
 
-	       	if ( ! $GLOBALS['reliever_payroll'])
+	       	if ($GLOBALS['with_13th_month'] == 1)
 	       	{
-		       	$data[] = array(
-								'description' => '13th Month',
-								'amount' => $payroll->r_13thmonth,
-								'multiplier' => '',
-							);
-	       	}
+		       	if ( ! $GLOBALS['reliever_payroll'])
+		       	{
+			       	$data[] = array(
+									'description' => '13th Month',
+									'amount' => $payroll->r_13thmonth,
+									'multiplier' => '',
+								);
+		       	}
+		    }
 
    	       	$data[] = array(
    							'description' => 'Allowance',
@@ -120,8 +128,11 @@
         else
         {
 	       	$data[] = $GLOBALS['earning']['r_cola'];
-	       	if ( ! $GLOBALS['reliever_payroll'])
-	       	$data[] = $GLOBALS['earning']['r_13thmonth'];
+	       	if ($GLOBALS['with_13th_month'] == 1)
+	       	{
+		       	if ( ! $GLOBALS['reliever_payroll'])
+		       	$data[] = $GLOBALS['earning']['r_13thmonth'];
+	       	}
 	       	$data[] = $GLOBALS['earning']['r_allowance'];
         }
         // dump($data);
@@ -155,15 +166,15 @@
 
     		foreach ($reg_deduction as $deduction2)
     		{
-    			if (!empty($payroll->$deduction2['payroll']))
+    			if (!empty(get_key($payroll, $deduction2['payroll'], '')))
     			{
-					if (abs($payroll->$deduction2['payroll']) > 0)
+					if (abs(get_key($payroll, $deduction2['payroll'], 0)) > 0)
 					{
 				           	$deduction1[] = array(
 				           		'name' => $deduction2['abbr'],
 				           		'description' => $deduction2['abbr'],
-				           		'payroll' => abs($payroll->$deduction2['payroll']),
-				           		'multiplier' => $deduction2['multiplier'] == '' ? '' : $payroll->$deduction2['multiplier'],
+				           		'payroll' => abs(get_key($payroll, $deduction2['payroll'], 0)),
+				           		'multiplier' => $deduction2['multiplier'] == '' ? '' : get_key($payroll, $deduction2['multiplier'], ''),
 				           	);
 					}
     			}
@@ -233,7 +244,7 @@
 			$this->load->model('projects');
 
 			$fields = $payroll_info->fields;
-			$project = $this->projects->get($payroll_info->project_id);
+
 			$reg_deduction = $this->manning_payroll_deduction_m->deduction_field($reliever_payroll);
 
 		    $fields = 'hourly_rate,' . $fields;
@@ -242,8 +253,8 @@
 		    $fields = 'monthly_rate,' . $fields;
 
 			$earning_total = $deduction_total = $ctr = 0;
+			// dump($payroll);
 		 ?>
-
 		<?php foreach ($payroll as $row): ?>
 <div class="row">
 	<div class="col-xs-12">
@@ -426,27 +437,27 @@
 												<?php endif ?>
 
 												<?php foreach ($reg_deduction as $deduction2): ?>
-													<?php if (!empty($row->$deduction2['payroll'])): ?>
-													<?php if (abs($row->$deduction2['payroll']) > 0): ?>
+													<?php if (!empty(get_key($row, $deduction2['payroll'], ''))): ?>
+													<?php if (abs(get_key($row, $deduction2['payroll'], 0)) > 0): ?>
 														<?php
 												           	if (empty($GLOBALS['deduction'][$deduction2['payroll']]))
 												           	{
 												           		$GLOBALS['deduction'][$deduction2['payroll']] = array(
 											           												'description' => $deduction2['abbr'],
-											           												'amount' => abs($row->$deduction2['payroll']),
-											           												'multiplier' => $deduction2['multiplier'] == '' ? '' : nf($row->$deduction2['multiplier']),
+											           												'amount' => abs(get_key($row, $deduction2['payroll'], '0')),
+											           												'multiplier' => nf(get_key($row, $deduction2['multiplier'], '')),
 											           											);
 												           	}
 												           	else
 												           	{
-												           		$GLOBALS['deduction'][$deduction2['payroll']]['amount'] += abs($row->$deduction2['payroll']);
-												           		$GLOBALS['deduction'][$deduction2['payroll']]['multiplier'] += $deduction2['multiplier'] == '' ? '' : nf($row->$deduction2['multiplier']);
+												           		$GLOBALS['deduction'][$deduction2['payroll']]['amount'] += abs(get_key($row, $deduction2['payroll'], 0));
+												           		$GLOBALS['deduction'][$deduction2['payroll']]['multiplier'] = nf(get_key($row, $deduction2['multiplier'], 0));
 												           	}
 														 ?>
 													<tr>
 														<td width="50%"><?php echo $deduction2['abbr'] ?></td>
-														<td class="text-right" width="15%"><?php echo $deduction2['multiplier'] == '' ? '' : nf($row->$deduction2['multiplier']) ?></td>
-														<td class="text-right" width="35%"><?php echo nf(abs($row->$deduction2['payroll'])) ?></td>
+														<td class="text-right" width="15%"><?php echo $deduction2['multiplier'] == '' ? '' : nf(get_key($row, $deduction2['multiplier'], 0)) ?></td>
+														<td class="text-right" width="35%"><?php echo nf(abs(get_key($row,$deduction2['payroll'], '0'))) ?></td>
 													</tr>
 
 													<?php endif ?>
@@ -502,7 +513,7 @@
 	</div>
 </div>
 
-
+<?php // $cnt1++; if($cnt1 == 3 ) die() ?>
 
 <?php endforeach ?>
 

@@ -150,31 +150,35 @@
 
 
                 <?php foreach ($earning as $billing): ?>
-                    <?php #die(dump($billing)); ?>
+                    <?php
+                        $employement_status = $billing->r_employment_status_id;
+                        if (get_key($billing, 'mr_employment_status_id', 0) > 0)
+                        $employement_status = $billing->mr_employment_status_id;
+                    ?>
                     <tr <?php echo $this->session->flashdata('id') == $billing->manning_payroll_earning_id ? "class='success'" : '';  ?> >
                         <td class="text-center" >
                             <?php
                                 if ($billing->w_adjustment == 1)
                                     echo 'Adj.';
-                                elseif ($billing->employment_status_id == RELIEVER)
+                                elseif ($employement_status == RELIEVER)
                                     echo 'R';
-                                elseif ($billing->employment_status_id == EXTRA_RELIEVER)
+                                elseif ($employement_status == EXTRA_RELIEVER)
                                     echo 'XR';
                                 else
                                     echo ++$counter;
                             ?>
                         </td>
                         <td
-                            <?php if ($billing->employment_status_id == RELIEVER) echo "class='bg-orange' "; ?>
-                            <?php if ($billing->employment_status_id == EXTRA_RELIEVER) echo "class='bg-red' "; ?>
+                            <?php if ($employement_status == RELIEVER) echo "class='bg-orange' "; ?>
+                            <?php if ($employement_status == EXTRA_RELIEVER) echo "class='bg-red' "; ?>
                             >
                             <?php
                                     echo $billing->lastname . ', ' . $billing->firstname . ' ' . $billing->middlename;
 
-                                    if ($billing->employment_status_id == RELIEVER)
+                                    if ($employement_status == RELIEVER)
                                     echo " <p class = 'label label-danger'>RELIEVER</p>";
 
-                                    if ($billing->employment_status_id == EXTRA_RELIEVER)
+                                    if ($employement_status == EXTRA_RELIEVER)
                                     echo " <p class = 'label label-danger'>EXTRA-RELIEVER</p>";
 
                                     if ( ! empty($billing->manning_reliever_id))

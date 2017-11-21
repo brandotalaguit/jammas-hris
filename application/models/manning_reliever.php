@@ -14,6 +14,7 @@ class Manning_reliever extends MY_Model
 		// 'mr_project_id' => ['field' => 'mr_project_id', 'label' => 'Project', 'rules' => 'trim|required|intval|is_natural_no_zero|xss_clean'],
 		'mr_payroll_id' => ['field' => 'mr_payroll_id', 'label' => 'Payroll', 'rules' => 'trim|required|intval|is_natural_no_zero|xss_clean'],
 		'mr_rate' => ['field' => 'mr_rate', 'label' => 'Rate Type', 'rules' => 'intval|is_natural_no_zero|xss_clean'],
+		'mr_employment_status_id' => ['field' => 'mr_employment_status_id', 'label' => 'Employment Status', 'rules' => 'intval|is_natural_no_zero|xss_clean'],
 		'mr_daily_rate' => ['field' => 'mr_daily_rate', 'label' => 'Daily Rate', 'rules' => 'trim|required|to_decimal|greater_than[0]|xss_clean'],
 		'mr_e_cola' => ['field' => 'mr_e_cola', 'label' => 'E-Cola', 'rules' => 'trim|to_decimal|required|xss_clean'],
 		'mr_allowance' => ['field' => 'mr_allowance', 'label' => 'Allowance', 'rules' => 'trim|to_decimal|xss_clean'],
@@ -29,7 +30,7 @@ class Manning_reliever extends MY_Model
 	{
 		$employee = new stdClass();
 		$employee->mr_manning_id = '0';
-		// $employee->mr_project_id = '0';
+		$employee->mr_employment_status_id = '0';
 		$employee->mr_payroll_id = '0';
 		$employee->mr_rate = '1';
 		$employee->mr_daily_rate = '502.00';

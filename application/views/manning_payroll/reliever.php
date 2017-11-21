@@ -17,13 +17,13 @@
             <div class="col-sm-8">
                 <div class="radio-inline margin">
                     <label>
-                        <input type="radio" name="employment_status" id="input_status" value="<?= RELIEVER ?>" required="">
+                        <input type="radio" name="mr_employment_status_id" id="input_status" value="<?= RELIEVER ?>" required="">
                         Reliever
                     </label>
                 </div>
                 <div class="radio-inline">
                     <label>
-                        <input type="radio" name="employment_status" id="input_status" value="<?= EXTRA_RELIEVER ?>" required="">
+                        <input type="radio" name="mr_employment_status_id" id="input_status" value="<?= EXTRA_RELIEVER ?>" required="">
                         Extra Reliever
                     </label>
                 </div>
@@ -129,7 +129,7 @@
         $input.trigger('change');
     }
 
-    $(document).on('click', 'input[type=radio][name=employment_status]', function (e) {
+    $(document).on('click', 'input[type=radio][name=mr_employment_status_id]', function (e) {
         $value = this.value;
         var $input = $('#manning_id');
         // Reliever

@@ -57,6 +57,27 @@ class updateDatabase extends CI_Controller {
 						$this->session->set_flashdata('message', 'Database has been successfully updated. You can now input allowance rate for reliever');
 				}
 
+				if ( ! $this->db->field_exists('mr_employment_status_id', 'jammas-hris`.`manning_reliever'))
+				{
+					$sql5 = "ALTER TABLE `jammas-hris`.`manning_reliever`
+					CHARACTER SET = utf8 , COLLATE = utf8_general_ci ,
+					ADD COLUMN `mr_employment_status_id` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '' AFTER `mr_allowance_mode_of_payment`;";
+					$this->db->query($sql5);
+					$this->session->set_flashdata('message', 'Database has been successfully updated. Manning mr_employment_status_id is now being record in the Database.');
+
+				}
+
+				if ( ! $this->db->field_exists('r_employment_status_id', 'jammas-hris`.`manning_payroll_earning'))
+				{
+					$sql6 = "ALTER TABLE `jammas-hris`.`manning_payroll_earning`
+								ADD COLUMN `r_employment_status_id` INT(2) NULL COMMENT '' AFTER `r_13thmonth`,
+								ADD INDEX `r_employment_status_id` (`r_employment_status_id` ASC)  COMMENT '';";
+					$this->db->query($sql6);
+					$this->session->set_flashdata('message', 'Database has been successfully updated. Manning r_employment_status_id is now being record in the Database.');
+
+				}
+
+
 				redirect('manning_payroll', 'refresh');
 
 	}
