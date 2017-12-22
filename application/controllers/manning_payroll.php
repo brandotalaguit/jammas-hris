@@ -982,7 +982,8 @@ class Manning_payroll extends Admin_Controller
                             'middlename',
                             'position_code',
                             'position',
-                            'SUM(gross_income) gross_income',
+                            // 'SUM(gross_income) gross_income',
+                            'SUM(sum_basic) gross_income',
                         );
 
         $validation = $this->manning_payroll_deduction_m->validate_search_form();

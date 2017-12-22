@@ -2,7 +2,7 @@
 
 <?php echo $form_url; ?>
 <div class="container">
-	
+
 
 <div class="row">
 	<div class="col-sm-10">
@@ -31,18 +31,18 @@
 			<span class="help-block"></span>
 		</div>
 
-		<label for="employee_share" class="col-sm-2 control-label">Employee Share</label>
-		<div class="form-group">
-			<div class="col-sm-6">
-				<input type="text" name="employee_share" id="employee_share" class="form-control deci" placeholder="Employee Share" value="<?php echo set_value('employee_share', $sss_matrix->employee_share);?>" autofocus>
-			</div>
-			<span class="help-block"></span>
-		</div>
-
 		<label for="employer_share" class="col-sm-2 control-label">Employer Share</label>
 		<div class="form-group">
 			<div class="col-sm-6">
 				<input type="text" name="employer_share" id="employer_share" class="form-control deci" placeholder="Employer Share" value="<?php echo set_value('employer_share', $sss_matrix->employer_share);?>" autofocus>
+			</div>
+			<span class="help-block"></span>
+		</div>
+
+		<label for="employee_share" class="col-sm-2 control-label">Employee Share</label>
+		<div class="form-group">
+			<div class="col-sm-6">
+				<input type="text" name="employee_share" id="employee_share" class="form-control deci" placeholder="Employee Share" value="<?php echo set_value('employee_share', $sss_matrix->employee_share);?>" autofocus>
 			</div>
 			<span class="help-block"></span>
 		</div>
@@ -63,11 +63,11 @@
 			</div>
 			<span class="help-block"></span>
 		</div>
-		
-		
+
+
 		<label for="remarks" class="col-sm-2 control-label">Remarks</label>
 		<div class="form-group">
-			<div class="col-sm-6">			
+			<div class="col-sm-6">
 				<textarea id="remarks" name="remarks" class="form-control" rows="3" placeholder="Remarks"><?php echo set_value('remarks', $sss_matrix->remarks);?></textarea>
 			</div>
 			<span class="help-block"></span>
@@ -80,7 +80,7 @@
 
 <div class="row">
 	<div class="col-sm-10">
-	
+
 	<div class="form-group">
 	  <div class="col-sm-offset-2 col-sm-6">
 	  <div class="btn-group">

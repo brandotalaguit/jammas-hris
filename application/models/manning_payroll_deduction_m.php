@@ -203,7 +203,6 @@ class Manning_payroll_deduction_m extends MY_Model
         if ($this->input->post('report_format') == 1)
         {
             ! $payroll_month || $this->db->group_by('payroll_month');
-            // $this->db->group_by('payroll_date, manning_id');
         }
         else
         {
@@ -349,6 +348,7 @@ class Manning_payroll_deduction_m extends MY_Model
         $this->db->join('manning as E', 'E.manning_id = manning_payroll_deduction.employee_id', 'left');
         $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
         $this->db->join('projects as G', 'G.project_id = A.project_id', 'left');
+        // $this->db->join('projects as G', 'G.project_id = A.project_id', 'left');
 
         $this->db->order_by('lastname, firstname, middlename, payroll_period ASC');
 
@@ -362,6 +362,11 @@ class Manning_payroll_deduction_m extends MY_Model
     public function generate_deduction($payroll_id, $employee_id = NULL, $post = NULL)
     {
         $this->load->model(['projects', 'manning_payroll_deduction_detail_m']);
+
+        $REGULAR = REGULAR;
+        $PROBITIONAL = PROBITIONAL;
+        $CO_TERMINOUS = CO_TERMINOUS;
+        $PROJECT_BASED = PROJECT_BASED;
 
         $payroll = $this->manning_payroll_m->get($payroll_id);
         $wages = explode(',', $payroll->fields);
@@ -440,16 +445,18 @@ class Manning_payroll_deduction_m extends MY_Model
                             COALESCE(sum($wage), 0) as gross_income,
                             COALESCE(sum(r_hourly_rate + r_semi_monthly_rate + r_monthly_rate), 0) pay_basic
                         FROM manning_payroll_earning MPE
-                        WHERE MPE.payroll_id = ? and is_actived
+                        WHERE MPE.payroll_id = ? and is_actived AND r_employment_status_id IN($REGULAR, $PROBITIONAL, $CO_TERMINOUS, $PROJECT_BASED)
                         GROUP BY manning_payroll_earning_id
                         HAVING pay_basic > 0
                     ) as a
                 LEFT JOIN (
-                        SELECT employee_id, COALESCE(sum($wage), 0) monthly_gross_income, COALESCE(sum(r_hourly_rate + r_semi_monthly_rate + r_monthly_rate), 0) monthly_basic
+                        SELECT employee_id, COALESCE(sum($wage), 0) monthly_gross_income,
+                        COALESCE(sum(r_hourly_rate + r_semi_monthly_rate + r_monthly_rate), 0) monthly_basic
                         FROM manning_payroll_earning MPE
                         LEFT JOIN manning_payroll ON manning_payroll.payroll_id = MPE.payroll_id AND manning_payroll.is_actived
-                        WHERE payroll_month = ? and payroll_year = ? and IsFinal = 1  and MPE.is_actived
-                        GROUP BY manning_payroll.project_id, employee_id
+                        WHERE payroll_month = ? and payroll_year = ? and IsFinal = 1
+                            AND r_employment_status_id IN($REGULAR, $PROBITIONAL, $CO_TERMINOUS, $PROJECT_BASED) and MPE.is_actived
+                        GROUP BY employee_id
                 ) as employee_salary ON employee_salary.employee_id = a.employee_id
                 LEFT JOIN (
                     SELECT employee_id,

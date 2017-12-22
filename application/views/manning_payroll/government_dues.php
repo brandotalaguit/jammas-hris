@@ -68,7 +68,7 @@
 			    <thead>
 			    	<tr>
 
-			    		<th colspan="<?php echo $contribution == 'sss' ? '9' :'8' ?>" class="text-center th-caption">
+			    		<th colspan="<?php echo $contribution == 'sss' ? '10' :'8' ?>" class="text-center th-caption">
 
 		    	<h4>JAMMAS INC.</h4>
 		    	<h5>
@@ -96,9 +96,9 @@
 					        <?php endif ?>
 				        </th>
 
-				        <?php if ( ! empty($contribution != 'sss')): ?>
-				        <th rowspan="2" width='12%' class="text-center">GROSS INCOME</th>
-				        <?php endif ?>
+				        <?php #if ( ! empty($contribution != 'sss')): ?>
+				        <th rowspan="2" width='12%' class="text-center">BASIC INCOME</th>
+				        <?php #endif ?>
 
 			    		<th colspan="<?= $contribution == 'sss' ? '6' : '4' ?>" width="" class="text-center">C O N T R I B U T I O N</th>
 				    </tr>
@@ -123,12 +123,18 @@
                     	$tmp_1 = 'employer_share_' . $contribution;
 						$tmp_2 = 'employee_share_' . $contribution;
 						$tmp_3 = 'total_monthly_premium_' . $contribution;
-
 						$company_share += $row->$tmp_1;
 						$employee_share += $row->$tmp_2;
-						$total_share += $row->$tmp_3;
+
 						if ($contribution == 'sss')
-						$ecc_share += $row->employee_compensation_program_sss;
+						{
+							$ecc_share += $row->employee_compensation_program_sss;
+							$total_share += ($row->$tmp_1 + $row->$tmp_2 + $row->employee_compensation_program_sss);
+						}
+						else
+						{
+							$total_share += $row->$tmp_3;
+						}
 
 						if ($row->$tmp_1 + $row->$tmp_2 ==  0)
 						continue;
@@ -150,11 +156,11 @@
 	                    	?>
 					</td>
 
-					<?php if ( $contribution != 'sss'): ?>
+					<?php #if ( $contribution != 'sss'): ?>
 					<td class="text-right">
 	                    <?php echo nf($row->gross_income); ?>
 					</td>
-					<?php endif ?>
+					<?php #endif ?>
 
 					<td class="text-right">
 	                    <?php
@@ -182,6 +188,9 @@
 
 					<td class="text-right">
 						<?php
+							if ($contribution == 'sss')
+							echo nf($row->$tmp_1 + $row->$tmp_2 + $row->employee_compensation_program_sss);
+							else
 							echo nf($row->$tmp_3);
 							?>
 					</td>
@@ -192,7 +201,7 @@
 
 		<tfoot>
 			<tr>
-				<th colspan="<?= $contribution == 'sss' ? '4' : '5' ?>">Sub-Total</th>
+				<th colspan="<?= /*$contribution == 'sss' ? '4' :*/ '5' ?>">Sub-Total</th>
 				<th class="text-right"><?php echo nf($company_share); ?></th>
 				<th class="text-right"><?php echo nf($employee_share); ?></th>
 				<?php if ($contribution == 'sss'): ?>
