@@ -867,6 +867,7 @@ class Manning_payroll extends Admin_Controller
                         'employee_id' => $id,
                         'r_daily_rate' => $daily_rate,
                         'r_allowance' => 0.00,
+                        'r_employment_status_id' => $employment_status_id,
                         'created_at' => $now,
                         'updated_at' => $now,
                        ];
