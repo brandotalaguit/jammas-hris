@@ -13,6 +13,7 @@ class Manning_payroll_earning_m extends MY_Model
 
     protected $earning_employment_status_ids = [REGULAR, PROBITIONAL, CO_TERMINOUS, PROJECT_BASED, RELIEVER, EXTRA_RELIEVER];
     protected $payroll_employment_status_ids = [REGULAR, PROBITIONAL, CO_TERMINOUS, PROJECT_BASED];
+    protected $reliever_employment_status_ids = [RELIEVER, EXTRA_RELIEVER];
 
     public $reliever_payroll = FALSE;
 
@@ -200,30 +201,24 @@ class Manning_payroll_earning_m extends MY_Model
         $this->db->join('manning_payroll as A', 'A.payroll_id = manning_payroll_earning.payroll_id', 'left');
         $this->db->join('manning as E', 'E.manning_id = manning_payroll_earning.employee_id', 'left');
         $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
-        $this->db->join('manning_payroll_deduction as G', 'manningPayrollEarningId = manning_payroll_earning_id', 'left');
+        $this->db->join('manning_payroll_deduction as G', 'manningPayrollEarningId = manning_payroll_earning_id AND G.is_actived', 'left');
         $this->db->join($deduction_sql . ' as H', 'H.employee_id = E.manning_id', 'left');
-        $this->db->join('manning_reliever as I', 'mr_manning_id = E.manning_id AND mr_payroll_id = A.payroll_id AND I.is_actived', 'left');
+        $this->db->join('manning_reliever as I',
+                        'mr_manning_id = manning_payroll_earning.employee_id AND mr_payroll_id = manning_payroll_earning.payroll_id AND I.is_actived', 'left');
 
         $this->db->group_by($group_by);
 
+        $employment_status = $this->payroll_employment_status_ids;
+
         if ($this->reliever_payroll == TRUE)
-        {
-            // $this->db->where_in('E.employment_status_id', [RELIEVER, EXTRA_RELIEVER]);
-            $employment_status = "( E.employment_status_id IN (" . RELIEVER . ", " .EXTRA_RELIEVER . ")
-                                    OR
-                                    I.mr_employment_status_id IN (" . RELIEVER . ", " .EXTRA_RELIEVER . ")
-                                  )";
-            $this->db->where($employment_status, NULL, FALSE);
-        }
+        $employment_status = $this->reliever_employment_status_ids;
         else
-        {
-            $this->db->where_in('E.employment_status_id', $this->payroll_employment_status_ids);
-            $this->db->where("ISNULL(mr_employment_status_id) = 1", NULL, FALSE);
-        }
+        $this->db->where("ISNULL(mr_employment_status_id) = 1", NULL, FALSE);
+
+        $this->db->where_in('r_employment_status_id', $employment_status);
 
 
-        // ONLY INCLUDE actived deduction
-        $this->db->where('G.is_actived', 1);
+        // INCLUDE ONLY employee with earning
         $this->db->having('earning >', 0);
 
         if ($manning_id !== NULL)
@@ -495,6 +490,11 @@ class Manning_payroll_earning_m extends MY_Model
                     $set = "{$post['field']} =  {$post['value']}, ";
                 }
             }
+
+            $e_cola = 'e_cola';
+            $daily_rate = 'daily_rate';
+            $allowance = 'allowance';
+            $allowance_mode_of_payment = 'allowance_mode_of_payment';
 
             if ( ! empty($employee_id))
             {
