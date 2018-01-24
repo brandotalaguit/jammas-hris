@@ -395,9 +395,9 @@ class Manning_payroll_earning_m extends MY_Model
                     `r_absent_rate_per_day` = round(((daily_rate/8) * no_absences_per_day) * -1,2),
                     `r_absent_rate` = round(((daily_rate/8) * no_absences_per_hr) * -1,2),
                     `r_incentive` = 0,
-                    `r_13thmonth` = IF(rate = 2, round(semi_monthly_rate/12,2),
+                    `r_13thmonth` = IF(with_13th_month=1, IF(rate = 2, round(semi_monthly_rate/12,2),
                                         IF(rate = 3, round((monthly_rate * 0.50)/12,2),
-                                                round(((daily_rate/8) * no_hrs)/12,2))),
+                                                round(((daily_rate/8) * no_hrs)/12,2))), 0.00),
                     `r_employment_status_id` = A.employment_status_id,
                     `C`.`updated_at` = ?
                 WHERE `C`.`payroll_id` =  ? AND C.is_actived = 1";
@@ -551,9 +551,9 @@ class Manning_payroll_earning_m extends MY_Model
                         `r_absent_rate_per_day` = round((({$daily_rate}/8) * no_absences_per_day) * -1,2),
                         `r_absent_rate` = round((({$daily_rate}/8) * no_absences_per_hr) * -1,2),
                         `r_incentive` = 0,
-                        `r_13thmonth` = IF(r_employment_status_id IN(?,?), 0.00, IF(rate = 2, round(semi_monthly_rate/12,2),
+                        `r_13thmonth` = IF(r_employment_status_id IN(?,?), 0.00, IF(with_13th_month = 1, IF(rate = 2, round(semi_monthly_rate/12,2),
                                             IF(rate = 3, round((monthly_rate * 0.50)/12,2),
-                                                    round((({$daily_rate}/8) * no_hrs)/12,2)))),
+                                                    round((({$daily_rate}/8) * no_hrs)/12,2))), 0.00)),
                         `C`.`updated_at` = ?
                     WHERE `C`.`payroll_id` =  ? AND C.is_actived = 1";
 
