@@ -366,7 +366,7 @@ class Manning_payroll_earning_m extends MY_Model
         $sql = "UPDATE `manning_payroll_earning` as C
                     LEFT JOIN manning as A ON C.employee_id = A.manning_id
                     LEFT JOIN manning_payroll as B ON C.payroll_id = B.payroll_id
-                    LEFT JOIN $join_proj_qry ON proj_id = B.project_id
+                    /*LEFT JOIN $join_proj_qry ON proj_id = B.project_id*/
                 SET
                     r_allowance = if(allowance_mode_of_payment=1, round((allowance * no_hrs)/8,2),
                                     if(allowance_mode_of_payment=2, allowance,
@@ -408,7 +408,7 @@ class Manning_payroll_earning_m extends MY_Model
         $sql2 = "UPDATE `manning_payroll_earning` as C
                     LEFT JOIN manning as A ON C.employee_id = A.manning_id
                     LEFT JOIN manning_payroll as B ON C.payroll_id = B.payroll_id
-                    LEFT JOIN $join_proj_qry ON proj_id = B.project_id
+                    /*LEFT JOIN $join_proj_qry ON proj_id = B.project_id*/
                     INNER JOIN manning_reliever F ON mr_manning_id = C.employee_id AND mr_payroll_id = {$payroll_id} AND F.is_actived
                 SET
                     r_allowance = if(mr_allowance_mode_of_payment=1, round((mr_allowance * no_hrs)/8,2),
@@ -520,7 +520,7 @@ class Manning_payroll_earning_m extends MY_Model
             $sql = "UPDATE `manning_payroll_earning` as C
                         LEFT JOIN manning as A ON C.employee_id = A.manning_id
                         LEFT JOIN manning_payroll as B ON C.payroll_id = B.payroll_id
-                        LEFT JOIN $join_proj_qry ON proj_id = B.project_id
+                        /*LEFT JOIN $join_proj_qry ON proj_id = B.project_id*/
                         LEFT JOIN manning_reliever as E ON A.manning_id = mr_manning_id AND B.payroll_id = mr_payroll_id AND E.is_actived
                     SET
                         $set

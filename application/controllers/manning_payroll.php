@@ -230,6 +230,8 @@ class Manning_payroll extends Admin_Controller
         // Process the form
         if ($this->form_validation->run() == TRUE)
         {
+            $proj = $this->projects->get($post['project_id']);
+            $post['with_13th_month'] = $proj->with_13th_month;
             $post['payroll_date'] != '0000-00-00' || $post['payroll_date'] = date('Y-m-d');
 
             // save post data
@@ -359,12 +361,14 @@ class Manning_payroll extends Admin_Controller
                 // generate deductions
                 $this->load->model('manning_payroll_deduction_m');
                 $affected = $this->manning_payroll_deduction_m->generate_deduction($id);
+                // $db_last = dump($this->db->last_query());
 
                 $this->manning_payroll_earning_m->update_payroll_reliever($id);
 
                 $this->db->order_by('payroll_id');
                 $data['payroll'] = $this->manning_payroll_m->get_manning_payroll($id);
                 $html = $this->load->view('manning_payroll/finalize', $data, TRUE);
+                // $html .= $db_last;
                 $this->session->set_flashdata('dialog_box', $html);
             }
         }

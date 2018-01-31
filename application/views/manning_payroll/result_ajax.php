@@ -68,8 +68,6 @@
                         echo anchor('manning_payroll/print_reliever_payslip/' . $row->payroll_id, '<i class="fa fa-print"></i> Reliever', ['class' => 'btn btn-success', 'target' => '_blank', 'title' => 'Print Reliever Payslip']);
                     ?>
                     <?php else: ?>
-                        <a href="<?php echo base_url("manning_payroll/earning/{$row->payroll_id}") ?>"
-                            class="btn btn-primary"><i class="fa fa-th"></i> Earning</a>
                         <?php echo btn_delete("manning_payroll/{$row->payroll_id}/delete", '&nbsp;') ?>
                     <?php endif ?>
                     </div>

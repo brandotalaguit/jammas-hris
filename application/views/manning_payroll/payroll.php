@@ -7,7 +7,7 @@
 	$GLOBALS['tardiness'] = $tardiness = ['r_late_amount', 'r_absent_rate', 'r_absent_rate_per_day'];
 	$GLOBALS['earning'] = $GLOBALS['deduction'] = array();
 	$GLOBALS['reliever_payroll'] = $reliever_payroll;
-	$GLOBALS['with_13th_month'] = $project->with_13th_month;
+	$GLOBALS['with_13th_month'] = $payroll_info->with_13th_month;
 
 
     function get_earnings($payroll, $fields, $totalOnly = FALSE)

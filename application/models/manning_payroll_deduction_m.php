@@ -431,9 +431,44 @@ class Manning_payroll_deduction_m extends MY_Model
                     abs(IFNULL(sum_employee_compensation_program_sss,0) - b.employee_compensation_program),
                     abs(IFNULL(sum_monthly_sss,0) - b.total_monthly_premium),
 
-                    IF({$mode_philhealth} = {$payroll_period}, d.employee_share, abs(IFNULL(sum_employee_philhealth,0) - d.employee_share)),
-                    IF({$mode_philhealth} = {$payroll_period}, d.employer_share, abs(IFNULL(sum_employer_philhealth,0) - d.employer_share)),
-                    IF({$mode_philhealth} = {$payroll_period}, d.total_monthly_premium, abs(IFNULL(sum_monthly_philhealth,0) - d.total_monthly_premium)),
+                    IF({$payroll_period} = 2,
+                        if(monthly_basic <= 10000,
+                                137.50 - sum_employee_philhealth,
+                                IF( monthly_basic * 0.01375 - sum_employee_philhealth < 0,
+                                    0,
+                                    monthly_basic * 0.01375 - sum_employee_philhealth
+                                )
+                        ),
+                        monthly_basic * 0.01375 - sum_employee_philhealth
+                    ),
+
+                    IF({$payroll_period} = 2,
+                        if(monthly_basic <= 10000,
+                                137.50 - sum_employer_philhealth,
+                                IF( monthly_basic * 0.01375 - sum_employer_philhealth < 0,
+                                    0,
+                                    monthly_basic * 0.01375 - sum_employer_philhealth
+                                )
+                        ),
+                        monthly_basic * 0.01375 - sum_employer_philhealth
+                    ),
+
+                    IF({$payroll_period} = 2,
+                            if(monthly_basic <= 10000,
+                                    (137.50 - sum_employee_philhealth) + (137.50 - sum_employer_philhealth),
+                                    IF( monthly_basic * 0.01375 - sum_employee_philhealth < 0,
+                                        0,
+                                        monthly_basic * 0.01375 - sum_employee_philhealth
+                                    )
+                                    +
+                                    IF( monthly_basic * 0.01375 - sum_employer_philhealth < 0,
+                                        0,
+                                        monthly_basic * 0.01375 - sum_employer_philhealth
+                                    )
+                            ),
+                            (monthly_basic * 0.01375 - sum_employee_philhealth) + (monthly_basic * 1.375 - sum_employer_philhealth)
+                    ),
+
 
                     IF({$mode_pagibig} = {$payroll_period}, c.employee_share, IF($mode_pagibig != 3, 0, abs(IFNULL(sum_employee_pagibig,0) - c.employee_share))),
                     IF({$mode_pagibig} = {$payroll_period}, c.employer_share, IF($mode_pagibig != 3, 0, abs(IFNULL(sum_employer_pagibig,0) - c.employer_share))),
@@ -480,14 +515,11 @@ class Manning_payroll_deduction_m extends MY_Model
                 LEFT JOIN pagibig_premium_contribution_matrix as c
                     on monthly_basic >= c.salary_range_start AND monthly_basic <= c.salary_range_end AND monthly_basic > 0
 
-                LEFT JOIN philhealth_premium_contribution_matrix as d
-                    on monthly_basic >= d.salary_range_start AND monthly_basic <= d.salary_range_end AND monthly_basic > 0
-
                 LEFT JOIN (
                     SELECT COUNT(*) cnt, COALESCE(SUM(fixed_amount), 0) sum_other_deduction_amount, employee_id FROM deductions
                     WHERE coverage_date_end >= ? AND mode_of_payment IN(2,{$payroll_period}) AND is_actived AND is_closed != 1
                     GROUP BY employee_id
-                ) as other ON a.employee_id = other.employee_id AND b.is_actived AND c.is_actived AND d.is_actived
+                ) as other ON a.employee_id = other.employee_id AND b.is_actived AND c.is_actived
                 HAVING monthly_basic > 0
         ";
         $dd = $this->db->query($sql, [$payroll_id, $payroll->payroll_month, $payroll->payroll_year, $payroll->payroll_month, $payroll->payroll_year, $payroll_date_start]);

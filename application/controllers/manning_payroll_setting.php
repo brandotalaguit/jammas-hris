@@ -72,8 +72,14 @@ class Manning_payroll_setting extends Admin_Controller {
 	        	$payroll = $this->manning_payroll_m->get($payroll_id);
 	        	if ( ! empty($payroll))
 	        	{
+	        		$affected = $this->manning_payroll_m->save($data, $payroll_id);
+
 	        		if ($save_option == 2)
 			        $msg = "<h4>Success.</h4><p>Payroll setting has been successfully applied to this project(s).</p>";
+
+			    	if ($affected > 0)
+			    	parent::redirect_to($msg, 'manning_payroll/update_payroll_data/' . $payroll_id, FALSE);
+
 	        		!$payroll->IsFinal || parent::redirect_to($msg, 'manning_payroll/earning/' . $payroll_id, FALSE);
 	        	}
 	        }
