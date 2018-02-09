@@ -1,3 +1,6 @@
+<style type="text/css">
+    td.bg-orange > a.btn-link { color: #fff !important; }
+</style>
 <div id="msg" class="alert"></div>
 <div class="modal fade" id="modal-id">
     <div class="modal-dialog" style="width: 95%;">
@@ -173,7 +176,10 @@
                             <?php if ($employement_status == EXTRA_RELIEVER) echo "class='bg-red' "; ?>
                             >
                             <?php
-                                    echo $billing->lastname . ', ' . $billing->firstname . ' ' . $billing->middlename;
+                            http://localhost/jammas-hris/manning_list/00000000811/edit
+                                    $employee_name = "";
+                                    empty($billing->employee_id) OR $employee_name = $billing->lastname . ', ' . $billing->firstname . ' ' . $billing->middlename;
+                                    echo anchor("manning_list/{$billing->employee_id}/edit", $employee_name, ['class' => 'btn-link', 'target' => '_blank']);
 
                                     if ($employement_status == RELIEVER)
                                     echo " <p class = 'label label-danger'>RELIEVER</p>";

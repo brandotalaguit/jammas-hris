@@ -245,7 +245,11 @@ class Manning_payroll_deduction_m extends MY_Model
              }
              else
              {
-                 $this->db->group_by('payroll_date, payroll_period');
+                if (!in_array('payroll_date', $field_arr))
+                {
+                    $field_arr = array_merge($field_arr, ['payroll_date']);
+                }
+                $this->db->group_by('payroll_date, payroll_period');
              }
 
              if (count($this->input->post('pay_period')))
@@ -433,40 +437,46 @@ class Manning_payroll_deduction_m extends MY_Model
 
                     IF({$payroll_period} = 2,
                         if(monthly_basic <= 10000,
-                                137.50 - sum_employee_philhealth,
-                                IF( monthly_basic * 0.01375 - sum_employee_philhealth < 0,
+                                137.50 - IFNULL(sum_employee_philhealth, 0),
+                                IF( monthly_basic * 0.01375 - IFNULL(sum_employee_philhealth, 0)  < 0,
                                     0,
-                                    monthly_basic * 0.01375 - sum_employee_philhealth
+                                    ROUND(monthly_basic * 0.01375 - IFNULL(sum_employee_philhealth, 0), 2)
                                 )
                         ),
-                        monthly_basic * 0.01375 - sum_employee_philhealth
+                        ROUND(monthly_basic * 0.01375 - IFNULL(sum_employee_philhealth, 0), 2)
                     ),
 
                     IF({$payroll_period} = 2,
                         if(monthly_basic <= 10000,
-                                137.50 - sum_employer_philhealth,
-                                IF( monthly_basic * 0.01375 - sum_employer_philhealth < 0,
+                                137.50 - IFNULL(sum_employer_philhealth, 0) ,
+                                IF( ROUND( monthly_basic * 0.01375 - IFNULL(sum_employer_philhealth, 0), 2)   < 0,
                                     0,
-                                    monthly_basic * 0.01375 - sum_employer_philhealth
+                                    ROUND( monthly_basic * 0.01375 - IFNULL(sum_employer_philhealth, 0), 2)
                                 )
                         ),
-                        monthly_basic * 0.01375 - sum_employer_philhealth
+                        ROUND( monthly_basic * 0.01375 - IFNULL(sum_employer_philhealth, 0), 2)
                     ),
 
                     IF({$payroll_period} = 2,
                             if(monthly_basic <= 10000,
-                                    (137.50 - sum_employee_philhealth) + (137.50 - sum_employer_philhealth),
-                                    IF( monthly_basic * 0.01375 - sum_employee_philhealth < 0,
+                                    ROUND(
+                                            (137.50 - IFNULL(sum_employee_philhealth, 0)) +
+                                            (137.50 - IFNULL(sum_employer_philhealth, 0))
+                                        , 2),
+                                    IF( ROUND(monthly_basic * 0.01375 - IFNULL(sum_employee_philhealth, 0), 2)  < 0,
                                         0,
-                                        monthly_basic * 0.01375 - sum_employee_philhealth
+                                        ROUND(monthly_basic * 0.01375 - IFNULL(sum_employee_philhealth, 0), 2)
                                     )
                                     +
-                                    IF( monthly_basic * 0.01375 - sum_employer_philhealth < 0,
+                                    IF( ROUND( monthly_basic * 0.01375 - IFNULL(sum_employer_philhealth, 0), 2)   < 0,
                                         0,
-                                        monthly_basic * 0.01375 - sum_employer_philhealth
+                                        ROUND( monthly_basic * 0.01375 - IFNULL(sum_employer_philhealth, 0), 2)
                                     )
                             ),
-                            (monthly_basic * 0.01375 - sum_employee_philhealth) + (monthly_basic * 1.375 - sum_employer_philhealth)
+                            ROUND(
+                                    (monthly_basic * 0.01375 - IFNULL(sum_employee_philhealth, 0)) +
+                                    (monthly_basic * 1.375 - IFNULL(sum_employer_philhealth, 0))
+                                , 2)
                     ),
 
 

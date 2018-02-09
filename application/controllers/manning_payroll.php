@@ -230,9 +230,16 @@ class Manning_payroll extends Admin_Controller
         // Process the form
         if ($this->form_validation->run() == TRUE)
         {
-            $proj = $this->projects->get($post['project_id']);
-            $post['with_13th_month'] = $proj->with_13th_month;
             $post['payroll_date'] != '0000-00-00' || $post['payroll_date'] = date('Y-m-d');
+            $proj = $this->projects->get($post['project_id']);
+            if (!empty($proj))
+            {
+                $post['with_13th_month']            = $proj->with_13th_month;
+                $post['mode_of_payment_sss']        = $proj->mode_of_payment_sss;
+                $post['mode_of_payment_pagibig']    = $proj->mode_of_payment_pagibig;
+                $post['mode_of_payment_allowance']  = $proj->mode_of_payment_allowance;
+                $post['mode_of_payment_philhealth'] = $proj->mode_of_payment_philhealth;
+            }
 
             // save post data
             $data['id'] = $this->manning_payroll_m->save($post, $id);
@@ -306,6 +313,16 @@ class Manning_payroll extends Admin_Controller
                 ]);
             ! empty($data['payroll_date']) || $data['payroll_date'] = date('Y-m-d');
             $data['fields'] = implode(",", $_POST['fields']);
+
+            $project = $this->projects->get($data['project_id']);
+            if (!empty($project))
+            {
+                $data['with_13th_month']            = $project->with_13th_month;
+                $data['mode_of_payment_sss']        = $project->mode_of_payment_sss;
+                $data['mode_of_payment_pagibig']    = $project->mode_of_payment_pagibig;
+                $data['mode_of_payment_allowance']  = $project->mode_of_payment_allowance;
+                $data['mode_of_payment_philhealth'] = $project->mode_of_payment_philhealth;
+            }
 
             // save post data
             $id = $this->manning_payroll_m->save($data, $id);

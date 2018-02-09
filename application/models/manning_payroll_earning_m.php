@@ -299,7 +299,7 @@ class Manning_payroll_earning_m extends MY_Model
         #TODO:
         // add missing employee,
         // update payroll entries
-        $this->load->model('manning_payroll_m');
+        $this->load->model(array('manning_payroll_m', 'projects'));
 
         $payroll = $this->manning_payroll_m->get($payroll_id);
 
@@ -313,6 +313,18 @@ class Manning_payroll_earning_m extends MY_Model
         }
 
         $project_id = $payroll->project_id;
+        $project = $this->projects->get($project_id);
+        if (!empty($project))
+        {
+            $data['with_13th_month']            = $project->with_13th_month;
+            $data['mode_of_payment_sss']        = $project->mode_of_payment_sss;
+            $data['mode_of_payment_pagibig']    = $project->mode_of_payment_pagibig;
+            $data['mode_of_payment_philhealth'] = $project->mode_of_payment_philhealth;
+            $data['mode_of_payment_allowance']  = $project->mode_of_payment_allowance;
+            // save post data
+            $this->manning_payroll_m->save($data, $project_id);
+        }
+
         // regular, project-based, probitionary & co-terminous, reliever status
         // --------------------------------------------------------------------
         // DO NOT forget to UPDATE save earning METHOD

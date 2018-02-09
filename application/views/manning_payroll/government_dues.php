@@ -57,6 +57,24 @@
 	$subtotal_company_share = $subtotal_employee_share = $subtotal_share = $company_share = $employee_share = $total_share = $ecc_share = 0;
 	$subtotal = array();
 	$title = FALSE;
+
+	$colspan_header = 9;
+	$colspan_subtotal = 5;
+
+	if ($_POST['report_format'] == '1')
+	{
+		// do nothing
+	}
+	else
+	{
+		$colspan_subtotal += 1;
+	}
+
+	if ($contribution == 'sss')
+	{
+		$colspan_header += 2;
+	}
+
 ?>
 	<?php foreach ($project as $key => $proj): ?>
 
@@ -68,7 +86,7 @@
 			    <thead>
 			    	<tr>
 
-			    		<th colspan="<?php echo $contribution == 'sss' ? '10' :'8' ?>" class="text-center th-caption">
+			    		<th colspan="<?= $colspan_header ?>" class="text-center th-caption">
 
 		    	<h4>JAMMAS INC.</h4>
 		    	<h5>
@@ -96,11 +114,13 @@
 					        <?php endif ?>
 				        </th>
 
-				        <?php #if ( ! empty($contribution != 'sss')): ?>
-				        <th rowspan="2" width='12%' class="text-center">BASIC INCOME</th>
-				        <?php #endif ?>
+				        <?php if ($_POST['report_format'] != '1'): ?>
+				        <th rowspan="2" width='8%'>PAYROLL DATE</th>
+				        <?php endif ?>
 
-			    		<th colspan="<?= $contribution == 'sss' ? '6' : '4' ?>" width="" class="text-center">C O N T R I B U T I O N</th>
+				        <th rowspan="2" width='12%' class="text-center">BASIC INCOME</th>
+
+			    		<th colspan="<?= $contribution == 'sss' ? '7' : '5' ?>" width="" class="text-center">C O N T R I B U T I O N</th>
 				    </tr>
 			    	<tr>
 				        <th width='11%' class="text-center">COMPANY SHARE</th>
@@ -115,8 +135,8 @@
 				<tbody>
 
 				<?php $ctr = 0; ?>
-			    <?php $company_share = $employee_share = $total_share = 0; ?>
-
+			    <?php $company_share = $employee_share = $total_share = $tmp_income = 0; ?>
+			    <?php $employee_no = $tmp_emp_no = ""; ?>
 				<?php foreach ($proj['project_data'] as $row): ?>
 	<!-- start result here -->
 				<?php
@@ -144,7 +164,10 @@
 						<?php echo ++$ctr;?>.
 					</td>
 					<td>
-						<?php echo $row->employee_no;?>
+						<?php
+							echo $row->employee_no;
+							$employee_no = $row->employee_no;
+						?>
 					</td>
 					<td>
 	                    <?php echo $row->lastname . ', ' . $row->firstname . ' ' . substr($row->middlename, 0, 1); ?>
@@ -156,9 +179,26 @@
 	                    	?>
 					</td>
 
+					<?php if ($_POST['report_format'] != '1'): ?>
+					<td>
+	                    <?php echo date('m-d-y', strtotime($row->payroll_date)); ?>
+					</td>
+					<?php endif ?>
 					<?php #if ( $contribution != 'sss'): ?>
 					<td class="text-right">
-	                    <?php echo nf($row->gross_income); ?>
+	                    <?php #echo nf($row->gross_income); ?>
+	                    <?php
+	                    	if ($employee_no != $tmp_emp_no)
+	                    	{
+	                    		$tmp_emp_no = $employee_no;
+	                    		$tmp_income = $row->gross_income;
+	                    	}
+	                    	else
+	                    	{
+	                    	 	$tmp_income = $row->gross_income - $tmp_income;
+	                    	}
+	                    	echo nf($tmp_income);
+	                    ?>
 					</td>
 					<?php #endif ?>
 
@@ -201,7 +241,7 @@
 
 		<tfoot>
 			<tr>
-				<th colspan="<?= /*$contribution == 'sss' ? '4' :*/ '5' ?>">Sub-Total</th>
+				<th colspan="<?= $colspan_subtotal ?>">Sub-Total</th>
 				<th class="text-right"><?php echo nf($company_share); ?></th>
 				<th class="text-right"><?php echo nf($employee_share); ?></th>
 				<?php if ($contribution == 'sss'): ?>
