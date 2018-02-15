@@ -186,9 +186,9 @@
 					<?php endif ?>
 					<?php #if ( $contribution != 'sss'): ?>
 					<td class="text-right">
-	                    <?php #echo nf($row->gross_income); ?>
+	                    <?php echo nf($row->gross_income); ?>
 	                    <?php
-	                    	if ($employee_no != $tmp_emp_no)
+	                    	/*if ($employee_no != $tmp_emp_no)
 	                    	{
 	                    		$tmp_emp_no = $employee_no;
 	                    		$tmp_income = $row->gross_income;
@@ -197,7 +197,7 @@
 	                    	{
 	                    	 	$tmp_income = $row->gross_income - $tmp_income;
 	                    	}
-	                    	echo nf($tmp_income);
+	                    	echo nf($tmp_income);*/
 	                    ?>
 					</td>
 					<?php #endif ?>

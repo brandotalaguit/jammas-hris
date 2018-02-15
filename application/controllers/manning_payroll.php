@@ -1005,7 +1005,7 @@ class Manning_payroll extends Admin_Controller
                             'position_code',
                             'position',
                             // 'SUM(gross_income) gross_income',
-                            'SUM(sum_basic) gross_income',
+                            'H.monthly_basic gross_income',
                         );
 
         $validation = $this->manning_payroll_deduction_m->validate_search_form();
@@ -1054,7 +1054,7 @@ class Manning_payroll extends Admin_Controller
             if ($govt_dues == 3)
             {
                 $govt_dues = 'sss';
-                unset($field_arr['SUM(gross_income) gross_income']);
+                unset($field_arr['H.monthly_basic gross_income']);
                 $field_arr = array_merge($field_arr, $this->manning_payroll_deduction_m->sss_deduction);
             }
 
@@ -1252,7 +1252,7 @@ class Manning_payroll extends Admin_Controller
                             'payroll_month',
                             'payroll_year',
 
-                            'SUM(gross_income) gross_income',
+                            'H.monthly_basic gross_income',
 
                             // deduction
                             'SUM(employee_share_philhealth) employee_share_philhealth',

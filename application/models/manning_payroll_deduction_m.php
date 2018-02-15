@@ -197,6 +197,11 @@ class Manning_payroll_deduction_m extends MY_Model
 
     public function get_by_employee_contribution($field_arr, $payroll_year, $manning_id = NULL, $payroll_month = NULL)
     {
+        $REGULAR = REGULAR;
+        $PROBITIONAL = PROBITIONAL;
+        $CO_TERMINOUS = CO_TERMINOUS;
+        $PROJECT_BASED = PROJECT_BASED;
+
         ! $manning_id || $this->db->where('manning_id IN (' . implode(',', $manning_id) . ')');
         ! $payroll_month || $this->db->where('payroll_month', $payroll_month);
 
@@ -214,14 +219,27 @@ class Manning_payroll_deduction_m extends MY_Model
             $this->db->where_in('payroll_period', $this->input->post('pay_period'));
         }
 
+        $summary = TRUE;
+        if ($this->input->post('report_format') == 2)
+        {
+          in_array('payroll_date', $field_arr) || array_push($field_arr, 'payroll_date');
+          $summary = FALSE;
+        }
+        self::join_by_payroll_month($payroll_month, $payroll_year, NULL, $summary, $manning_id);
+
         $this->db->where('payroll_year', $payroll_year);
         return $this->fields($field_arr)
                     ->group_by('manning_id')
                     ->get_manning_payroll_deduction();
     }
 
-    public function get_by_project_contribution($field_arr, $payroll_year, $project_id, $payroll_month = NULL)
+    public function get_by_project_contribution($field_arr,$payroll_year,$project_id,$payroll_month=NULL)
     {
+        $REGULAR = REGULAR;
+        $PROBITIONAL = PROBITIONAL;
+        $CO_TERMINOUS = CO_TERMINOUS;
+        $PROJECT_BASED = PROJECT_BASED;
+
          // Fecth all row
          // $this->db->having('employee_share_philhealth >', 0);
          // project ids
@@ -257,6 +275,13 @@ class Manning_payroll_deduction_m extends MY_Model
                  $this->db->where_in('payroll_period', $this->input->post('pay_period'));
              }
 
+             $summary = TRUE;
+             if ($this->input->post('report_format') == 2)
+             {
+               $summary = FALSE;
+             }
+             self::join_by_payroll_month($payroll_month, $payroll_year, $row->project_id, $summary);
+
              $result = $this->fields($field_arr)
                             // ->group_by('G.project_id, manning_id')
                             ->group_by('manning_id')
@@ -270,6 +295,49 @@ class Manning_payroll_deduction_m extends MY_Model
          }
 
          return $project;
+    }
+
+    public function join_by_payroll_month($month, $year, $project_id = NULL, $summary = FALSE, $manning_id = array())
+    {
+        $REGULAR = REGULAR;
+        $PROBITIONAL = PROBITIONAL;
+        $CO_TERMINOUS = CO_TERMINOUS;
+        $PROJECT_BASED = PROJECT_BASED;
+
+        $column = "employee_id, \nCOALESCE(sum(r_hourly_rate+r_semi_monthly_rate+r_monthly_rate), 0) monthly_basic \n";
+        $join_on  = 'manning_payroll_deduction.employee_id=H.employee_id';
+        if ($summary == TRUE)
+        {
+            $group_by = 'employee_id';
+        }
+        else
+        {
+            $column  .= ",\n MPE.payroll_id";
+            $group_by = 'employee_id, MPE.payroll_id';
+            $join_on .= ' AND manning_payroll_deduction.payroll_id = H.payroll_id';
+        }
+
+        $where = "\n and project_id = $project_id";
+        if ($project_id == NULL)
+        {
+            ! $manning_id || $where = "\n and employee_id IN (". implode(',', $manning_id) .")";
+        }
+
+        $sql_statement = "SELECT $column FROM manning_payroll_earning MPE
+                           LEFT JOIN manning_payroll
+                            ON manning_payroll.payroll_id = MPE.payroll_id
+                           WHERE payroll_month = '$month'
+                            and payroll_year = '$year'
+                            $where
+                            and IsFinal = 1
+                            and r_employment_status_id IN($REGULAR, $PROBITIONAL, $CO_TERMINOUS, $PROJECT_BASED)
+                            and manning_payroll.is_actived
+                            and MPE.is_actived
+                           GROUP BY $group_by ";
+
+        $this->db->join('(' . $sql_statement . ') as H', $join_on, 'left');
+
+        return $this;
     }
 
     public function get_deduction()
@@ -353,7 +421,6 @@ class Manning_payroll_deduction_m extends MY_Model
         $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
         $this->db->join('projects as G', 'G.project_id = A.project_id', 'left');
         // $this->db->join('projects as G', 'G.project_id = A.project_id', 'left');
-
         $this->db->order_by('lastname, firstname, middlename, payroll_period ASC');
 
 
