@@ -999,9 +999,9 @@ class Manning_payroll extends Admin_Controller
         $this->load->model('manning_payroll_deduction_m');
         $field_arr = array(
                             'employee_no',
-                            'lastname',
-                            'firstname',
-                            'middlename',
+                            'UPPER(lastname) lastname',
+                            'UPPER(firstname) firstname',
+                            'UPPER(middlename) middlename',
                             'position_code',
                             'position',
                             // 'SUM(gross_income) gross_income',

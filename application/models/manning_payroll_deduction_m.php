@@ -14,7 +14,7 @@ class Manning_payroll_deduction_m extends MY_Model
     private $deductions = array();
 
     private $_select = "title, tin, rate_hourly, rate_daily, rate_monthly, rate_semi_monthly,
-                            lastname, firstname, middlename, position_code, position,
+                            UPPER(lastname) lastname, UPPER(firstname) firstname, UPPER(middlename) middlename, position_code, position,
                             pagibig_no, philhealth_no, tin_no, sss_no, employee_no, date_printed, date_start, date_end,
                             manning_payroll_deduction.*";
 
@@ -317,7 +317,11 @@ class Manning_payroll_deduction_m extends MY_Model
             $join_on .= ' AND manning_payroll_deduction.payroll_id = H.payroll_id';
         }
 
+        $where = "";
+        if ($project_id != NULL)
+        {
         $where = "\n and project_id = $project_id";
+        }
         if ($project_id == NULL)
         {
             ! $manning_id || $where = "\n and employee_id IN (". implode(',', $manning_id) .")";
