@@ -38,7 +38,10 @@
 				<td><?php echo $row->middlename ?></td>
 				<td><?php echo $row->title ?></td>
 				<td><?php echo $row->payroll_month . ' ' . $row->payroll_year . '<br>'
-				 . ' (' . $row->payroll_period . ' cut-off' . ' ' . php_date($row->date_start, 'M. d') . ' to ' . php_date($row->date_end, 'M. d') . ')' ; ?></td>
+				 . ' (' . $row->payroll_period . ' cut-off' . ' ' . php_date($row->date_start, 'M. d') . ' to ' . php_date($row->date_end, 'M. d') . ')' ;
+				 	echo anchor('manning_payroll/earning/' . $row->payroll_id , 'Earning', ['class' => 'btn-link', 'target' => '_blank']);
+ 					echo ' | ' . anchor('manning_payroll/print_payroll/' . $row->payroll_id , 'Payroll', ['class' => 'btn-link', 'target' => '_blank']);
+				 ?></td>
 				<td><?php echo nf($row->biweekly_basic); ?></td>
 				<td><?php echo $row->employee_share_philhealth; ?></td>
 				<td><?php echo $row->employer_share_philhealth; ?></td>
