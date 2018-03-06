@@ -1,7 +1,7 @@
 <div class="modal-dialog">
     <div class="modal-content">
-    
-    
+
+
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h4 class="modal-title"> <?php echo $this->uri->segment(3) > 0 ? '<i class="fa fa-pencil"></i> Edit' : '<i class="fa fa-plus"></i> New' ?> Project Payroll</h4>
@@ -21,7 +21,7 @@
 
             }
         </style>
-        
+
         <label for="title" class="col-sm-3 control-label">Project</label>
         <div class="form-group">
             <div class="col-sm-8">
@@ -44,13 +44,13 @@
         <label for="payroll_month" class="col-sm-3 control-label">Payroll Month</label>
         <div class="form-group">
             <div class="col-sm-3">
-            <?php 
+            <?php
                 echo form_dropdown(
-                        'payroll_month', 
-                        $months, 
-                        $this->input->post('payroll_month') ? $this->input->post('payroll_month') : $payroll->payroll_month, 
+                        'payroll_month',
+                        $months,
+                        $this->input->post('payroll_month') ? $this->input->post('payroll_month') : $payroll->payroll_month,
                         'id="select2_payroll_month" class="form-control" autofocus style="width:100%"'
-                    ); 
+                    );
                 ?>
             <p class="help-block payroll_month"></p>
             </div>
@@ -74,7 +74,7 @@
                 <label class="radio-inline">
                   <input type="radio" name="payroll_period" id="payroll_period2" value="2nd" <?php $payroll->payroll_period == '2nd' ? $check = TRUE : $check = FALSE; echo set_radio('payroll_period', '2nd', $check);?> > 2nd
                 </label>
-                
+
                 <p class="help-block payroll_period"></p>
             </div>
         </div>
@@ -82,21 +82,21 @@
         <label for="date_start" class="col-sm-3 control-label">Period Covered</label>
         <div class="form-group">
             <div class="col-sm-3">
-                <input type="date" name="date_start" id="date_start" class="form-control" placeholder="Date from" value="<?php echo set_value('date_start', $payroll->date_start);?>">
+                <input type="text" name="date_start" id="date_start" class="form-control dtpicker" placeholder="Date from" value="<?php echo set_value('date_start', $payroll->date_start);?>">
                 <p class="help-block date_start"></p>
             </div>
             <div class="col-sm-1">
             <label for="date_end" class="control-label">To</label>
             </div>
             <div class="col-sm-3">
-                <input type="date" name="date_end" id="date_end" class="form-control" placeholder="Date to" value="<?php echo set_value('date_end', $payroll->date_end);?>">
+                <input type="text" name="date_end" id="date_end" class="form-control dtpicker" placeholder="Date to" value="<?php echo set_value('date_end', $payroll->date_end);?>">
                 <p class="help-block date_end"></p>
             </div>
         </div>
 
         <label class="col-sm-3 control-label">Wages</label>
         <div class="form-group">
-            <div class="col-sm-8">          
+            <div class="col-sm-8">
                 <?php echo form_dropdown('fields[]', $columns, $this->input->post('fields[]') ? $this->input->post('fields[]') : explode(',', $payroll->fields), 'id="fields" style="width:100%" class="form-control multiple-select2" multiple="multiple"' ) ?>
                 <p class="help-block fields">Note: Hourly Rate, Semi-Monthly Rate, Monthly Rate, E-COLA and Allowance are automatically included.</p>
             </div>
@@ -112,7 +112,7 @@
 
     </div>
     <div class="modal-footer clearfix">
-        
+
     <div class="row">
     <div class="col-md-6" id="row-action1">
         <button type="button" id="btn_payroll_action" name="btn_action" class="btn btn-primary btn-block">
@@ -122,195 +122,40 @@
             <b>CREATE PAYROLL</b>
         <?php endif ?>
         </button>
-        
+
     </div>
     <div class="col-md-6">
         <button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
-        
+
     </div>
     </div>
     </div>
 <?php echo form_close(); ?>
-<!-- <script type="text/javascript">
-    $(function(){
-        $('select').css('width', '100%').select2();
-    })
-</script> -->
 
 <script type="text/javascript">
     $(function () {
-        // jQuery.ajax({
-        //       url: "<?php #echo base_url() ?>assets/js/scripts.js",
-        //       dataType: "script",
-        //       cache: true
-        // }).done(function() {
-                // console.log('js loaded')
-                $('input[type=date], .dtpicker').datepicker({
-                  format: "yyyy-mm-dd",
-                  startView: 0,
-                  forceParse: true,
-                  autoclose: true,
-                  todayHighlight: true
-                });
 
-                $('input[name=payroll_year]').datepicker({
-                    autoclose: true,
-                        format: "yyyy",
-                        viewMode: "years", 
-                        minViewMode: "years",
-                        startDate: '2014',
-                        endDate: new Date(),
-                });
-                
-                // dataURL = $('#select2_project_id').attr('dataURL');
+        $('input[type=date], .dtpicker').datepicker({
+          format: "yyyy-mm-dd",
+          startView: 0,
+          forceParse: true,
+          autoclose: true,
+          todayHighlight: true
+        });
 
-                var $element = $('#select2_project_id').select2({dropdownParent: $('#payroll-modal')});
-                /*var $element = $('#select2_project_id').select2({
-                    ajax: {
-                        type: "POST",
-                        url: dataURL,
-                        data: function (params) {
-                         // Query paramters will be ?search=[term]&page=[page]
-                         return {
-                             search: params.term,
-                             pageLimit: 15
-                         }
-                        },
-                        processResults: function (data, page) { 
-                            return {
-                                results: $.map(data, function (item) {
-                                    return {
-                                       id: item.id,
-                                       text: item.title + '-' + item.description,
-                                       title: item.title,
-                                       description: item.description,
-                                    };
-                                })
-                            };
-                            
-                        },
-                        dataType: 'json',
-                        cache: true,
-                        delay: 250,
-                    },
-                    id: function (item) { return { id: item.id }; },
-                    escapeMarkup: function(m) { return m; },
-                    templateResult: formatResult,
-                    templateSelection: formatSelection,
-                    dropdownParent: $('#payroll-modal'),
-                });
-                // $('#select2_project_id').val(<?php #$echo $payroll->project_id ?>).trigger('change.select2');
-                function formatResult(data) 
-                {
-                    if (data.loading) return data.text;
-                    return '<h5 style="margin-bottom: 0px;">' + data.title + '</h5>' + '<small>' + data.description + '</small>';
-                }
+        $('input[name=payroll_year]').datepicker({
+            autoclose: true,
+                format: "yyyy",
+                viewMode: "years",
+                minViewMode: "years",
+                startDate: '2014',
+                endDate: new Date(),
+        });
 
-                function formatSelection(data) 
-                {
-                    // console.log(data)
-                    $('p.project_title').html(data.description)
-                    return data.description
-                }
+        var $element = $('#select2_project_id').select2({dropdownParent: $('#payroll-modal')});
 
-
-                
-                /*var fetchData = function(form_data, dataURL, dataTYPE = 'json', method = 'POST') {
-                    // Return the $.ajax promise
-                    return $.ajax({
-                        data: form_data,
-                        type: method,
-                        dataType: dataTYPE,
-                        url: dataURL,
-                        cache: false
-                    });
-                }
-
-                function failed_ajax_request(jqXHR, textStatus, errorThrown) {
-
-                  console.log(textStatus + ': ' + errorThrown);
-                    alert(textStatus + ': ' + errorThrown);
-                  // location.reload();
-
-                }*/
-
-
-                /*$(document).on('click', '#btn_action', function(e) {
-
-                    e.preventDefault();
-                    $input = $('#btn_action');
-                    $input.attr('disabled', true);
-
-                    $form = $('#form-manning-payroll')
-                    form_data = $form.serializeArray()
-                    form_data.push(
-                        {name : 'project_id', value: $('[name=project_id]').val()}, 
-                        {name: 'fields', value: $('[name="fields[]"]').val()},
-                        {name: 'payroll_period', value: $('[name=payroll_period]:checked').val()}
-                    )
-
-                    form_data = $.param(form_data)
-                    ajax_request = fetchData(form_data, $form.attr('action'))
-                    // console.log(form_data);
-                    ajax_request.done(function(data){
-                      // console.log(data)
-                      
-
-                      if (data.status == 'success') 
-                      {
-                        // window.location.replace(data.url)
-                        $input.css('display', 'none');
-                        $input.css('visiblity', 'hidden');
-                        $button = '<a href="<?php echo base_url('manning_payroll') ?>" class="btn btn-success btn-block">Proceed to payroll earning</a>';
-                        $('#row-action1').append($button);
-                      }
-                      else
-                      {
-                          $.each(data.post_error, function(key, value){
-                            $('p.'+key).removeClass('help-block').addClass('text-danger').html(value)
-                          })
-                          $input.removeAttr('disabled');
-                      }
-                    }).fail(function(jqXHR, textStatus, errorThrown){ 
-                      return failed_ajax_request(jqXHR, textStatus, errorThrown); 
-                    });
-                })*/
-        // });
-
-
-
-        // if ($('#select2_project_id').find('option:selected').text().trim() != "") 
-        // {
-        //     $('#select2_project_id').change();
-        //     console.log('changes')
-        // }
         $('#fields').select2();
-        // $('#fields').empty();
-        // $(document).on('change', '#select2_project_id', function() {
-            // $project_id = $('select#select2_project_id.form-control').val();
-            // console.log($project_id)
-            // if ($project_id)
-            // {
-            // console.log(this.value)
-            // console.log($element)
-            //     var request = $.ajax({
-            //             data: {project_id: $project_id},
-            //             type: 'post',
-            //             dataType: 'json',
-            //             url: "<?php #echo base_url('manning_payroll/select2rates') ?>",                        
-            //             cache: true
-            //         });
-            //     request.done(function(data){
-            //         console.log('here')
-            //         console.log(data)
-            //         $('#fields').select2({data:data}).trigger("change");
-            //         // $('#fields').select2("val", {data:data} ).trigger("change");
-            //     })
-            // }
-            // else
-            // {
-            // }
-        // })
+
 
     })
 </script>
@@ -323,4 +168,4 @@
  * User: Brando
  * Date: 8/31/14
  * Time: 10:55 PM
- */ 
+ */

@@ -1,7 +1,7 @@
 // IIFE - Immediately Invoked Function Expression
  (function($, window, document) {
 
-   // The $ is now locally scoped 
+   // The $ is now locally scoped
 
    // Generic function to make an AJAX call
    var fetchData = function(form_data, dataURL, dataTYPE = 'json', method = 'POST') {
@@ -51,56 +51,6 @@
 	});
 
 	$('select').select2();
-	/*dataURL = $('#select2_project_id').attr('dataURL');
-
-	var $element = $('#select2_project_id').select2({
-	    ajax: {
-	        type: "POST",
-	        url: dataURL,
-	        data: function (params) {
-	         // Query paramters will be ?search=[term]&page=[page]
-	         return {
-	             search: params.term,
-	             pageLimit: 15
-	         }
-	        },
-	        processResults: function (data, page) { 
-	            return {
-	                results: $.map(data, function (item) {
-	                    return {
-	                       id: item.id,
-	                       text: item.title + '-' + item.description,
-	                       title: item.title,
-	                       description: item.description,
-	                    };
-	                })
-	            };
-	            
-	        },
-	        dataType: 'json',
-	        cache: true,
-	        delay: 250,
-	    },
-	    id: function (item) { return { id: item.id }; },
-	    escapeMarkup: function(m) { return m; },
-	    templateResult: formatResult,
-	    templateSelection: formatSelection,
-	    dropdownParent: $('#payroll-modal'),
-	});
-	// $('#select2_project_id').val(<?php #$echo $payroll->project_id ?>).trigger('change.select2');
-	function formatResult(data) 
-	{
-	    if (data.loading) return data.text;
-	    return '<h5 style="margin-bottom: 0px;">' + data.title + '</h5>' + '<small>' + data.description + '</small>';
-	}
-
-	function formatSelection(data) 
-	{
-	    // console.log(data)
-	    $('p.project_title').html(data.description)
-	    return data.description
-	}*/
-
 
 	$(document).on('click', '#btn_payroll_action', function(e) {
 
@@ -111,19 +61,17 @@
 	    $form = $('#form-manning-payroll')
 	    form_data = $form.serializeArray()
 	    form_data.push(
-	        {name : 'project_id', value: $('[name=project_id]').val()}, 
+	        {name : 'project_id', value: $('[name=project_id]').val()},
 	        {name: 'fields', value: $('[name="fields[]"]').val()},
 	        {name: 'payroll_period', value: $('[name=payroll_period]:checked').val()}
 	    )
 
 	    form_data = $.param(form_data)
 	    ajax_request = fetchData(form_data, $form.attr('action'))
-	    // console.log(form_data);
 	    ajax_request.done(function(data){
-	      // console.log(data)
-	      
 
-	      if (data.status == 'success') 
+
+	      if (data.status == 'success')
 	      {
 	        // window.location.replace(data.url)
 	        $input.css('display', 'none');
@@ -138,47 +86,19 @@
 	          })
 	          $input.removeAttr('disabled');
 	      }
-	    }).fail(function(jqXHR, textStatus, errorThrown){ 
-	      return failed_ajax_request(jqXHR, textStatus, errorThrown); 
+	    }).fail(function(jqXHR, textStatus, errorThrown){
+	      return failed_ajax_request(jqXHR, textStatus, errorThrown);
 	    });
-	})
-
-	/*$('#select2_project_id').select2({
-		ajax: {
-			type: "POST",
-			url: $(this).attr('dataURL'),
-			// data: function (params) {
-			// 	// Query paramters will be ?search=[term]&page=[page]
-			// 	return {
-			// 		search: params.term,
-			// 		pageLimit: 25
-			// 	}
-			// },
-			dataType: 'json',
-			cache: true,
-			// delay: 250,
-			// templateResult: formatResult,
-		}
 	});
-	$('#select2_project_id').val(null).trigger('change.select2');*/
-
-	// function formatResult(data) 
-	// {
-	// 	if (!data.id) { return data.text; }
-	// 	return $(
-	// 	   '<b>' + data.title + '</b>' + ' - <em>' + data.description + '</em>'
-	// 	);
-	// }
 
 
-	// $('input[name=daily_rate]').on('change', function (e) {
 	$(document).on('change','input[name=daily_rate]', function(e) {
 		console.log(this.value)
-	})
-
 	});
 
-  
+	}); // end DOM
+
+
 	// Clear cache modal
 	$('body').on('hidden.bs.modal', '.modal', function () {
 	$(this).removeData('bs.modal');

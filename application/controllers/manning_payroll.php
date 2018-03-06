@@ -172,23 +172,160 @@ class Manning_payroll extends Admin_Controller
         $this->manning_payroll_earning_m->update_payroll_data($payroll_id);
     }
 
-    public function test($payroll_id = 280)
+    public function employee_deduction()
     {
-        $this->load->model(array('manning_payroll_m', 'manning_reliever', 'manning_payroll_deduction_m'));
-        // remove deductions reliever and extra-reliever
-        $this->db->select('mr_manning_id')->where('mr_payroll_id', $payroll_id);
-        $relievers = $this->manning_reliever->get();
-        dump($relievers);
+        $this->load->model('manning_payroll_deduction_m');
+        $this->load->model('manning');
+        $this->load->model('manning_payroll_m');
+        // $this->output->enable_profiler(TRUE);
 
-        foreach ($relievers as $row)
-        $reliever[] = $row->mr_manning_id;
+        // $employee_id = [278, 618, 1578];
+        // $payroll_period = ['1','2'];
+        // $payroll_month = 'January';
+        // $payroll_year = '2018';
 
-        $this->db->where_in('employee_id', $reliever)->where('payroll_id', $payroll_id);
-        $remove_reliever_govt_dues = $this->manning_payroll_deduction_m->get();
-        dump($remove_reliever_govt_dues);
+        $this->data['hidden'] = $this->data['list'] = array();
+        if ($this->input->post('btn_action') == 'Search')
+        {
+            $employee_id = $this->input->post('manning_id');
+            $payroll_period = $this->input->post('payroll_period');
+            $payroll_month = $this->input->post('payroll_month');
+            $payroll_year = $this->input->post('payroll_year');
+            $this->data['hidden'] = compact('payroll_period', 'payroll_month', 'payroll_year');
 
-        dd($this->db->last_query());
+            $REGULAR = REGULAR;
+            $PROBITIONAL = PROBITIONAL;
+            $CO_TERMINOUS = CO_TERMINOUS;
+            $PROJECT_BASED = PROJECT_BASED;
 
+            $employee_status = "('{$REGULAR}', '{$PROBITIONAL}', '{$CO_TERMINOUS}', '{$PROJECT_BASED}')";
+
+            is_null($employee_id) || $where_in_employee = " AND employee_id IN ( ". implode(',', $employee_id) ." )";
+
+            $join = "SELECT employee_id employee_id2,
+                            sum(IFNULL(r_hourly_rate,0)+IFNULL(r_semi_monthly_rate,0)+IFNULL(r_monthly_rate,0)) monthly_basic, COUNT(*) pay_cnt
+                        FROM manning_payroll_earning MPE
+                        WHERE is_actived {$where_in_employee}
+                            AND r_employment_status_id IN $employee_status
+                            AND EXISTS (
+                                SELECT 1 FROM manning_payroll WHERE payroll_id = MPE.payroll_id
+                                and payroll_month = '{$payroll_month}' and payroll_year = '{$payroll_year}' and IsFinal = 1
+                                and is_actived
+                            )
+                        GROUP BY employee_id";
+
+            $this->db->where_in('LEFT(payroll_period,1)', $payroll_period);
+            $this->db->where('payroll_month', $payroll_month);
+            $this->db->where('payroll_year', $payroll_year);
+            $this->db->where_in('employee_id2', $employee_id);
+            $this->db->select('date_start,date_end,payroll_month,payroll_year,payroll_period, pay_cnt, monthly_basic');
+            $this->db->select('IFNULL(r_hourly_rate,0)+IFNULL(r_semi_monthly_rate,0)+IFNULL(r_monthly_rate,0) biweekly_basic', FALSE);
+            $this->db->join("(" . $join . ") as employee_salary", 'employee_id2 = employee_id', 'left');
+            $this->db->join('manning_payroll_earning B', 'B.payroll_id = manning_payroll_deduction.payroll_id AND employee_id2 = B.employee_id AND B.is_actived', 'left');
+            $this->data['list'] = $this->manning_payroll_deduction_m->get_manning_payroll_deduction();
+
+        }
+
+
+        $this->data['employees'] = $this->manning->as_dropdown();
+        $this->data['months'] = $this->manning_payroll_m->get_month();
+        $this->data['page_title'] = 'PAYROLL REGISTER | Employee Deduction';
+        // dump($list);
+
+        return parent::load_view('manning_payroll/employee_deductions');
+    }
+
+    public function recompute_employee_deduction()
+    {
+        $this->load->model('manning_payroll_deduction_m');
+        // $this->output->enable_profiler(TRUE);
+        // dump($_POST);
+
+        // $employee_id = [278,618,1578];
+        // $payroll_period = '1';
+        // $payroll_month = 'January';
+        // $payroll_year = '2018';
+        $where = array();
+
+        if ($_POST) {
+            if (!empty($_POST['manning_payroll_deduction_id']))
+            {
+                $employee_id = $this->input->post('manning_id');
+                $payroll_period = $this->input->post('payroll_period');
+                $payroll_month = $this->input->post('payroll_month');
+                $payroll_year = $this->input->post('payroll_year');
+                $this->data['hidden'] = compact('payroll_period', 'payroll_month', 'payroll_year');
+
+                $key = $_POST['manning_payroll_deduction_id'];
+                $this->db->select('manning_payroll_deduction_id, employee_id, manning_payroll.payroll_id, payroll_month, payroll_year, LEFT(payroll_period,1) payroll_period', FALSE);
+                $this->db->where_in('manning_payroll_deduction_id', $key);
+                $this->db->join('manning_payroll', 'manning_payroll.payroll_id = manning_payroll_deduction.payroll_id', 'left');
+                $this->db->order_by('payroll_year, payroll_month, payroll_period, employee_id');
+                $list = $this->manning_payroll_deduction_m->get();
+                foreach ($list as $row)
+                {
+                    $this->manning_payroll_deduction_m->delete($row->manning_payroll_deduction_id);
+                }
+                foreach ($list as $row)
+                {
+                    $employee_id = $row->employee_id;
+                    $payroll_period = $row->payroll_period;
+                    $payroll_month = $row->payroll_month;
+                    $payroll_year = $row->payroll_year;
+                    $deleted[] = $row->manning_payroll_deduction_id;
+
+
+                    $this->manning_payroll_deduction_m->employee_deduction($employee_id, $payroll_period, $payroll_month, $payroll_year);
+
+                    $where[] = "(
+                                B.employee_id = '{$employee_id}'
+                                AND payroll_month = '{$payroll_month}'
+                                AND payroll_year = '{$payroll_year}'
+                                AND LEFT(payroll_period,1) = '{$payroll_period}'
+                                )
+                                ";
+                }
+
+                if (count($where)) {
+                    $this->session->set_userdata('where', $where);
+                    return redirect('manning_payroll/deduction_result');
+                }
+
+            }
+        }
+
+
+    }
+
+    public function deduction_result()
+    {
+        if ($this->session->userdata('where'))
+        {
+            $this->output->enable_profiler(TRUE);
+            $this->load->model('manning_payroll_deduction_m');
+            $where = $this->session->userdata('where');
+                // result
+                $ctr = 0;
+               foreach ($where as $param)
+               {
+                    if ($ctr >= 1)
+                        $where_sql .= ' OR ' . $param ;
+                    else
+                        $where_sql =  $param ;
+                    $ctr++;
+               }
+
+
+
+               $this->db->where('(' . $where_sql . ')', NULL, FALSE);
+                $this->db->select('date_start,date_end,payroll_month,payroll_year,payroll_period');
+                $this->db->select('IFNULL(r_hourly_rate,0)+IFNULL(r_semi_monthly_rate,0)+IFNULL(r_monthly_rate,0)biweekly_basic', FALSE);
+                $this->db->join('manning_payroll_earning B', 'B.payroll_id = manning_payroll_deduction.payroll_id AND manning_payroll_deduction.employee_id = B.employee_id AND B.is_actived', 'left');
+                $this->data['list'] = $this->manning_payroll_deduction_m->get_manning_payroll_deduction();
+
+                return parent::load_view('manning_payroll/employee_deductions_result');
+        }
+        redirect('manning_payroll/test2','refresh');
     }
 
     public function modal($payroll_id = NULL)

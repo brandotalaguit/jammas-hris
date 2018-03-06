@@ -147,6 +147,7 @@
                                                                 'data-keyboard' => 'false',
                                                                 'class'         => 'btn btn-primary',
                                                             ]); ?>
+                <?php echo anchor('manning_payroll/employee_deduction', 'Re-compute Selected Employee Deduction', ['class' => 'btn btn-primary']); ?>
             </p>
 
 

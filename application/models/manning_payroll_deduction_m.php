@@ -438,27 +438,47 @@ class Manning_payroll_deduction_m extends MY_Model
     {
         $this->load->model(['projects', 'manning_payroll_deduction_detail_m']);
 
-        $REGULAR = REGULAR;
-        $PROBITIONAL = PROBITIONAL;
-        $CO_TERMINOUS = CO_TERMINOUS;
+        $now           = date('Y-m-d H:i:s');
+        $REGULAR       = REGULAR;
+        $PROBITIONAL   = PROBITIONAL;
+        $CO_TERMINOUS  = CO_TERMINOUS;
         $PROJECT_BASED = PROJECT_BASED;
 
-        $payroll = $this->manning_payroll_m->get($payroll_id);
-        $wages = explode(',', $payroll->fields);
+        $employee_status = "('{$REGULAR}', '{$PROBITIONAL}', '{$CO_TERMINOUS}', '{$PROJECT_BASED}')";
 
-        $wage = FALSE;
-        $now = date('Y-m-d H:i:s');
-        $deduction_field = ['late_amount', 'absent_rate', 'absent_rate_per_day'];
-        $payroll_period = substr($payroll->payroll_period, 0, 1);
+        $payroll         = $this->manning_payroll_m->get($payroll_id);
+        $payroll_month   = $payroll->payroll_month;
+        $payroll_year    = $payroll->payroll_year;
+        $payroll_period  = substr($payroll->payroll_period, 0, 1);
+
+        $where_in_payroll_period = "";
+        $where_not_equal_payroll_period = "";
+        if ($payroll_period == 1)
+        {
+            $where_in_payroll_period = " AND payroll_period = 1";
+            $where_not_equal_payroll_period = "AND payroll_period != 1";
+        }
+
+        if ($payroll_period == 2)
+        {
+            $where_in_payroll_period = " AND payroll_period = 2";
+            $where_not_equal_payroll_period = "AND payroll_period != 2";
+        }
+
+        $wages           = explode(',', $payroll->fields);
+        $wage            = FALSE;
+
+        $deduction_field    = ['late_amount', 'absent_rate', 'absent_rate_per_day'];
         $payroll_date_start = $payroll->date_start;
-        $payroll_date_end = $payroll->date_end;
+        $payroll_date_end   = $payroll->date_end;
 
-        $project = $this->projects->get($payroll->project_id);
+        $project    = $this->projects->get($payroll->project_id);
+        $project_id = $project->project_id;
 
-        $mode_allowance = $project->mode_of_payment_allowance;
-        $mode_pagibig = $project->mode_of_payment_pagibig;
+        $mode_allowance  = $project->mode_of_payment_allowance;
+        $mode_pagibig    = $project->mode_of_payment_pagibig;
         $mode_philhealth = $project->mode_of_payment_philhealth;
-        $mode_sss = $project->mode_of_payment_sss;
+        $mode_sss        = $project->mode_of_payment_sss;
 
         $wages[] = 'hourly_rate';
         $wages[] = 'semi_monthly_rate';
@@ -478,101 +498,108 @@ class Manning_payroll_deduction_m extends MY_Model
         if ($payroll_period == 2)
         $mode_of_payment = 3;
 
-        $this->manning_payroll_deduction_detail_m->delete_by(['PayrollId'=>$payroll_id]);
-        $sql = "INSERT INTO manning_payroll_deduction_detail(PayrollId, DeductionId, amount, created_at, updated_at)
-                SELECT ?, deduction_id, fixed_amount, NOW(), NOW() FROM deductions
-                WHERE ? BETWEEN coverage_date_start AND coverage_date_end
-                    AND mode_of_payment IN(2,{$mode_of_payment}) AND is_actived AND
-                    EXISTS(
-                        SELECT 1 FROM manning_payroll_earning MPE
-                        WHERE payroll_id = ? AND deductions.employee_id = MPE.employee_id AND is_actived
-                        HAVING COALESCE(sum(r_hourly_rate + r_semi_monthly_rate + r_monthly_rate), 0) > 0
-                    )";
-        $this->db->query($sql, [$payroll_id, $payroll_date_end, $payroll_id]);
+        // Other Deductions ---------------------------------------------------------------------------------------
+        $other_deduction = self::generate_other_deductions($payroll_id, $mode_of_payment, $payroll_date_end);
+        // End Other Deductions -----------------------------------------------------------------------------------
 
-        parent::delete_by(['payroll_id'=>$payroll_id]);
 
-                $sql = "INSERT INTO manning_payroll_deduction(
-                    manningPayrollEarningId, payroll_id, employee_id, gross_income, sum_basic,
+        $sql = "INSERT INTO manning_payroll_deduction(
+                    manningPayrollEarningId, payroll_id, employee_id, sum_basic,
                     employee_share_sss, employer_share_sss, employee_compensation_program_sss, total_monthly_premium_sss,
                     employee_share_philhealth, employer_share_philhealth, total_monthly_premium_philhealth,
                     employee_share_pagibig, employer_share_pagibig, total_monthly_premium_pagibig,
                     other_deduction, created_at, updated_at
                 )
-                SELECT  a.manning_payroll_earning_id, payroll_id, a.employee_id, gross_income, monthly_basic,
+                SELECT  a.manning_payroll_earning_id, payroll_id, a.employee_id, monthly_basic,
 
-                    abs(IFNULL(sum_employee_sss,0) - b.employee_share),
-                    abs(IFNULL(sum_employer_sss,0) - b.employer_share),
-                    abs(IFNULL(sum_employee_compensation_program_sss,0) - b.employee_compensation_program),
-                    abs(IFNULL(sum_monthly_sss,0) - b.total_monthly_premium),
+                    abs(if(payroll_period=1,0,IFNULL(sum_employee_sss,0)) - b.employee_share),
+                    abs(if(payroll_period=1,0,IFNULL(sum_employer_sss,0)) - b.employer_share),
+                    abs(if(payroll_period=1,0,IFNULL(sum_employee_compensation_program_sss,0)) - b.employee_compensation_program),
+                    abs(if(payroll_period=1,0,IFNULL(sum_monthly_sss,0)) - b.total_monthly_premium),
 
-                    IF({$payroll_period} = 2,
-                        if(monthly_basic <= 10000,
-                                137.50 - IFNULL(sum_employee_philhealth, 0),
-                                IF( monthly_basic * 0.01375 - IFNULL(sum_employee_philhealth, 0)  < 0,
-                                    0,
-                                    ROUND(monthly_basic * 0.01375 - IFNULL(sum_employee_philhealth, 0), 2)
-                                )
-                        ),
-                        ROUND(monthly_basic * 0.01375 - IFNULL(sum_employee_philhealth, 0), 2)
+                    IF(payroll_period = 1,
+                        ROUND(biweekly_basic * 0.01375, 2),
+                        IF(monthly_basic <= 10000,
+                            137.50 - IFNULL(sum_employee_philhealth, 0),
+                            ROUND(monthly_basic * 0.01375, 2) - IFNULL(sum_employee_philhealth, 0)
+                        )
                     ),
 
-                    IF({$payroll_period} = 2,
-                        if(monthly_basic <= 10000,
-                                137.50 - IFNULL(sum_employer_philhealth, 0) ,
-                                IF( ROUND( monthly_basic * 0.01375 - IFNULL(sum_employer_philhealth, 0), 2)   < 0,
-                                    0,
-                                    ROUND( monthly_basic * 0.01375 - IFNULL(sum_employer_philhealth, 0), 2)
-                                )
-                        ),
-                        ROUND( monthly_basic * 0.01375 - IFNULL(sum_employer_philhealth, 0), 2)
+                    IF(payroll_period = 1,
+                        ROUND(biweekly_basic * 0.01375, 2),
+                        IF(monthly_basic <= 10000,
+                            137.50 - IFNULL(sum_employee_philhealth, 0),
+                            ROUND(monthly_basic * 0.01375, 2) - IFNULL(sum_employee_philhealth, 0)
+                        )
                     ),
 
-                    IF({$payroll_period} = 2,
-                            if(monthly_basic <= 10000,
-                                    ROUND(
-                                            (137.50 - IFNULL(sum_employee_philhealth, 0)) +
-                                            (137.50 - IFNULL(sum_employer_philhealth, 0))
-                                        , 2),
-                                    IF( ROUND(monthly_basic * 0.01375 - IFNULL(sum_employee_philhealth, 0), 2)  < 0,
-                                        0,
-                                        ROUND(monthly_basic * 0.01375 - IFNULL(sum_employee_philhealth, 0), 2)
-                                    )
-                                    +
-                                    IF( ROUND( monthly_basic * 0.01375 - IFNULL(sum_employer_philhealth, 0), 2)   < 0,
-                                        0,
-                                        ROUND( monthly_basic * 0.01375 - IFNULL(sum_employer_philhealth, 0), 2)
-                                    )
-                            ),
-                            ROUND(
-                                    (monthly_basic * 0.01375 - IFNULL(sum_employee_philhealth, 0)) +
-                                    (monthly_basic * 1.375 - IFNULL(sum_employer_philhealth, 0))
-                                , 2)
+                    IF(payroll_period = 1,
+                        ROUND(biweekly_basic * 0.01375, 2) * 2,
+                        IF(monthly_basic <= 10000,
+                            (137.50 - IFNULL(sum_employee_philhealth, 0)) * 2,
+                            (ROUND(monthly_basic * 0.01375, 2) - IFNULL(sum_employee_philhealth, 0)) * 2
+                        )
                     ),
 
-
-                    IF({$mode_pagibig} = {$payroll_period}, c.employee_share, IF($mode_pagibig != 3, 0, abs(IFNULL(sum_employee_pagibig,0) - c.employee_share))),
-                    IF({$mode_pagibig} = {$payroll_period}, c.employer_share, IF($mode_pagibig != 3, 0, abs(IFNULL(sum_employer_pagibig,0) - c.employer_share))),
-                    IF({$mode_pagibig} = {$payroll_period}, c.total_monthly_premium, IF($mode_pagibig != 3, 0, abs(IFNULL(sum_monthly_pagibig,0) - c.total_monthly_premium))),
+                    IF(mode_of_payment_pagibig = payroll_period,
+                        c.employee_share,
+                        if(mode_of_payment_pagibig != 3,
+                            0,
+                            abs(IFNULL(sum_employee_pagibig,0) - c.employee_share)
+                        )
+                    ),
+                    IF(mode_of_payment_pagibig = payroll_period,
+                        c.employer_share,
+                        if(mode_of_payment_pagibig != 3,
+                            0,
+                            abs(IFNULL(sum_employer_pagibig,0) - c.employer_share)
+                        )
+                    ),
+                    IF(mode_of_payment_pagibig = payroll_period,
+                        c.total_monthly_premium,
+                        if(mode_of_payment_pagibig != 3,
+                            0,
+                            abs(IFNULL(sum_monthly_pagibig,0) - c.total_monthly_premium)
+                        )
+                    ),
 
                     sum_other_deduction_amount, '{$now}', '{$now}'
                 FROM (
-                        SELECT manning_payroll_earning_id, payroll_id, employee_id,
-                            COALESCE(sum($wage), 0) as gross_income,
-                            COALESCE(sum(r_hourly_rate + r_semi_monthly_rate + r_monthly_rate), 0) pay_basic
+                        SELECT manning_payroll_earning_id, MPE.payroll_id, employee_id,
+                            P.project_id,
+                            LEFT(payroll_period,1) payroll_period,
+                            IF(MP.mode_of_payment_allowance=0, P.mode_of_payment_allowance, MP.mode_of_payment_allowance) mode_of_payment_allowance,
+                            IF(MP.mode_of_payment_pagibig=0, P.mode_of_payment_pagibig, MP.mode_of_payment_pagibig) mode_of_payment_pagibig,
+                            IF(MP.mode_of_payment_philhealth=0, P.mode_of_payment_philhealth, MP.mode_of_payment_philhealth) mode_of_payment_philhealth,
+                            IF(MP.mode_of_payment_sss=0, P.mode_of_payment_sss, MP.mode_of_payment_sss) mode_of_payment_sss,
+                            IF(MP.with_13th_month=0, P.with_13th_month, MP.with_13th_month) with_13th_month,
+                            ( r_hourly_rate +  r_semi_monthly_rate + r_monthly_rate ) biweekly_basic
                         FROM manning_payroll_earning MPE
-                        WHERE MPE.payroll_id = ? and is_actived AND r_employment_status_id IN($REGULAR, $PROBITIONAL, $CO_TERMINOUS, $PROJECT_BASED)
+                        LEFT JOIN manning_payroll MP
+                            ON MP.payroll_id = MPE.payroll_id
+                        LEFT JOIN projects P ON MP.project_id = P.project_id
+                        WHERE payroll_month = '{$payroll_month}' and payroll_year = '{$payroll_year}' and IsFinal = 1
+                            {$where_in_payroll_period}
+                            and MPE.is_actived
+                            and r_employment_status_id IN $employee_status
+                            and MP.payroll_id = {$payroll_id}
                         GROUP BY manning_payroll_earning_id
-                        HAVING pay_basic > 0
+                        HAVING biweekly_basic > 0
                     ) as a
                 LEFT JOIN (
-                        SELECT employee_id, COALESCE(sum($wage), 0) monthly_gross_income,
-                        COALESCE(sum(r_hourly_rate + r_semi_monthly_rate + r_monthly_rate), 0) monthly_basic
-                        FROM manning_payroll_earning MPE
-                        LEFT JOIN manning_payroll ON manning_payroll.payroll_id = MPE.payroll_id AND manning_payroll.is_actived
-                        WHERE payroll_month = ? and payroll_year = ? and IsFinal = 1
-                            AND r_employment_status_id IN($REGULAR, $PROBITIONAL, $CO_TERMINOUS, $PROJECT_BASED) and MPE.is_actived
-                        GROUP BY employee_id
+                    SELECT employee_id,
+                        sum(IFNULL(r_hourly_rate,0)+IFNULL(r_semi_monthly_rate,0)+IFNULL(r_monthly_rate,0)) monthly_basic,
+                        count(*) pay_cnt
+                    FROM manning_payroll_earning MPE
+                    WHERE MPE.is_actived
+                        AND r_employment_status_id IN $employee_status
+                        AND EXISTS (
+                            SELECT 1 FROM manning_payroll WHERE payroll_id = MPE.payroll_id
+                            and payroll_month = '{$payroll_month}' and payroll_year = '{$payroll_year}' and IsFinal = 1
+                            and is_actived
+                            AND project_id = {$project_id}
+                        )
+                    GROUP BY employee_id
                 ) as employee_salary ON employee_salary.employee_id = a.employee_id
                 LEFT JOIN (
                     SELECT employee_id,
@@ -587,294 +614,263 @@ class Manning_payroll_deduction_m extends MY_Model
                             COALESCE(SUM(employee_compensation_program_sss), 0) sum_employee_compensation_program_sss,
                             COALESCE(SUM(total_monthly_premium_sss), 0) sum_monthly_sss
                     FROM manning_payroll_deduction MPD
-                    LEFT JOIN manning_payroll ON manning_payroll.payroll_id = MPD.payroll_id and manning_payroll.is_actived
-                    WHERE payroll_month = ? and payroll_year = ? and IsFinal = 1 and MPD.is_actived
-                    GROUP BY manning_payroll.project_id, employee_id
+                    LEFT JOIN manning_payroll ON manning_payroll.payroll_id = MPD.payroll_id
+                    WHERE payroll_month = '{$payroll_month}' and payroll_year = '{$payroll_year}' and IsFinal = 1
+                            {$where_not_equal_payroll_period}
+                            and project_id = {$project_id}
+                            and MPD.is_actived
+                            and manning_payroll.is_actived
+                    GROUP BY employee_id
                 ) as employee_deduction ON employee_deduction.employee_id = a.employee_id
-                LEFT JOIN sss_premium_contribution_matrix as b on monthly_basic >= b.salary_range_start AND monthly_basic <= b.salary_range_end
+
+                LEFT JOIN sss_premium_contribution_matrix as b
+                    on IF(payroll_period=1, biweekly_basic, monthly_basic) >= b.salary_range_start
+                    AND IF(payroll_period=1, biweekly_basic, monthly_basic) <= b.salary_range_end
 
                 LEFT JOIN pagibig_premium_contribution_matrix as c
-                    on monthly_basic >= c.salary_range_start AND monthly_basic <= c.salary_range_end AND monthly_basic > 0
+                    on monthly_basic >= c.salary_range_start AND monthly_basic <= c.salary_range_end AND monthly_basic >0
 
                 LEFT JOIN (
                     SELECT COUNT(*) cnt, COALESCE(SUM(fixed_amount), 0) sum_other_deduction_amount, employee_id FROM deductions
-                    WHERE coverage_date_end >= ? AND mode_of_payment IN(2,{$payroll_period}) AND is_actived AND is_closed != 1
+                    WHERE coverage_date_end >= '{$payroll_date_start}' AND mode_of_payment IN(2,{$payroll_period}) AND is_actived AND is_closed != 1
                     GROUP BY employee_id
                 ) as other ON a.employee_id = other.employee_id AND b.is_actived AND c.is_actived
                 HAVING monthly_basic > 0
         ";
-        $dd = $this->db->query($sql, [$payroll_id, $payroll->payroll_month, $payroll->payroll_year, $payroll->payroll_month, $payroll->payroll_year, $payroll_date_start]);
-        // die(dump($this->db->last_query()));
-        // dd($dd->result());
+
+        // Process Government Deductions
+        parent::delete_by(['payroll_id'=>$payroll_id]);
+        // dump($this->db->last_query());
+        // $this->db->query($sql, [$payroll_id, $payroll->payroll_month, $payroll->payroll_year, $payroll->payroll_month, $payroll->payroll_year, $payroll_date_start]);
+        $this->db->query($sql);
+        // dd($this->db->last_query());
+
         return $this->db->affected_rows();
     }
 
-    public function save_earning($payroll_id, $employee_id = NULL, $post = NULL, $manning_payroll_earning_id = NULL)
+    public function generate_other_deductions($payroll_id, $mode_of_payment, $payroll_date_end)
+    {
+        $this->load->model('manning_payroll_deduction_detail_m');
+        // Other Deductions ---------------------------------------------------------------------------------------
+        $this->manning_payroll_deduction_detail_m->delete_by(['PayrollId'=>$payroll_id]);
+        $sql = "INSERT INTO manning_payroll_deduction_detail(PayrollId, DeductionId, amount, created_at, updated_at)
+                SELECT ?, deduction_id, fixed_amount, NOW(), NOW() FROM deductions
+                WHERE ? BETWEEN coverage_date_start AND coverage_date_end
+                    AND mode_of_payment IN(2,{$mode_of_payment}) AND is_actived AND
+                    EXISTS(
+                        SELECT 1 FROM manning_payroll_earning MPE
+                        WHERE payroll_id = ? AND deductions.employee_id = MPE.employee_id AND is_actived
+                        HAVING COALESCE(sum(r_hourly_rate + r_semi_monthly_rate + r_monthly_rate), 0) > 0
+                    )";
+        $this->db->query($sql, [$payroll_id, $payroll_date_end, $payroll_id]);
+        return $this->db->affected_rows();
+        // End Other Deductions -----------------------------------------------------------------------------------
+    }
+
+    public function remove_employee_payroll_deduction($employee_id=NULL, $payroll_period, $payroll_month, $payroll_year)
+    {
+        /*$this->load->model('manning_payroll_deduction_detail_m');
+        $exist_in = "EXISTS(SELECT 1 FROM manning_payroll_deduction WHERE  )"
+        $this->db->where($exist_in, NULL, FALSE);
+        $this->manning_payroll_deduction_detail_m->delete_by(['PayrollId'=>$payroll_id]);
+        $sql = "INSERT INTO manning_payroll_deduction_detail(PayrollId, DeductionId, amount, created_at, updated_at)
+                SELECT ?, deduction_id, fixed_amount, NOW(), NOW() FROM deductions
+                WHERE ? BETWEEN coverage_date_start AND coverage_date_end
+                    AND mode_of_payment IN(2,{$mode_of_payment}) AND is_actived AND
+                    EXISTS(
+                        SELECT 1 FROM manning_payroll_earning MPE
+                        WHERE payroll_id = ? AND deductions.employee_id = MPE.employee_id AND is_actived and IsFinal = 1
+                        HAVING COALESCE(sum(r_hourly_rate + r_semi_monthly_rate + r_monthly_rate), 0) > 0
+                    )";
+        $this->db->query($sql, [$payroll_id, $payroll_date_end, $payroll_id]);
+        return $this->db->affected_rows();*/
+    }
+
+    public function employee_deduction($employee_id = NULL, $payroll_period, $payroll_month, $payroll_year)
     {
         $now = date('Y-m-d H:i:s');
-        $param = ['payroll_id' => $payroll_id];
-        ! $employee_id || $param['employee_id'] = $employee_id;
+        $this->load->model('projects');
 
-        $count = parent::count($param);
-        if ($count)
+        $REGULAR = REGULAR;
+        $PROBITIONAL = PROBITIONAL;
+        $CO_TERMINOUS = CO_TERMINOUS;
+        $PROJECT_BASED = PROJECT_BASED;
+
+        $employee_status = "('{$REGULAR}', '{$PROBITIONAL}', '{$CO_TERMINOUS}', '{$PROJECT_BASED}')";
+
+        $where_in_employee = "";
+        // is_null($employee_id) || $where_in_employee = " AND employee_id IN( " . implode(',', $employee_id) . " )";
+        is_null($employee_id) || $where_in_employee = " AND employee_id IN ( $employee_id )";
+        $where_in_deduction_employee = "";
+        is_null($employee_id) || $where_in_deduction_employee = str_replace('employee_id', 'deductions.employee_id', $where_in_employee);
+
+        $where_in_payroll_period = "";
+        $where_not_equal_payroll_period = "";
+        if ($payroll_period == 1)
         {
-            $set = '';
-            if ($post !== NULL)
-            {
-                if ($this->db->field_exists($post['field'], 'manning_payroll_earning'))
-                {
-                    $set = "{$post['field']} =  {$post['value']}, ";
-                }
-            }
-
-
-            $sql = "UPDATE `manning_payroll_earning` as C
-                        LEFT JOIN manning as A ON C.employee_id = A.manning_id
-                        LEFT JOIN manning_payroll as B ON C.payroll_id = B.payroll_id
-                    SET
-                        $set
-                        r_allowance = if(allowance_mode_of_payment=1 AND payroll_period='1st', allowance,
-                                            if(allowance_mode_of_payment=2 AND payroll_period='2nd', allowance,
-                                                if(allowance_mode_of_payment=3, allowance, 0.00))),
-                        `r_cola` = if(find_in_set('cola', fields), round((10/8) * (rw_day*8),2), 0.00),
-                        `r_hourly_rate` = round((daily_rate/8) * no_hrs,2),
-                        `r_daily_rate` = round(daily_rate * rw_day,2),
-                        `r_semi_monthly_rate` = round(monthly_rate * 0.50,2),
-                        `r_monthly_rate` = round(monthly_rate,2),
-                        `r_regular_ot_day` = round(((daily_rate/8) * 1.25) * rw_ot_day,2),
-                        `r_straight_duty` = round((daily_rate/8) * sd_day,2),
-                        -- `r_straight_ot_day` =round( straight_ot_day,2),
-                        `r_night_diff` = round(((daily_rate/8) * 0.10) * nd_day,2),
-                        `r_night_ot_diff` = round((((daily_rate/8) * 1.25) * 0.10) * nd_ot_day,2),
-                        `r_legal_holiday` = round(((daily_rate+10)/8) * lg_day,2),
-                        `r_legal_ot_holiday` = round((((daily_rate/8) * 1.25) * 2) * lg_ot_day,2),
-                        `r_rest_day_rate` = round(((daily_rate/8) * 1.30) * rd_day,2),
-                        `r_rest_day_ot_rate` = round((((daily_rate/8) * 1.30) * 0.30) * rd_ot_day,2),
-                        `r_rest_day_special_holiday` = round(117.24 * rd_sh_day/*((daily_rate/8) * 0.50) * rd_sh_day*/,2),
-                        `r_rest_day_special_ot_holiday` = round(((daily_rate/8) * 1.95) * rd_sh_ot_day,2),
-                        `r_rest_day_legal_holiday` = round((((daily_rate/8) * 1.30) * 2) * rd_lg_hl,2),
-                        `r_rest_day_legal_ot_holiday` = round(((daily_rate/8) * 3.38) * rd_lg_ot_hl,2),
-                        `r_special_holiday` = round((((daily_rate+10)/8) * 0.30) * sp_day,2),
-                        `r_special_ot_holiday` = round(98.44 *  sp_ot_day/*(((daily_rate/8) * 0.30) * 1.30) * sp_ot_day*/,2),
-                        `r_late_amount` = round(((daily_rate/8)/60) * late_minutes * -1,2),
-                        `r_absent_rate_per_day` = round(((daily_rate/8) * no_absences_per_day) * -1,2),
-                        `r_absent_rate` = round(((daily_rate/8) * no_absences_per_hr) * -1,2),
-                        `C`.`updated_at` = ?
-                    WHERE `C`.`payroll_id` =  ? AND C.is_actived = 1";
-
-            if ($employee_id !== NULL)
-            $sql .= " AND C.employee_id = {$employee_id}";
-
-            if ($manning_payroll_earning_id !== NULL)
-            {
-                $sql .= " AND manning_payroll_earning_id = ?";
-                $this->db->query($sql, [$now, $payroll_id, $manning_payroll_earning_id]);
-                // dump($this->db->last_query());
-                // stop processing and return affected row
-                return $this->db->affected_rows();
-            }
-
-            $this->db->query($sql, [$now, $payroll_id]);
-        }
-        else
-        {
-            $this->load->model('manning_payroll_m', 'manning');
-            $payroll = $this->manning_payroll_m->get($payroll_id, TRUE);
-            $project_id = $payroll->project_id;
-
-            $post = [];
-            $manning = $this->db
-                            ->where([
-                                     'project_id' => $project_id,
-                                     'is_actived' => 1
-                                    ])
-                            ->get('manning')
-                            ->result();
-            if (count($manning))
-            {
-                foreach ($manning as $employee)
-                {
-                    $post[] = [
-                                    'payroll_id' => $payroll->payroll_id,
-                                    'employee_id' => $employee->manning_id,
-                                    'r_daily_rate' => $employee->daily_rate,
-                                    'r_semi_monthly_rate' => $employee->semi_monthly_rate,
-                                    'r_monthly_rate' => $employee->monthly_rate,
-                                    'r_allowance' => $employee->allowance,
-                                    'created_at' => $now,
-                                    'updated_at' => $now,
-                              ];
-                }
-                $affected = $this->db->insert_batch('manning_payroll_earning', $post);
-            }
+            $where_in_payroll_period = " AND payroll_period = 1";
+            $where_not_equal_payroll_period = "AND payroll_period != 1";
         }
 
-        return self::get_manning_payroll_earning($payroll_id);
-    }
+        if ($payroll_period == 2)
+        {
+            $where_in_payroll_period = " AND payroll_period = 2";
+            $where_not_equal_payroll_period = "AND payroll_period != 2";
+        }
 
+        $sql = "INSERT INTO manning_payroll_deduction(
+                    manningPayrollEarningId, payroll_id, employee_id, sum_basic,
+                    employee_share_sss, employer_share_sss, employee_compensation_program_sss, total_monthly_premium_sss,
+                    employee_share_philhealth, employer_share_philhealth, total_monthly_premium_philhealth,
+                    employee_share_pagibig, employer_share_pagibig, total_monthly_premium_pagibig,
+                    other_deduction, created_at, updated_at
+                )
+                SELECT  a.manning_payroll_earning_id, a.payroll_id, a.employee_id, monthly_basic,
+                    abs(if(payroll_period=1,0,IFNULL(sum_employee_sss,0)) - b.employee_share),
+                    abs(if(payroll_period=1,0,IFNULL(sum_employer_sss,0)) - b.employer_share),
+                    abs(if(payroll_period=1,0,IFNULL(sum_employee_compensation_program_sss,0)) - b.employee_compensation_program),
+                    abs(if(payroll_period=1,0,IFNULL(sum_monthly_sss,0)) - b.total_monthly_premium),
 
-    /**
-     * Generate billing summary per period
-     *
-     * @param   array   a key/value pair of fields
-     * @return  object  data summary
-     */
-    public function get_project_summary_by($condition = NULL, $group_by = NULL)
-    {
-        if ($condition != NULL)
-        $this->db->where($condition);
+                    IF(payroll_period = 1,
+                        ROUND(biweekly_basic * 0.01375, 2),
+                        IF(monthly_basic <= 10000,
+                            137.50 - IFNULL(sum_employee_philhealth, 0),
+                            ROUND(monthly_basic * 0.01375, 2) - IFNULL(sum_employee_philhealth, 0)
+                        )
+                    ),
 
-        if ($group_by === NULL)
-        $group_by = 'manning_payroll_earning.payroll_id';
+                    IF(payroll_period = 1,
+                        ROUND(biweekly_basic * 0.01375, 2),
+                        IF(monthly_basic <= 10000,
+                            137.50 - IFNULL(sum_employee_philhealth, 0),
+                            ROUND(monthly_basic * 0.01375, 2) - IFNULL(sum_employee_philhealth, 0)
+                        )
+                    ),
 
-        $this->db->group_by($group_by);
+                    IF(payroll_period = 1,
+                        ROUND(biweekly_basic * 0.01375, 2) * 2,
+                        IF(monthly_basic <= 10000,
+                            (137.50 - IFNULL(sum_employee_philhealth, 0)) * 2,
+                            (ROUND(monthly_basic * 0.01375, 2) - IFNULL(sum_employee_philhealth, 0)) * 2
+                        )
+                    ),
 
-        return self::get_project_summary();
-    }
+                    IF(mode_of_payment_pagibig = payroll_period,
+                        c.employee_share,
+                        if(mode_of_payment_pagibig != 3,
+                            0,
+                            abs(IFNULL(sum_employee_pagibig,0) - c.employee_share)
+                        )
+                    ),
+                    IF(mode_of_payment_pagibig = payroll_period,
+                        c.employer_share,
+                        if(mode_of_payment_pagibig != 3,
+                            0,
+                            abs(IFNULL(sum_employer_pagibig,0) - c.employer_share)
+                        )
+                    ),
+                    IF(mode_of_payment_pagibig = payroll_period,
+                        c.total_monthly_premium,
+                        if(mode_of_payment_pagibig != 3,
+                            0,
+                            abs(IFNULL(sum_monthly_pagibig,0) - c.total_monthly_premium)
+                        )
+                    ),
+                    sum_other_deduction_amount, '{$now}', '{$now}'
+                FROM (
+                        SELECT manning_payroll_earning_id, MPE.payroll_id, employee_id,
+                                P.project_id,
+                                LEFT(payroll_period,1) payroll_period,
+                                IF(MP.mode_of_payment_allowance=0, P.mode_of_payment_allowance, MP.mode_of_payment_allowance) mode_of_payment_allowance,
+                                IF(MP.mode_of_payment_pagibig=0, P.mode_of_payment_pagibig, MP.mode_of_payment_pagibig) mode_of_payment_pagibig,
+                                IF(MP.mode_of_payment_philhealth=0, P.mode_of_payment_philhealth, MP.mode_of_payment_philhealth) mode_of_payment_philhealth,
+                                IF(MP.mode_of_payment_sss=0, P.mode_of_payment_sss, MP.mode_of_payment_sss) mode_of_payment_sss,
+                                IF(MP.with_13th_month=0, P.with_13th_month, MP.with_13th_month) with_13th_month,
+                                ( r_hourly_rate +  r_semi_monthly_rate + r_monthly_rate ) biweekly_basic
+                        FROM manning_payroll_earning MPE
+                        LEFT JOIN manning_payroll MP
+                            ON MP.payroll_id = MPE.payroll_id
+                        LEFT JOIN projects P ON MP.project_id = P.project_id
+                        WHERE payroll_month = '{$payroll_month}' and payroll_year = '{$payroll_year}' and IsFinal = 1
+                            {$where_in_payroll_period}
+                            and MPE.is_actived
+                            and r_employment_status_id IN $employee_status
+                            {$where_in_employee}
+                        GROUP BY manning_payroll_earning_id
+                        HAVING biweekly_basic > 0
+                    ) as a
+                LEFT JOIN (
+                    SELECT employee_id,
+                        sum(IFNULL(r_hourly_rate,0)+IFNULL(r_semi_monthly_rate,0)+IFNULL(r_monthly_rate,0)) monthly_basic,
+                        count(*) pay_cnt
+                    FROM manning_payroll_earning MPE
+                    WHERE is_actived {$where_in_employee}
+                        AND r_employment_status_id IN $employee_status
+                        AND EXISTS (
+                            SELECT 1 FROM manning_payroll WHERE payroll_id = MPE.payroll_id
+                            and payroll_month = '{$payroll_month}' and payroll_year = '{$payroll_year}' and IsFinal = 1
+                            and is_actived
+                        )
+                    GROUP BY employee_id
+                ) as employee_salary ON employee_salary.employee_id = a.employee_id
+                LEFT JOIN (
+                    SELECT employee_id,
+                        COALESCE(SUM(employee_share_philhealth), 0) sum_employee_philhealth,
+                        COALESCE(SUM(employer_share_philhealth), 0) sum_employer_philhealth,
+                        COALESCE(SUM(total_monthly_premium_philhealth), 0) sum_monthly_philhealth,
+                        COALESCE(SUM(employee_share_pagibig), 0) sum_employee_pagibig,
+                        COALESCE(SUM(employer_share_pagibig), 0) sum_employer_pagibig,
+                        COALESCE(SUM(total_monthly_premium_pagibig), 0) sum_monthly_pagibig,
+                        COALESCE(SUM(employee_share_sss), 0) sum_employee_sss,
+                        COALESCE(SUM(employer_share_sss), 0) sum_employer_sss,
+                        COALESCE(SUM(employee_compensation_program_sss), 0) sum_employee_compensation_program_sss,
+                        COALESCE(SUM(total_monthly_premium_sss), 0) sum_monthly_sss
+                    FROM manning_payroll_deduction MPD
+                    LEFT JOIN manning_payroll ON manning_payroll.payroll_id = MPD.payroll_id
+                    WHERE payroll_month = '{$payroll_month}' and payroll_year = '{$payroll_year}' and IsFinal = 1
+                            {$where_not_equal_payroll_period}
+                            and MPD.is_actived
+                            and manning_payroll.is_actived
+                            {$where_in_employee}
+                    GROUP BY employee_id
+                ) as employee_deduction ON employee_deduction.employee_id = a.employee_id
 
+                LEFT JOIN sss_premium_contribution_matrix as b
+                    on IF(payroll_period=1, biweekly_basic, monthly_basic) >= b.salary_range_start
+                    AND IF(payroll_period=1, biweekly_basic, monthly_basic) <= b.salary_range_end
 
-    /**
-     * Generate project summary
-     *
-     * @param   int
-     * @param   int
-     * @param   bool
-     * @return  object
-     */
-    public function get_project_summary($manning_payroll_earning_id = NULL, $single = FALSE)
-    {
-        $this->db->select('manning_payroll_earning.payroll_id,
-            F.position,
-            fields,
-            A.remarks as billing_remarks,
-            SUM(IF(w_adjustment=0,1,0)) as cnt_emp,
-            SUM(IF(w_adjustment=1,1,0)) as cnt_adj,
-            COUNT(*) as cnt_row,
-            /*date_start, date_end, */
+                LEFT JOIN pagibig_premium_contribution_matrix as c
+                    on monthly_basic >= c.salary_range_start AND monthly_basic <= c.salary_range_end AND monthly_basic >0
 
-            r_semi_monthly_rate as semi_monthly_rate,
-            r_monthly_rate as monthly_rate,
-            r_daily_rate as daily_rate,
-            r_hourly_rate as hourly_rate,
-            allowance,
-            allowance_mode_of_payment,
-            /*regular_ot_day, straight_duty, straight_ot_day, night_diff, night_ot_diff, legal_holiday, legal_ot_holiday, */
-            /*rest_day_rate, rest_day_ot_rate, rest_day_special_holiday, rest_day_special_ot_holiday, rest_day_legal_holiday, rest_day_legal_ot_holiday, */
-            /*special_holiday, special_ot_holiday, */
-            /*late_amount, late_minutes, no_absences_per_day, no_absences_per_hr, absent_rate, absent_rate_per_day,*/
+                LEFT JOIN (
+                    SELECT COUNT(*) cnt,COALESCE(SUM(fixed_amount), 0) sum_other_deduction_amount,deductions.employee_id
+                    FROM deductions
+                    LEFT JOIN manning_payroll_deduction_detail MPDD ON deduction_id = DeductionId
+                    LEFT JOIN manning_payroll MP ON payroll_id = PayrollId
+                    LEFT JOIN manning_payroll_earning MPE ON MP.payroll_id = MPE.payroll_id AND MPE.employee_id = deductions.employee_id
+                    WHERE deductions.is_actived
+                            AND MP.is_actived
+                            AND MPDD.is_actived
+                            AND MPE.is_actived
+                            AND is_closed != 1
+                            AND payroll_year = '{$payroll_year}' AND payroll_month = '{$payroll_month}' AND IsFinal = 1
+                            {$where_in_payroll_period}
+                            AND mode_of_payment IN(2, left(payroll_period,1))
+                            {$where_in_deduction_employee}
+                        GROUP BY deductions.employee_id
+                ) as other ON a.employee_id = other.employee_id AND b.is_actived AND c.is_actived
+                HAVING monthly_basic > 0
+                ";
 
-            SUM(no_hrs) as working_hours,
-            SUM(rw_day) as working_days, SUM(rw_ot_day) as rw_ot_day_cnt,
-            SUM(sd_day) as sd_day_cnt, SUM(sd_ot_day) as sd_ot_day_cnt,
-            SUM(nd_day) as nd_day_cnt, SUM(nd_ot_day) as nd_ot_day_cnt,
-            SUM(lg_day) as lg_day_cnt, SUM(lg_ot_day) as lg_ot_day_cnt,
-            SUM(rd_day) as rd_day_cnt, SUM(rd_ot_day) as rd_ot_day_cnt, SUM(rd_sh_day) as rd_sh_day_cnt, SUM(rd_sh_ot_day) as rd_sh_ot_day_cnt,
-            SUM(rd_lg_hl) as rd_lg_hl_cnt, SUM(rd_lg_ot_hl) as rd_lg_ot_hl_cnt,
-            SUM(sp_day) as h_day_cnt, SUM(sp_ot_day) as h_ot_day_cnt,
-            SUM(late_minutes) as late_minutes_cnt,
-            SUM(no_absences_per_day) as no_absences_per_day_cnt,
-            SUM(no_absences_per_hr) as no_absences_per_hr_cnt,
+        // Process Government Deductions
+        // parent::delete_by(['payroll_id'=>$payroll_id]);
+        $qry = $this->db->query($sql);
+        // dump($this->db->last_query());
+        // dd($qry->result());
 
-            SUM(r_cola) as cola,
-            SUM(r_hourly_rate ) as hourly,
-            SUM(r_daily_rate ) as daily,
-            SUM(r_semi_monthly_rate) as semi_monthly,
-            SUM(r_monthly_rate) as monthly,
-            SUM(r_regular_ot_day ) as ot,
-            SUM(r_straight_duty ) as s_duty,
-            SUM(r_straight_ot_day ) as s_ot_duty,
-            SUM(r_night_diff ) as n_duty,
-            SUM(r_night_ot_diff ) as n_ot_duty,
-            SUM(r_legal_holiday ) as lg_duty,
-            SUM(r_legal_ot_holiday ) as lg_ot_duty,
-            SUM(r_rest_day_rate ) as rd_duty,
-            SUM(r_rest_day_ot_rate ) as rd_ot_duty,
-            SUM(r_rest_day_special_holiday ) as rd_sh,
-            SUM(r_rest_day_special_ot_holiday ) as rd_ot_sh,
-            SUM(r_rest_day_legal_holiday ) as rd_lghl,
-            SUM(r_rest_day_legal_ot_holiday ) as rd_ot_lghl,
-            SUM(r_special_holiday ) as sp_hl_duty,
-            SUM(r_special_ot_holiday ) as sp_hl_ot_duty,
-            SUM(r_late_amount ) as late,
-            SUM(r_absent_rate_per_day ) as deduct_absent_per_day,
-            SUM(r_absent_rate ) as deduct_absent_per_hr
-            ',
-            FALSE);
-
-            // SUM(semi_monthly_rate) as semi_monthly, SUM(monthly_rate) as monthly, SUM(no_hrs * hourly_rate) as hourly,
-            // SUM(rw_day * daily_rate) as daily, SUM(rw_ot_day * regular_ot_day) as ot,
-            // SUM(sd_day * straight_duty) as s_duty, SUM(sd_ot_day * straight_ot_day) as s_ot_duty,
-            // SUM(nd_day * night_diff) as n_duty, SUM(nd_ot_day * night_ot_diff) as n_ot_duty,
-            // SUM(lg_day * legal_holiday) as lg_duty, SUM(lg_ot_day * legal_ot_holiday) as lg_ot_duty,
-            // SUM(rd_day * rest_day_rate) as rd_duty, SUM(rd_ot_day * rest_day_ot_rate) as rd_ot_duty,
-            // SUM(rd_sh_day * rest_day_special_holiday) as rd_sh, SUM(rd_sh_ot_day * rest_day_special_ot_holiday) as rd_ot_sh,
-            // SUM(rd_lg_hl * rest_day_legal_holiday) as rd_lghl, SUM(rd_lg_ot_hl * rest_day_legal_ot_holiday) as rd_ot_lghl,
-            // SUM(sp_day * special_holiday) as sp_hl_duty, SUM(sp_ot_day * special_ot_holiday) as sp_hl_ot_duty,
-            // SUM(late_minutes * late_amount) as late,
-            // SUM(no_absences_per_day * absent_rate_per_day) as deduct_absent_per_day,
-            // SUM(no_absences_per_hr * absent_rate) as deduct_absent_per_hr
-
-         $this->_summay_join_statement();
-
-        if ($manning_payroll_earning_id !== NULL)
-        $this->db->group_by('manning_payroll_earning.manning_payroll_earning_id');
-
-        return parent::get($manning_payroll_earning_id, $single);
-    }
-
-    public function get_billing_rates_array()
-    {
-        /**
-         * rates =>
-         *          [rate*basis => total_rate_amount] |
-         *          [rate title] |
-         *          [rate excel label] |
-         *          [total per rate => grand total] |  <--(get_project_summary.[column_name])
-         *          [total per column => column total] <--(get_project_summary.[column_name]_cnt)
-         */
-
-        $array = array(
-            'cola' => 'r_cola|cola|cola|cola|cola',
-            'hourly_rate' => "no_hrs|No. of hours worked|No.<br>Hours|hourly|working_hours",
-            'daily_rate' => "rw_day|Regular days worked|Reg.<br>Days|daily|working_days",
-            'semi_monthly_rate' => "0|0|0|semi_monthly|1",
-            'monthly_rate' => "0|0|0|monthly|1",
-            'regular_ot_day' => "rw_ot_day|Regular days O.T. worked|Reg.<br>O.T.|ot|rw_ot_day_cnt",
-            'straight_duty' => "sd_day|Straight days worked|Straight<br>Duty|s_duty|sd_day_cnt",
-            'straight_ot_day' => "sd_ot_day|Straight days O.T. worked|Straight<br>Duty O.T.|s_ot_duty|sd_ot_day_cnt",
-            'night_diff' => "nd_day|Night Differential worked|Night<br>Diff.|n_duty|nd_day_cnt",
-            'night_ot_diff' => "nd_ot_day|Night Differential O.T. worked|Night<br>Diff. O.T.|n_ot_duty|nd_ot_day_cnt",
-            'legal_holiday' => "lg_day|Legal Holidays worked|Leg.<br>Hol.|lg_duty|lg_day_cnt",
-            'legal_ot_holiday' => "lg_ot_day|Legal Holidays O.T. worked|Leg.<br>Hol. O.T.|lg_ot_duty|lg_ot_day_cnt",
-            'rest_day_rate' => "rd_day|Rest Day worked|Rest<br>Day|rd_duty|rd_day_cnt",
-            'rest_day_ot_rate' => "rd_ot_day|Rest Day O.T.|RD O.T.|rd_ot_duty|rd_ot_day_cnt",
-            'rest_day_special_holiday' => "rd_sh_day|Rest Day Special Holidays worked|Rest Day<br>Spcl. Hol.|rd_sh|rd_sh_day_cnt",
-            'rest_day_special_ot_holiday' => "rd_sh_ot_day|Rest Day Special Holidays O.T.|RD O.T.<br>Spcl. Hol.|rd_ot_sh|rd_sh_ot_day_cnt",
-            'rest_day_legal_holiday' => "rd_lg_hl|Rest Day Legal Holidays worked|Rest Day<br>Leg. Hol.|rd_lghl|rd_lg_hl_cnt",
-            'rest_day_legal_ot_holiday' => "rd_lg_ot_hl|Rest Day Legal Holidays O.T. worked|RD O.T.<br>Leg. Hol.|rd_ot_lghl|rd_lg_ot_hl_cnt",
-            'special_holiday' => "sp_day|Special Holidays worked|Spcl.<br>Hol.|sp_hl_duty|h_day_cnt",
-            'special_ot_holiday' => "sp_ot_day|Special Holidays O.T. worked|Spcl. Hol. <br>O.T.|sp_hl_ot_duty|h_ot_day_cnt",
-            'late_amount' => "late_minutes|Minutes Lates|Lates|late|late_minutes_cnt",
-            'absent_rate_per_day' => "no_absences_per_day|No. of Days Absent|No. of Days Absent|deduct_absent_per_day|no_absences_per_day_cnt",
-            // 'absent_rate_per_hr' => "no_absences_per_hr|No. of Hours Absent|Absences Per Hrs|deduct_absent_per_hr|no_absences_per_hr_cnt",
-            'absent_rate' => "no_absences_per_hr|No. of Hours Absent|Absences Per Hrs|deduct_absent_per_hr|no_absences_per_hr_cnt",
-        );
-
-        return $array;
-    }
-
-
-    private function _summay_join_statement()
-    {
-        // $this->db->join('project_billing_info as A', 'A.payroll_id = manning_payroll_earning.payroll_id', 'left');
-        $this->db->join('manning_payroll as A', 'A.payroll_id = manning_payroll_earning.payroll_id', 'left');
-        $this->db->join('projects as B', 'B.project_id = A.project_id', 'left');
-        $this->db->join('manning as C', 'C.manning_id = manning_payroll_earning.employee_id', 'left');
-        // $this->db->join('employees as E', 'E.employee_id = C.employee_id', 'left');
-        // $this->db->join('project_position_rates as D', 'D.ppr_id = C.ppr_id', 'left');
-        $this->db->join('positions as F', 'F.position_id = C.position_id', 'left');
+        return $this->db->affected_rows();
     }
 
 }
 
-/*Location: ./application/models/manning_payroll_earning_m.php*/
+/*Location: ./application/models/manning_payroll_deduction_m.php*/
