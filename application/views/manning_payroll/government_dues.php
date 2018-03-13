@@ -135,7 +135,7 @@
 				<tbody>
 
 				<?php $ctr = 0; ?>
-			    <?php $company_share = $employee_share = $total_share = $tmp_income = 0; ?>
+			    <?php $company_share = $employee_share = $total_share = $tmp_income = $tmp_total = 0; ?>
 			    <?php $employee_no = $tmp_emp_no = ""; ?>
 				<?php foreach ($proj['project_data'] as $row): ?>
 	<!-- start result here -->
@@ -145,15 +145,17 @@
 						$tmp_3 = 'total_monthly_premium_' . $contribution;
 						$company_share += $row->$tmp_1;
 						$employee_share += $row->$tmp_2;
-
 						if ($contribution == 'sss')
 						{
 							$ecc_share += $row->employee_compensation_program_sss;
-							$total_share += ($row->$tmp_1 + $row->$tmp_2 + $row->employee_compensation_program_sss);
+							$tmp_total = $row->$tmp_1 + $row->$tmp_2 + $row->employee_compensation_program_sss;
+							$total_share += $tmp_total;
 						}
 						else
 						{
-							$total_share += $row->$tmp_3;
+							// $total_share += $row->$tmp_3;
+							$total_share += $row->$tmp_1 + $row->$tmp_2;
+							$tmp_total = $row->$tmp_1 + $row->$tmp_2;
 						}
 
 						if ($row->$tmp_1 + $row->$tmp_2 ==  0)
@@ -231,7 +233,7 @@
 							if ($contribution == 'sss')
 							echo nf($row->$tmp_1 + $row->$tmp_2 + $row->employee_compensation_program_sss);
 							else
-							echo nf($row->$tmp_3);
+							echo nf($tmp_total);
 							?>
 					</td>
 				</tr>
