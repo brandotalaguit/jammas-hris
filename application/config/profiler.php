@@ -12,7 +12,7 @@
 */
 
 $config['get']				= FALSE;
-$config['post']				= FALSE;
+$config['post']				= TRUE;
 $config['config']			= FALSE;
 $config['queries'] 			= TRUE;
 $config['uri_string']		= FALSE;

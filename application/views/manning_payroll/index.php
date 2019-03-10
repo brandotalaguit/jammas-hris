@@ -147,6 +147,17 @@
                                                                 'data-keyboard' => 'false',
                                                                 'class'         => 'btn btn-primary',
                                                             ]); ?>
+
+
+                <?= anchor('manning_payroll/thirteenth_month'
+                                                            , '13th Month Report'
+                                                            , [
+                                                                'data-toggle'   => 'modal',
+                                                                'data-target'   => '#payroll-modal',
+                                                                'data-backdrop' => 'static',
+                                                                'data-keyboard' => 'false',
+                                                                'class'         => 'btn btn-primary',
+                                                            ]); ?>
             </p>
 
 
@@ -284,13 +295,21 @@
               startDate: '2014',
               endDate: new Date(),
         });
-    })
+    });
     $('body').on('click', 'button[type=button][name=btn_contribution_action]', function(e){
         e.preventDefault();
         $('#frmContribution').attr('action', $(this).data('url')).submit();
         // alert($('#frmContribution').attr('action'))
         // $('#frmContribution').submit();
+    });
+
+    $('body').on('click', 'button[type=button][name=btn_13thmonth]', function(e){
+        e.preventDefault();
+        $('#frm13thMonth').attr('action', $(this).data('url')).submit();
+        // alert($('#frmContribution').attr('action'))
+        // $('#frmContribution').submit();
     })
+
 </script>
 <script>
     $("body").on("click", ".pagination a", function() {

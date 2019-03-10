@@ -195,6 +195,39 @@ class Manning_payroll_deduction_m extends MY_Model
         return $data;
     }
 
+    public function validate_13thmonth_form()
+    {
+        $data = array('success' => FALSE, 'message' => '', 'form' => array());
+
+        $rules = $this->search_contribution_rules;
+        $scope = $this->input->post('scope');
+
+        if ($scope == 1)
+        $rules['manning_id']['rules'] .= '|required';
+
+        if ($scope == 2)
+        $rules['project_id']['rules'] .= '|required';
+
+        unset($rules['payroll_month']);
+        unset($rules['payroll_year']);
+        unset($rules['deduction_and_govtdue']);
+        unset($rules['report_format']);
+        unset($rules['contribution']);
+        unset($rules['deduction']);
+
+        $this->form_validation->set_rules($rules);
+        $this->form_validation->set_error_delimiters('<p class="text-danger">', '</p>');
+
+        ! $this->form_validation->run() || $data['success'] = TRUE;
+        validation_errors() || $data['messages'] = validation_errors();
+
+        foreach ($this->search_contribution_rules as $key => $value) {
+            $data['form'][$key] = form_error($key);
+        }
+
+        return $data;
+    }
+
     public function get_by_employee_contribution($field_arr, $payroll_year, $manning_id = NULL, $payroll_month = NULL)
     {
         $REGULAR = REGULAR;

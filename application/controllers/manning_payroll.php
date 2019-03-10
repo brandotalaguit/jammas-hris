@@ -1187,9 +1187,85 @@ class Manning_payroll extends Admin_Controller
         $this->load_view('manning_payroll/government_dues');
     }
 
-    private function get_thirteenth_month()
+    public function thirteenth_month_report()
     {
         // $this->output->enable_profiler(TRUE);
+        $this->load->model('manning_payroll_deduction_m');
+        $field_arr = array(
+                            'employee_no',
+                            'UPPER(lastname) lastname',
+                            'UPPER(firstname) firstname',
+                            'UPPER(middlename) middlename',
+                            'position_code',
+                            'position',
+                            // 'SUM(gross_income) gross_income',
+                            'H.monthly_basic gross_income',
+                        );
+
+        $validation = $this->manning_payroll_deduction_m->validate_13thmonth_form();
+        if ($validation['success'] == FALSE)
+        {
+            $message = '<h4>Unable to process request</h4><ul>';
+            if ( ! empty($validation['messages']))
+            $message .= on_fail(empty($error),  '<li>' . $validation['messages'] . '</li>');
+
+            foreach ($validation['form'] as $errors => $error)
+            $message .= on_fail(empty($error),  '<li>' . $error . '</li>');
+            $message .= '</ul>';
+
+            parent::redirect_with('manning_payroll', array('error' => $message));
+        }
+
+        $post['payroll_month'] = NULL;
+
+        foreach ($validation['form'] as $key => $value) {
+            empty($_POST[$key]) || $post[$key] = $_POST[$key];
+        }
+
+        return self::get_thirteenth_month();
+    }
+
+    public function thirteenth_month()
+    {
+        $this->load->model(array('deduction_categories', 'manning'));
+
+        $data['projects'] = $this->projects->get_projects();
+
+        $data['employees'] = array('-1' => 'All Active Employees') + $this->manning->as_dropdown();
+
+        unset($data['projects'][0]);
+        unset($data['employees'][0]);
+        unset($data['deductions'][0]);
+
+        return $this->load->view('manning_payroll/thirteenth_month_dialog', $data);
+    }
+
+    public function employee_thirteenth_month($employee_id, $date_start, $date_end)
+    {
+        $this->load->model('manning');
+        // $this->output->enable_profiler(TRUE);
+
+        $_POST['date_start'] = $date_start;
+        $_POST['date_end'] = $date_end;
+        $_POST['employee_id'] = $employee_id;
+
+        $this->db->where('employee_id', $employee_id);
+
+        $data['payroll'] = array(
+            'project_id' => -1,
+            'project_title' => '',
+            'project_data' => $this->manning_payroll_earning_m->get_thirteenth_month(),
+        );
+
+        $data['employee'] = $this->manning->get($employee_id);
+
+        return $this->load->view('manning_payroll/employee_thirteenth_month_dialog', $data);
+    }
+
+    private function get_thirteenth_month()
+    {
+        $this->output->enable_profiler(TRUE);
+
 
         if ($this->input->post('scope') == 2)
         {

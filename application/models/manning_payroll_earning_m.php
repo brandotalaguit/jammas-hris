@@ -848,29 +848,115 @@ class Manning_payroll_earning_m extends MY_Model
 
     public function get_thirteenth_month()
     {
-
-
-
+        // $this->output->enable_profiler(TRUE);
         // select fields
         $field = $this->thirteenth_month_field;
 
+        /*if ($this->input->post('coverage', TRUE) == '1')
+        {
+            if (isset($_POST['employee_id']))
+            {
+                $field = array_merge($field, ['payroll_date, A.payroll_id, G.title, payroll_period, r_hourly_rate, r_daily_rate, r_semi_monthly_rate, r_monthly_rate']);
+                $this->db->order_by('payroll_date');
+                $this->db->order_by('payroll_period', 'asc');
+            }
+            else
+            {
+                // to summarized and
+                // GROUP BY
+                $field = array_diff($field, ['r_13thmonth', 'A.payroll_id', 'payroll_date']);
+                $field = array_merge($field, ['SUM(r_13thmonth) r_13thmonth', 'count(*) cnt_r13thmonth']);
+
+                $this->db->group_by('manning_id');
+                $this->db->order_by('lastname, firstname, middlename');
+            }
+            // for project with 13th month only
+            $this->db->where('r_13thmonth >', 0);
+        }
+        else
+        {*/
+            // 07/18/2018
+            // TODO: re-compute employees 13th month benefits here
+            if (isset($_POST['employee_id']))
+            {
+                $thirteenth_month_arr = [
+                        'payroll_date',
+                        'A.payroll_id',
+                        'G.title',
+                        'payroll_period',
+                        'date_start',
+                        'date_end',
+                        'r_employment_status_id',
+                        'r_hourly_rate as r_hourly_rate1',
+                        'r_semi_monthly_rate as r_semi_monthly_rate1',
+                        'r_monthly_rate as r_monthly_rate1',
+                        'r_daily_rate as r_daily_rate1',
+                        'round(r_semi_monthly_rate/12,2) as r_semi_monthly_rate',
+                        'round((r_monthly_rate * 0.50)/12,2) as r_monthly_rate',
+                        'round(((r_daily_rate/8) * no_hrs)/12,2) as r_daily_rate',
+                        'round(r_hourly_rate/12,2) as r_hourly_rate',
+                    ];
+
+                $field = array_merge($field, $thirteenth_month_arr);
+                $this->db->order_by('payroll_date');
+                $this->db->order_by('payroll_period', 'asc');
+            }
+            else
+            {
+                // to summarized and
+                // GROUP BY
+                $field = array_diff($field, ['r_13thmonth', 'A.payroll_id', 'payroll_date']);
+                $thirteenth_month_arr = [
+                        // 'payroll_date',
+                        // 'A.payroll_id',
+                        // 'G.title',
+                        // 'payroll_period',
+                        'SUM(r_hourly_rate) as r_hourly_rate1',
+                        'SUM(r_semi_monthly_rate) as r_semi_monthly_rate1',
+                        'SUM(r_monthly_rate) as r_monthly_rate1',
+                        'SUM(r_daily_rate) as r_daily_rate1',
+                        'SUM(round(r_semi_monthly_rate/12,2)) as r_semi_monthly_rate',
+                        'SUM(round((r_monthly_rate * 0.50)/12,2)) as r_monthly_rate',
+                        'SUM(round(((r_daily_rate/8) * no_hrs)/12,2)) as r_daily_rate',
+                        'SUM(round(r_hourly_rate/12,2)) as r_hourly_rate',
+                    ];
+                $field = array_merge($field, $thirteenth_month_arr);
+
+                $this->db->group_by('manning_id');
+                $this->db->order_by('lastname, firstname, middlename');
+            }
+        // }
+
+
+
         // payroll period
-        // if (count($this->input->post('pay_period')))
-        // $this->db->where_in('payroll_period', $this->input->post('pay_period'));
+        if ($this->input->post('pay_period'))
+        $this->db->where_in('payroll_period', $this->input->post('pay_period'));
 
         //  month
         if ($this->input->post('payroll_month'))
         $this->db->where('payroll_month', $this->input->post('payroll_month'));
 
         // year
+        if ($this->input->post('payroll_year'))
         $this->db->where('payroll_year', $this->input->post('payroll_year'));
+
+        if ($this->input->post('date_start') && $this->input->post('date_end'))
+        {
+            $date_start = $this->input->post('date_start');
+            $date_end = $this->input->post('date_end');
+
+            $this->db->where("payroll_date BETWEEN '{$date_start}' AND '{$date_end}'");
+        }
 
         if ($this->input->post('scope') == 1)
         {
             // scope employee
             $manning_id = $this->input->post('manning_id');
             if (in_array(-1, $manning_id))
-            $this->db->where('manning_id', NULL);
+            {
+                // $this->db->where('manning_id', NULL);
+            }
             else
             {
                 $this->db->where('manning_id IN (' . implode(',', $manning_id) . ')');
@@ -888,35 +974,20 @@ class Manning_payroll_earning_m extends MY_Model
             }
         }*/
 
-        // payroll period
-        if ($this->input->post('pay_period'))
-        $this->db->where_in('payroll_period', $this->input->post('pay_period'));
-
-        $this->db->where('r_13thmonth >', 0);
-
-        $field = array_merge($field, ['payroll_date, A.payroll_id']);
-        if ($this->input->post('report_format') == 1)
-        {
-            // summarized and
-            // GROUP BY
-            unset($field['payroll_date']);
-            unset($field['r_13thmonth']);
-            unset($field['A.payroll_id']);
-
-            $field = array_merge($field, ['SUM(r_13thmonth) r_13thmonth', 'count(*) cnt_r13thmonth']);
 
 
-            $this->db->group_by('manning_id');
-        }
+        $this->db->where_not_in('r_employment_status_id', [RELIEVER, EXTRA_RELIEVER]);
+        $this->db->where('IsPayrollPrinted != ', 0);
+        $this->db->where('DateFinalized >', 0);
 
         $this->db->select($field, FALSE);
 
         $this->db->join('manning_payroll as A', 'A.payroll_id = '.$this->table_name.'.payroll_id', 'left');
         $this->db->join('manning as E', 'E.manning_id = '.$this->table_name.'.employee_id', 'left');
         $this->db->join('positions as F', 'F.position_id = E.position_id', 'left');
-        // $this->db->join('projects as G', 'G.project_id = A.project_id', 'left');
+        $this->db->join('projects as G', 'G.project_id = A.project_id', 'left');
 
-        $this->db->order_by('lastname, firstname, middlename');
+
 
         return parent::get();
     }

@@ -1,4 +1,8 @@
+<div class="modal fade" id="payroll-modal">
+
+</div>
  <style type="text/css">
+
  	td {
  		vertical-align: top;
  	}
@@ -54,6 +58,10 @@
 <?php
 	// $projects = array_unique(array_map(function ($ar) {return $ar->title;}, $result), SORT_REGULAR);
 	// dump($project);
+
+	$date_start = $this->input->post('date_start', TRUE);
+	$date_end = $this->input->post('date_end', TRUE);
+
 	$subtotal_company_share = $subtotal_employee_share = $subtotal_share = $company_share = $employee_share = $total_share = $ecc_share = 0;
 	$subtotal = array();
 	$title = FALSE;
@@ -87,10 +95,8 @@
 				        <th width='25%' class="text-center">LASTNAME</th>
 				        <th width='25%' class="text-center">FIRSTNAME</th>
 				        <th width='15%' class="text-center">MIDDLENAME</th>
-				        <?php /* if (trim($report_type) != 'Summary'): ?>
-				        <th width='10%' class="text-center">PAYROLL DATE</th>
-				        <?php endif */ ?>
 				        <th width='15%' class="text-center">AMOUNT</th>
+				        <th class="hidden-print">ACTION</th>
 				    </tr>
 			    </thead>
 				<tbody>
@@ -101,7 +107,13 @@
 				<?php foreach ($proj['project_data'] as $row): ?>
 	<!-- start result here -->
 				<?php
-						$total_amount += get_key($row, 'r_13thmonth', 0);
+						$r_semi_monthly_rate = get_key($row, 'r_semi_monthly_rate', 0);
+						$r_monthly_rate = get_key($row, 'r_monthly_rate', 0);
+						$r_daily_rate = get_key($row, 'r_daily_rate', 0);
+						$r_hourly_rate = get_key($row, 'r_hourly_rate', 0);
+						$r_13thmonth = ($r_semi_monthly_rate + $r_monthly_rate + $r_daily_rate + $r_hourly_rate);
+						$total_amount +=  $r_13thmonth;
+						// $total_amount += get_key($row, 'r_13thmonth', 0);
 					?>
 				<tr>
 					<td><?php echo ++$ctr;?>.</td>
@@ -109,20 +121,27 @@
 					<td><?php echo $row->lastname ?></td>
 					<td><?php echo $row->firstname ?></td>
 					<td><?php echo $row->middlename; ?></td>
-			        <?php /*if (trim($report_type) != 'Summary'): ?>
-					<td>
-	                    <?php
-	                    	$payroll_date = get_key($row, 'payroll_date', '');
-	                    	if ($payroll_date > '')
-                    		echo date('m/d/Y', strtotime($payroll_date));
-	                    ?>
-					</td>
-					<?php endif*/ ?>
 					<td class="text-right">
 	                    <?php
-	                    	echo nf(get_key($row,'r_13thmonth', 0));
+	                    	echo nf($r_13thmonth);
+	                    	// if ($r_13thmonth == 0)
+	                    	// {
+	                    	// 	dump($r_semi_monthly_rate);
+	                    	// 	dump($r_monthly_rate);
+	                    	// 	dump($r_daily_rate);
+	                    	// 	dump($r_hourly_rate);
+	                    	// }
 	                    ?>
 					</td>
+					<td class="hidden-print"><?= anchor('manning_payroll/employee_thirteenth_month/'. $row->employee_id . '/' . $date_start . '/' . $date_end
+                                                            , 'View'
+                                                            , [
+                                                                'data-toggle'   => 'modal',
+                                                                'data-target'   => '#payroll-modal',
+                                                                'data-backdrop' => 'static',
+                                                                'data-keyboard' => 'false',
+                                                                'class'         => 'btn btn-primary',
+                                                            ]); ?></td>
 				</tr>
 	<!-- end result here -->
 				<?php endforeach ?>
@@ -131,6 +150,7 @@
 			<tr>
 				<th colspan="<?= '5' ?>">Sub-Total</th>
 				<th class="text-right"><?php echo nf($total_amount); ?></th>
+				<th class="hidden-print">&nbsp;</th>
 			</tr>
 		<!-- </tfoot> -->
 		</tbody>
